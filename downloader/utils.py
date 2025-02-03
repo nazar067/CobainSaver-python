@@ -3,7 +3,7 @@ import re
 from urllib.parse import urlparse
 from aiogram.types import Message
 
-from downloader.youtube import download_youtube_video
+from downloader.youtube import process_youtube_video
 
 async def identify_service(url: str) -> str:
     """
@@ -36,7 +36,7 @@ async def choose_service(bot, message: Message):
     service = await identify_service(url)
     chat_id = message.chat.id
     if service is "YouTube":
-        return await download_youtube_video(bot, url, chat_id)
+        return await process_youtube_video(bot, url, chat_id)
 
 async def delete_not_url(message: str) -> str:
     """
