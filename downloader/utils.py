@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 from aiogram.types import Message
 
 from downloader.youtube import process_youtube_video
+from downloader.youtube_music import process_youtube_music
 
 async def identify_service(url: str) -> str:
     """
@@ -37,6 +38,8 @@ async def choose_service(bot, message: Message, business_connection_id):
     chat_id = message.chat.id
     if service is "YouTube":
         return await process_youtube_video(bot, url, chat_id, business_connection_id)
+    elif service is "YouTubeMusic":
+        return await process_youtube_music(bot, url, chat_id, business_connection_id)
 
 async def delete_not_url(message: str) -> str:
     """
