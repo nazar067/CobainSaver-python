@@ -6,7 +6,8 @@ from aiogram import Bot
 from aiogram.types import FSInputFile
 
 from downloader.media import del_media_content, send_audio
-from downloader.youtube import download_thumbnail
+from downloader.youtube.youtube import download_thumbnail
+from downloader.youtube.youtube_music_playlist import process_youtube_music_playlist
 from user.get_user_path import get_user_path
 
 MAX_SIZE_MB = 50 
@@ -15,6 +16,9 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, business_conne
     """
     Обрабатывает скачивание аудио с YouTube Music и отправляет его пользователю.
     """
+    if "/playlist?" in url:
+        await process_youtube_music_playlist(bot, chat_id, url)
+        return
     user_folder = await get_user_path(chat_id)
 
     data = fetch_youtube_music_data(url, user_folder)
