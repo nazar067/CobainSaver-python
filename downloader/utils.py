@@ -5,7 +5,6 @@ from aiogram.types import Message
 
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
-from downloader.youtube.youtube_music_playlist import process_youtube_music_playlist
 
 async def identify_service(url: str) -> str:
     """

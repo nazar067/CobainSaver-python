@@ -1,23 +1,23 @@
+import asyncio
 import yt_dlp
 import os
 import requests
 import math
 from aiogram import Bot
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
-from typing import Optional
+from aiogram.types import FSInputFile
+from downloader.media import del_media_content
 from downloader.youtube.youtube import download_thumbnail
+from keyboard import generate_playlist_keyboard
+from typing import Optional
 from user.get_user_path import get_user_path
 
 PAGE_SIZE = 10
-
-
 async def process_youtube_music_playlist(bot: Bot, chat_id: int, url: str, page: int = 1, msg_id: Optional[int] = None):
     """
     Обрабатывает скачивание и отображение плейлиста YouTube Music.
     """
     user_folder = await get_user_path(chat_id)
-
-    playlist_info = fetch_youtube_music_playlist(url, user_folder)
+    playlist_info = await fetch_youtube_music_playlist(url, user_folder)
 
     if "error" in playlist_info:
         return await bot.send_message(chat_id, playlist_info["error"])
@@ -36,45 +36,24 @@ async def process_youtube_music_playlist(bot: Bot, chat_id: int, url: str, page:
     end_idx = start_idx + PAGE_SIZE
     songs_for_current_page = videos[start_idx:end_idx]
 
-    buttons_list = [
-        [InlineKeyboardButton(text=track["title"], callback_data=f"L {track['id']} {chat_id}")]
-        for track in songs_for_current_page
-    ]
-
-    navigation_buttons = []
-    if total_pages > 1:
-        if page > 1:
-            navigation_buttons.append(
-                InlineKeyboardButton(text="◀️ Назад", callback_data=f"P {chat_id} {playlist_id} {page - 1} {msg_id}")
-            )
-        if page < total_pages:
-            navigation_buttons.append(
-                InlineKeyboardButton(text="Вперед ▶️", callback_data=f"N {chat_id} {playlist_id} {page + 1} {msg_id}")
-            )
-    if navigation_buttons:
-        buttons_list.append(navigation_buttons)
-
-    inline_keyboard = InlineKeyboardMarkup(inline_keyboard=buttons_list)
-
     caption = f"🎵 <b>{playlist_title}</b>\n\nТреков: {total_videos}\nСтраница {page}/{total_pages}\n⬇ Выберите песню для скачивания"
 
-    if msg_id:
-        await bot.edit_message_caption(chat_id, msg_id, caption=caption, reply_markup=inline_keyboard, parse_mode="HTML")
-    else:
-        with open(thumbnail_path, "rb") as thumb:
-            message = await bot.send_photo(
-                chat_id=chat_id,
-                photo=FSInputFile(thumbnail_path),
-                caption=caption,
-                reply_markup=inline_keyboard,
-                parse_mode="HTML"
-            )
+    if msg_id is None:
+        message = await bot.send_photo(chat_id, photo=FSInputFile(thumbnail_path), caption=caption, parse_mode="HTML")
         msg_id = message.message_id
 
+    msg_id = int(msg_id)
+    inline_keyboard = await generate_playlist_keyboard(songs_for_current_page, chat_id, playlist_id, page, total_pages, msg_id)
+
+    await bot.edit_message_caption(chat_id=chat_id, message_id=msg_id, caption=caption, reply_markup=inline_keyboard, parse_mode="HTML")
+
+    if thumbnail_path:
+        await del_media_content(thumbnail_path)
+    
     return msg_id
+        
 
-
-def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
+async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
     """
     Извлекает информацию о плейлисте YouTube Music.
     """
@@ -89,7 +68,7 @@ def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
             info = ydl.extract_info(url, download=False)
 
         if "_type" in info and info["_type"] == "playlist":
-            playlist_title = info.get("title", "Плейлист без названия")
+            playlist_title = info.get("title", "")
             playlist_id = info.get("id", None)
             videos = [
                 {"title": entry["title"], "id": entry["id"]}

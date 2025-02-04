@@ -1,3 +1,4 @@
+import asyncio
 import yt_dlp
 import os
 import requests
@@ -19,9 +20,10 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, business_conne
     if "/playlist?" in url:
         await process_youtube_music_playlist(bot, chat_id, url)
         return
+    
     user_folder = await get_user_path(chat_id)
 
-    data = fetch_youtube_music_data(url, user_folder)
+    data = await fetch_youtube_music_data(url, user_folder)
 
     if "error" in data:
         return data["error"]
@@ -42,9 +44,9 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, business_conne
     return "Ошибка: даже в минимальном качестве аудио превышает 50MB."
 
 
-def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
+async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     """
-    Извлекает данные аудио и скачивает его с YouTube Music.
+    Асинхронно извлекает данные аудио и скачивает его с YouTube Music.
     """
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -60,28 +62,31 @@ def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         ],
     }
 
-    try:
+    def download_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
+            return ydl.extract_info(url, download=True)
 
-            file_path = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-            audio_title = info_dict.get("title", "Аудио без названия")
-            audio_id = info_dict.get("id", None)
-            duration = info_dict.get("duration", 0)
+    try:
+        info_dict = await asyncio.to_thread(download_info)
 
-            thumbnail_path = None
-            if audio_id:
-                thumbnail_url = f"https://img.youtube.com/vi/{audio_id}/maxresdefault.jpg"
-                thumbnail_path = os.path.join(user_folder, f"{audio_id}_thumbnail.jpg")
-                download_thumbnail(thumbnail_url, thumbnail_path)
+        file_path = info_dict["requested_downloads"][0]["filepath"]
+        audio_title = info_dict.get("title", "Аудио без названия")
+        audio_id = info_dict.get("id", None)
+        duration = info_dict.get("duration", 0)
+        
+        thumbnail_path = None
+        if audio_id:
+            thumbnail_url = f"https://img.youtube.com/vi/{audio_id}/maxresdefault.jpg"
+            thumbnail_path = os.path.join(user_folder, f"{audio_id}_thumbnail.jpg")
+            download_thumbnail(thumbnail_url, thumbnail_path)
 
-            return {
-                "file_path": file_path,
-                "audio_title": audio_title,
-                "audio_id": audio_id,
-                "duration": duration,
-                "thumbnail_path": thumbnail_path
-            }
+        return {
+            "file_path": file_path,
+            "audio_title": audio_title,
+            "audio_id": audio_id,
+            "duration": duration,
+            "thumbnail_path": thumbnail_path
+        }
 
     except Exception as e:
         return {"error": f"Ошибка при скачивании: {str(e)}"}

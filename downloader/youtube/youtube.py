@@ -1,3 +1,4 @@
+import asyncio
 import requests
 import yt_dlp
 import os
@@ -15,10 +16,13 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, business_conne
     """
     Обрабатывает скачивание и отправку видео пользователю.
     """
+    if "/live/" in url:
+        return "стримы не поддерживаются"
+    
     user_folder = await get_user_path(chat_id)
 
     for quality in QUALITIES:
-        data = fetch_youtube_data(url, user_folder, quality)
+        data = await fetch_youtube_data(url, user_folder, quality)
 
         if "error" in data:
             return data["error"]
@@ -39,9 +43,9 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, business_conne
 
     return "Ошибка: даже в минимальном качестве видео превышает 50MB."
 
-def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
+async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
-    Извлекает данные видео, скачивает видео и превью.
+    Асинхронно извлекает данные видео, скачивает видео и превью.
     """
     ydl_opts = {
         'format': f"bestvideo[height<={quality}]+bestaudio/best",
@@ -51,28 +55,31 @@ def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         'quiet': True,
     }
 
-    try:
+    def download_video():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
+            return ydl.extract_info(url, download=True)
 
-            file_path = ydl.prepare_filename(info_dict)
-            video_title = info_dict.get("title", "Видео без названия")
-            video_id = info_dict.get("id", None)
-            duration = info_dict.get("duration", 0)
+    try:
+        info_dict = await asyncio.to_thread(download_video)
 
-            thumbnail_path = None
-            if video_id:
-                thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
-                thumbnail_path = os.path.join(user_folder, f"{video_id}_thumbnail.jpg")
-                download_thumbnail(thumbnail_url, thumbnail_path)
+        file_path = info_dict["requested_downloads"][0]["filepath"]
+        video_title = info_dict.get("title", "Видео без названия")
+        video_id = info_dict.get("id", None)
+        duration = info_dict.get("duration", 0)
 
-            return {
-                "file_path": file_path,
-                "video_title": video_title,
-                "video_id": video_id,
-                "duration": duration,
-                "thumbnail_path": thumbnail_path
-            }
+        thumbnail_path = None
+        if video_id:
+            thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+            thumbnail_path = os.path.join(user_folder, f"{video_id}_thumbnail.jpg")
+            download_thumbnail(thumbnail_url, thumbnail_path)
+
+        return {
+            "file_path": file_path,
+            "video_title": video_title,
+            "video_id": video_id,
+            "duration": duration,
+            "thumbnail_path": thumbnail_path
+        }
 
     except Exception as e:
         return {"error": f"Ошибка при скачивании: {str(e)}"}
