@@ -31,12 +31,12 @@ async def identify_service(url: str) -> str:
 
     return "Another"
 
-async def choose_service(bot, message: Message):
+async def choose_service(bot, message: Message, business_connection_id):
     url = await delete_not_url(message.text)
     service = await identify_service(url)
     chat_id = message.chat.id
     if service is "YouTube":
-        return await process_youtube_video(bot, url, chat_id)
+        return await process_youtube_video(bot, url, chat_id, business_connection_id)
 
 async def delete_not_url(message: str) -> str:
     """

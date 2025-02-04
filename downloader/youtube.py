@@ -11,7 +11,7 @@ from user.get_user_path import get_user_path
 MAX_SIZE_MB = 50  
 QUALITIES = ["1080", "720", "480", "360", "240", "144"]  
 
-async def process_youtube_video(bot: Bot, url: str, chat_id: int) -> str:
+async def process_youtube_video(bot: Bot, url: str, chat_id: int, business_connection_id) -> str:
     """
     Обрабатывает скачивание и отправку видео пользователю.
     """
@@ -31,7 +31,7 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int) -> str:
         if os.path.exists(file_path):
             file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
             if file_size_mb <= MAX_SIZE_MB:
-                return await send_video(bot, chat_id, file_path, video_title, thumbnail_path, duration)
+                return await send_video(bot, chat_id, business_connection_id, file_path, video_title, thumbnail_path, duration)
 
             await del_media_content(file_path)
             if thumbnail_path:

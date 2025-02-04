@@ -1,6 +1,6 @@
 import asyncio
 from aiogram import Bot, Dispatcher, types
-from aiogram.types import Message
+from aiogram.types import Message, BusinessConnection
 from aiogram.filters import CommandStart
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
@@ -21,7 +21,11 @@ async def start(message: Message):
 
 @dp.message()
 async def echo_handler(message: Message):
-    await choose_service(bot, message)
+    await choose_service(bot, message, "")
+    
+@dp.business_message()
+async def echo_handler(message: Message):
+    await choose_service(bot, message, message.business_connection_id)
 
 async def main():
     print("Bot started")
