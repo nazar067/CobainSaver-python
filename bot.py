@@ -4,8 +4,9 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
+from downloader.spotify import process_spotify_track
 from downloader.youtube.youtube_music import process_youtube_music
-from downloader.youtube.youtube_music_playlist import process_youtube_music_playlist
+from downloader.playlist import process_music_playlist
 from handlers.start_handler import start_handler
 from utils.service import choose_service
 
@@ -31,22 +32,49 @@ async def echo_handler(message: Message):
     
 @dp.callback_query(lambda c: c.data.startswith("P "))
 async def previous_page(callback: CallbackQuery):
-    _, chat_id, playlist_id, new_page, msg_id = callback.data.split()
-    await process_youtube_music_playlist(callback.bot, int(chat_id), f"https://music.youtube.com/playlist?list={playlist_id}", int(new_page), int(msg_id))
+    _, source, content_type, chat_id, playlist_id, new_page, msg_id = callback.data.split()
+    if source == "Y":
+        await process_music_playlist(callback.bot, int(chat_id), f"https://music.youtube.com/playlist?list={playlist_id}", int(new_page), int(msg_id))
+    elif source == "S":
+        if content_type is "a":
+            await process_music_playlist(callback.bot, int(chat_id), f"https://open.spotify.com/album/{playlist_id}", int(new_page), int(msg_id))
+        elif content_type is "p":
+            await process_music_playlist(callback.bot, int(chat_id), f"https://open.spotify.com/playlist/{playlist_id}", int(new_page), int(msg_id))
     await callback.answer()
 
 @dp.callback_query(lambda c: c.data.startswith("N "))
 async def next_page(callback: CallbackQuery):
-    _, chat_id, playlist_id, new_page, msg_id = callback.data.split()
-    await process_youtube_music_playlist(callback.bot, int(chat_id), f"https://music.youtube.com/playlist?list={playlist_id}", int(new_page), int(msg_id))
+    print(callback.data)
+    _, source, content_type, chat_id, playlist_id, new_page, msg_id = callback.data.split()
+    if source == "Y":
+        await process_music_playlist(callback.bot, int(chat_id), f"https://music.youtube.com/playlist?list={playlist_id}", int(new_page), int(msg_id))
+    elif source == "S":
+        if content_type is "a":
+            await process_music_playlist(callback.bot, int(chat_id), f"https://open.spotify.com/album/{playlist_id}", int(new_page), int(msg_id))
+        elif content_type is "p":
+            await process_music_playlist(callback.bot, int(chat_id), f"https://open.spotify.com/playlist/{playlist_id}", int(new_page), int(msg_id))
     await callback.answer()
 
-@dp.callback_query(lambda c: c.data.startswith("L "))
+@dp.callback_query(lambda c: c.data.startswith(("Y ", "S ")))
 async def select_track(callback: CallbackQuery):
-    _, track_id, chat_id, playlist_id, msg_id = callback.data.split()
-    track_url = f"https://music.youtube.com/watch?v={track_id}"
+    """
+    Обрабатывает выбор трека с YouTube Music или Spotify.
+    """
+    data = callback.data.split()
+    print(data)
+    source = data[0]  # 'Y' (YouTube) или 'S' (Spotify)
+    track_id = data[1]  # ID трека (или текстовый запрос для Spotify)
+    chat_id = int(data[2])
 
-    asyncio.create_task(process_youtube_music(callback.bot, track_url, int(chat_id)))
+    if source == "Y":
+        # YouTube трек (используем видео ID)
+        track_url = f"https://music.youtube.com/watch?v={track_id}"
+        asyncio.create_task(process_youtube_music(callback.bot, track_url, chat_id))
+    
+    elif source == "S":
+        # Spotify трек (поиск на YouTube по названию)
+        url = "https://open.spotify.com/track/" + track_id
+        asyncio.create_task(process_spotify_track(callback.bot, url, chat_id))
 
     await callback.answer()
 

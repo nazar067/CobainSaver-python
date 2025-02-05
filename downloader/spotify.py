@@ -1,23 +1,9 @@
-import os
 import yt_dlp
 import asyncio
-import requests
-import json
 from aiogram import Bot
-from spotipy import Spotify
-from spotipy.oauth2 import SpotifyClientCredentials
 from downloader.youtube.youtube_music import process_youtube_music
-
-def get_spotify_credentials():
-    return "cdae9ddf2d664afcbda097fe95c4ee4f", "63a589c3bb794462bdf587df6d9125a9"
-
-def get_spotify_client():
-    client_id, client_secret = get_spotify_credentials()
-    auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    return Spotify(auth_manager=auth_manager)
-
-def extract_track_id(url: str) -> str:
-    return url.split("/")[-1].split("?")[0]
+from downloader.playlist import process_music_playlist
+from utils.spotify_helper import extract_track_id, get_spotify_client
 
 async def find_song_on_ytmusic(query: str) -> str:
     ydl_opts = {
@@ -26,15 +12,25 @@ async def find_song_on_ytmusic(query: str) -> str:
         "format": "bestaudio/best",
         "noplaylist": True,
     }
+    def search():
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            return ydl.extract_info(query, download=False)
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(query, download=False)
+    try:
+        info = await asyncio.to_thread(search)  # Асинхронный вызов
         if "entries" in info and len(info["entries"]) > 0:
             video_id = info["entries"][0]["id"]
             return f"https://music.youtube.com/watch?v={video_id}"
         return None
+    except Exception as e:
+        print(f"❌ Ошибка при поиске YouTube Music: {str(e)}")
+        return None
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, business_connection_id: str = None):
+    if "/playlist/" in url or "/album/" in url:
+        if business_connection_id is "":
+            await process_music_playlist(bot, chat_id, url)
+        return
     spotify = get_spotify_client()
     track_id = extract_track_id(url)
 
