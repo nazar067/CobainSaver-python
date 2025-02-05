@@ -18,7 +18,8 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, business_conne
     Обрабатывает скачивание аудио с YouTube Music и отправляет его пользователю.
     """
     if "/playlist?" in url:
-        await process_youtube_music_playlist(bot, chat_id, url)
+        if business_connection_id is "":
+            await process_youtube_music_playlist(bot, chat_id, url)
         return
     
     user_folder = await get_user_path(chat_id)
@@ -32,10 +33,11 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, business_conne
     audio_title = data["audio_title"]
     duration = data["duration"]
     thumbnail_path = data["thumbnail_path"]
+    author = data["author"]
     if os.path.exists(file_path):
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         if file_size_mb <= MAX_SIZE_MB:
-            return await send_audio(bot, chat_id, business_connection_id, file_path, audio_title, thumbnail_path, duration)
+            return await send_audio(bot, chat_id, business_connection_id, file_path, audio_title, thumbnail_path, duration, author)
 
         await del_media_content(file_path)
         if thumbnail_path:
@@ -73,6 +75,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         audio_title = info_dict.get("title", "Аудио без названия")
         audio_id = info_dict.get("id", None)
         duration = info_dict.get("duration", 0)
+        author = info_dict.get("channel", info_dict.get("uploader", "CobainSaver"))
         
         thumbnail_path = None
         if audio_id:
@@ -85,7 +88,8 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
             "audio_title": audio_title,
             "audio_id": audio_id,
             "duration": duration,
-            "thumbnail_path": thumbnail_path
+            "thumbnail_path": thumbnail_path,
+            "author": author,
         }
 
     except Exception as e:

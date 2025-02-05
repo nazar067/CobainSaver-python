@@ -23,7 +23,7 @@ async def send_video(bot: Bot, chat_id: int, business_connection_id, file_path: 
     except Exception as e:
         await bot.send_message(chat_id, f"Ошибка при отправке видео: {str(e)}")
         
-async def send_audio(bot: Bot, chat_id: int, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int) -> str:
+async def send_audio(bot: Bot, chat_id: int, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author) -> str:
     """
     Отправляет аудио в чат.
     """
@@ -38,6 +38,7 @@ async def send_audio(bot: Bot, chat_id: int, business_connection_id: Optional[st
             title=title,
             duration=duration,
             thumbnail=thumbnail,
+            performer=author
         )
         await del_media_content(file_path)
         if thumbnail_path:
