@@ -4,10 +4,10 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
-from downloader.utils import choose_service
 from downloader.youtube.youtube_music import process_youtube_music
 from downloader.youtube.youtube_music_playlist import process_youtube_music_playlist
 from handlers.start_handler import start_handler
+from utils.service import choose_service
 
 TOKEN = API_TOKEN
 

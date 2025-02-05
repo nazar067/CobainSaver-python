@@ -1,10 +1,8 @@
-import os
-import re
 from urllib.parse import urlparse
 from aiogram.types import Message
-
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
+from utils.get_url import delete_not_url
 
 async def identify_service(url: str) -> str:
     """
@@ -40,23 +38,3 @@ async def choose_service(bot, message: Message, business_connection_id):
         return await process_youtube_video(bot, url, chat_id, business_connection_id)
     elif service is "YouTubeMusic":
         return await process_youtube_music(bot, url, chat_id, business_connection_id)
-
-async def delete_not_url(message: str) -> str:
-    """
-    Фильтрует URL-адрес из сообщения.
-    """
-    regex_url = re.compile(r"\bhttps://\S+\b")
-
-    regex_short_url = re.compile(r"youtu.be/\w+")
-
-    match_url = regex_url.search(message)
-
-    match_short_url = regex_short_url.search(message)
-
-    if match_url:
-        return match_url.group(0)
-
-    if match_short_url:
-        return "https://" + match_short_url.group(0)
-
-    return ""
