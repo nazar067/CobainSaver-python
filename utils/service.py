@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 from aiogram.types import Message
+from downloader.spotify import process_spotify_track
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
 from utils.get_url import delete_not_url
@@ -38,3 +39,5 @@ async def choose_service(bot, message: Message, business_connection_id):
         return await process_youtube_video(bot, url, chat_id, business_connection_id)
     elif service is "YouTubeMusic":
         return await process_youtube_music(bot, url, chat_id, business_connection_id)
+    elif service is "Spotify":
+        return await process_spotify_track(bot, url, chat_id, business_connection_id)
