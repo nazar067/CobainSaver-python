@@ -2,6 +2,8 @@ downloads/
 
 config.py
 
+.cache
+
 __pycache__/
 *.pyc
 *.pyo
