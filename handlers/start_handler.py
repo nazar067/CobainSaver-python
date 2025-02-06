@@ -21,8 +21,8 @@ async def start_handler(bot: Bot, message: Message, dp: Dispatcher):
         if not language_code or len(language_code) != 2:
             language_code = "en"
         await set_language(pool, chat_id, language_code)
-        user_language = language_code
+        chat_language = language_code
     else:
-        user_language = existing_language["language_code"]
+        chat_language = existing_language["language_code"]
         
-    await bot.send_message(chat_id, translations["welcome"][user_language])
+    await bot.send_message(chat_id, translations["welcome"][chat_language])

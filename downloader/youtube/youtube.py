@@ -2,30 +2,32 @@ import asyncio
 import requests
 import yt_dlp
 import os
-from typing import Optional
-from aiogram import Bot
-from aiogram.types import FSInputFile, InputFile
+from aiogram import Bot, Dispatcher
 
 from downloader.media import del_media_content, send_video
+from localisation.get_language import get_language
 from user.get_user_path import get_user_path
+from localisation.translations.downloader import translations
 
 MAX_SIZE_MB = 50  
+DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
 QUALITIES = ["1080", "720", "480", "360", "240", "144"]  
 
-async def process_youtube_video(bot: Bot, url: str, chat_id: int, business_connection_id) -> str:
+async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id) -> str:
     """
     Обрабатывает скачивание и отправку видео пользователю.
     """
+    pool = dp["db_pool"]
+    chat_language = await get_language(pool, chat_id)
     if "/live/" in url:
-        return "стримы не поддерживаются"
-    
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["live_unavaliable_content"][chat_language])
     user_folder = await get_user_path(chat_id)
 
     for quality in QUALITIES:
         data = await fetch_youtube_data(url, user_folder, quality)
 
         if "error" in data:
-            return data["error"]
+            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language])
 
         file_path = data["file_path"]
         video_title = data["video_title"]
@@ -35,13 +37,13 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, business_conne
         if os.path.exists(file_path):
             file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
             if file_size_mb <= MAX_SIZE_MB:
-                return await send_video(bot, chat_id, business_connection_id, file_path, video_title, thumbnail_path, duration)
+                return await send_video(bot, chat_id, chat_language, business_connection_id, file_path, video_title, thumbnail_path, duration)
 
             await del_media_content(file_path)
             if thumbnail_path:
                 await del_media_content(thumbnail_path)
 
-    return "Ошибка: даже в минимальном качестве видео превышает 50MB."
+    return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language])
 
 async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
@@ -87,13 +89,23 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
 
 def download_thumbnail(thumbnail_url: str, save_path: str) -> None:
     """
-    Скачивает превью по URL.
+    Скачивает превью по URL. В случае ошибки загружает резервное изображение.
     """
     try:
-        response = requests.get(thumbnail_url, stream=True)
+        response = requests.get(thumbnail_url, stream=True, timeout=10)
+        if response.status_code == 200:
+            with open(save_path, "wb") as f:
+                for chunk in response.iter_content(1024):
+                    f.write(chunk)
+            return
+    except:
+        print()
+
+    try:
+        response = requests.get(DEFAULT_THUMBNAIL_URL, stream=True, timeout=10)
         if response.status_code == 200:
             with open(save_path, "wb") as f:
                 for chunk in response.iter_content(1024):
                     f.write(chunk)
     except Exception as e:
-        print(f"Ошибка при скачивании превью: {e}")
+        print()

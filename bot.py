@@ -5,8 +5,6 @@ from aiogram.filters import CommandStart
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
 from downloader.music_selector import select_music
-from downloader.spotify import process_spotify_track
-from downloader.youtube.youtube_music import process_youtube_music
 from handlers.start_handler import start_handler
 from utils.pagination import playlist_pagination
 from utils.service import choose_service
@@ -25,11 +23,11 @@ async def start(message: Message):
 
 @dp.message()
 async def echo_handler(message: Message):
-    await choose_service(bot, message, "")
+    await choose_service(bot, message, "", dp)
     
 @dp.business_message()
 async def echo_handler(message: Message):
-    await choose_service(bot, message, message.business_connection_id)
+    await choose_service(bot, message, message.business_connection_id, dp)
     
 @dp.callback_query(lambda c: c.data.startswith("P "))
 async def pagination_button(callback: CallbackQuery):
@@ -37,7 +35,7 @@ async def pagination_button(callback: CallbackQuery):
 
 @dp.callback_query(lambda c: c.data.startswith(("Y ", "S ")))
 async def select_track(callback: CallbackQuery):
-    await select_music(callback)
+    await select_music(callback, dp)
 
 async def main():
     print("Bot started")

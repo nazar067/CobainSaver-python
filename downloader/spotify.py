@@ -1,6 +1,6 @@
 import yt_dlp
 import asyncio
-from aiogram import Bot
+from aiogram import Bot, Dispatcher
 from downloader.youtube.youtube_music import process_youtube_music
 from downloader.playlist import process_music_playlist
 from utils.spotify_helper import extract_track_id, get_spotify_client
@@ -17,7 +17,7 @@ async def find_song_on_ytmusic(query: str) -> str:
             return ydl.extract_info(query, download=False)
 
     try:
-        info = await asyncio.to_thread(search)  # Асинхронный вызов
+        info = await asyncio.to_thread(search)
         if "entries" in info and len(info["entries"]) > 0:
             video_id = info["entries"][0]["id"]
             return f"https://music.youtube.com/watch?v={video_id}"
@@ -26,7 +26,7 @@ async def find_song_on_ytmusic(query: str) -> str:
         print(f"❌ Ошибка при поиске YouTube Music: {str(e)}")
         return None
 
-async def process_spotify_track(bot: Bot, url: str, chat_id: int, business_connection_id: str = None):
+async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None):
     if "/playlist/" in url or "/album/" in url:
         await process_music_playlist(bot, business_connection_id, chat_id, url)
         return
@@ -44,7 +44,7 @@ async def process_spotify_track(bot: Bot, url: str, chat_id: int, business_conne
 
         if youtube_music_url:
             print(f"✅ Найдено: {youtube_music_url}")
-            asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, business_connection_id))
+            asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id))
         else:
             await bot.send_message(chat_id, "❌ Не удалось найти трек на YouTube Music.")
     

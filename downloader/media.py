@@ -2,8 +2,9 @@ import os
 from typing import Optional
 from aiogram import Bot
 from aiogram.types import FSInputFile
+from localisation.translations.erros import translations
 
-async def send_video(bot: Bot, chat_id: int, business_connection_id, file_path: str, title: str = None, thumbnail_path: Optional[str] = None, duration: int = None) -> None:
+async def send_video(bot: Bot, chat_id: int, chat_language, business_connection_id, file_path: str, title: str = None, thumbnail_path: Optional[str] = None, duration: int = None) -> None:
     """
     Отправляет скачанное видео в чат.
     """
@@ -21,9 +22,10 @@ async def send_video(bot: Bot, chat_id: int, business_connection_id, file_path: 
         if thumbnail_path:
             await del_media_content(thumbnail_path)
     except Exception as e:
-        await bot.send_message(chat_id, f"Ошибка при отправке видео: {str(e)}")
+        print(e)
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])
         
-async def send_audio(bot: Bot, chat_id: int, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author) -> str:
+async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author) -> str:
     """
     Отправляет аудио в чат.
     """
@@ -44,9 +46,9 @@ async def send_audio(bot: Bot, chat_id: int, business_connection_id: Optional[st
         if thumbnail_path:
             await del_media_content(thumbnail_path)
 
-        return "Аудио успешно отправлено!"
+        return
     except Exception as e:
-        return f"Ошибка при отправке аудио: {str(e)}"       
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     
         
 async def del_media_content(file_path):
     os.remove(file_path)
