@@ -28,8 +28,7 @@ async def find_song_on_ytmusic(query: str) -> str:
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, business_connection_id: str = None):
     if "/playlist/" in url or "/album/" in url:
-        if business_connection_id is "":
-            await process_music_playlist(bot, chat_id, url)
+        await process_music_playlist(bot, business_connection_id, chat_id, url)
         return
     spotify = get_spotify_client()
     track_id = extract_track_id(url)

@@ -18,8 +18,7 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, business_conne
     Обрабатывает скачивание аудио с YouTube Music и отправляет его пользователю.
     """
     if "/playlist?" in url:
-        if business_connection_id is "":
-            await process_music_playlist(bot, chat_id, url)
+        await process_music_playlist(bot, business_connection_id, chat_id, url)
         return
     
     user_folder = await get_user_path(chat_id)

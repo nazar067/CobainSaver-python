@@ -14,14 +14,13 @@ from utils.spotify_helper import extract_spotify_id, get_spotify_client
 
 PAGE_SIZE = 10
 
-async def process_music_playlist(bot: Bot, chat_id: int, url: str, page: int = 1, msg_id: Optional[int] = None):
+async def process_music_playlist(bot: Bot, business_connection_id: Optional[str], chat_id: int, url: str, page: int = 1, msg_id: Optional[int] = None):
     """
     Универсальная функция обработки плейлистов с разных платформ (Spotify, YouTube Music).
     """
     user_folder = await get_user_path(chat_id)
     source = ""
-    
-    # 📌 Определяем источник (Spotify / YouTube)
+
     if "spotify" in url:
         playlist_info = await fetch_spotify_data(url, user_folder)
         source = "S"
@@ -32,7 +31,6 @@ async def process_music_playlist(bot: Bot, chat_id: int, url: str, page: int = 1
     if "error" in playlist_info:
         return await bot.send_message(chat_id, playlist_info["error"])
 
-    # 📌 Универсальный формат данных
     title = playlist_info.get("title", "Без названия")
     owner = playlist_info.get("owner", "Неизвестный")
     tracks = playlist_info.get("tracks", [])
@@ -51,14 +49,12 @@ async def process_music_playlist(bot: Bot, chat_id: int, url: str, page: int = 1
     caption = f"🎵 <b>{title}</b>\n👤 {owner}\n📀 Плейлист\n🎧 Треков: {total_tracks}\n📃 Страница {page}/{total_pages}\n⬇ Выберите песню для скачивания"
 
     if msg_id is None:
-        message = await bot.send_photo(chat_id, photo=FSInputFile(cover_path), caption=caption, parse_mode="HTML")
+        message = await bot.send_photo(business_connection_id=business_connection_id, chat_id=chat_id, photo=FSInputFile(cover_path), caption=caption, parse_mode="HTML")
         msg_id = message.message_id
 
     msg_id = int(msg_id)
-    print(playlist_id)
-    inline_keyboard = await generate_playlist_keyboard(songs_for_current_page, chat_id, source, playlist_id, page, total_pages, msg_id, content_type)
-
-    await bot.edit_message_caption(chat_id=chat_id, message_id=msg_id, caption=caption, reply_markup=inline_keyboard, parse_mode="HTML")
+    inline_keyboard = await generate_playlist_keyboard(songs_for_current_page, source, playlist_id, page, total_pages, content_type)
+    await bot.edit_message_caption(business_connection_id=business_connection_id, chat_id=chat_id, message_id=msg_id, caption=caption, reply_markup=inline_keyboard, parse_mode="HTML")
 
     if cover_path:
         await del_media_content(cover_path)
@@ -145,7 +141,7 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
             artist_name = track["artists"][0]["name"]
             track_id = track["id"]
 
-            tracks.append({"title": f"{artist_name} - {track_name}", "id": track_id})
+            tracks.append({"title": f"{track_name} - {artist_name}", "id": track_id})
 
         # 📌 Загружаем обложку
         cover_path = os.path.join(user_folder, f"{spotify_id}_thumbnail.jpg")
