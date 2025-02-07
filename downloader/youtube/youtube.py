@@ -15,35 +15,121 @@ QUALITIES = ["1080", "720", "480", "360", "240", "144"]
 
 async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id) -> str:
     """
-    Обрабатывает скачивание и отправку видео пользователю.
+    Обрабатывает скачивание и отправку видео пользователю с выбором оптимального качества.
     """
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
+
     if "/live/" in url:
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["live_unavaliable_content"][chat_language])
+        return await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["live_unavaliable_content"][chat_language]
+        )
+
     user_folder = await get_user_path(chat_id)
 
-    for quality in QUALITIES:
-        data = await fetch_youtube_data(url, user_folder, quality)
+    # 🔹 Начинаем с 360p
+    current_quality = "360"
+    data = await fetch_youtube_data(url, user_folder, current_quality)
 
-        if "error" in data:
-            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language])
+    if "error" in data:
+        return await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["unavaliable_content"][chat_language]
+        )
 
-        file_path = data["file_path"]
-        video_title = data["video_title"]
-        duration = data["duration"]
-        thumbnail_path = data["thumbnail_path"]
+    file_path = data["file_path"]
+    video_title = data["video_title"]
+    duration = data["duration"]
+    thumbnail_path = data["thumbnail_path"]
 
-        if os.path.exists(file_path):
+    if os.path.exists(file_path):
+        file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+        print(f"Размер {current_quality}p: {file_size_mb}MB")  # ДЛЯ ДЕБАГА
+
+        # 🔹 Первый этап: проверяем, нужно ли улучшить качество
+        quality_upgrades = {
+            "360": "1080",
+            "1080": "720",
+            "720": "480",
+            "480": "360",
+            "240": "144"
+        }
+
+        if file_size_mb <= 10:
+            next_quality = "1080"
+        elif 11 <= file_size_mb <= 25:
+            next_quality = "720"
+        elif 26 <= file_size_mb <= 45:
+            next_quality = "480"
+        elif 51 <= file_size_mb <= 120:
+            next_quality = "240"
+        elif 121 <= file_size_mb <= 180:
+            next_quality = "144"
+        else:
+            next_quality = None  # Если 360p > 180MB, сразу переходим к понижению качества
+
+        # Если попадаем в новый диапазон, скачиваем это качество
+        if next_quality:
+            print(f"⚡ Переход к {next_quality}p")
+            await del_media_content(file_path)
+            current_quality = next_quality  # Теперь это новая точка старта
+
+            data = await fetch_youtube_data(url, user_folder, current_quality)
+            if "error" in data:
+                return await bot.send_message(
+                    chat_id=chat_id,
+                    business_connection_id=business_connection_id,
+                    text=translations["unavaliable_content"][chat_language]
+                )
+
+            file_path = data["file_path"]
             file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
-            if file_size_mb <= MAX_SIZE_MB:
+            print(f"Размер {current_quality}p: {file_size_mb}MB")
+
+        # 🔹 Если после улучшения видео ≤50MB → отправляем
+        if file_size_mb <= 50:
+            return await send_video(bot, chat_id, chat_language, business_connection_id, file_path, video_title, thumbnail_path, duration)
+
+    # 🔹 Второй этап: понижаем качество до 144p, если необходимо
+    quality_downgrades = ["240", "144"]  # Базовый порядок понижения
+    if current_quality in quality_upgrades:
+        quality_downgrades = list(quality_upgrades.values())
+        quality_downgrades = [q for q in quality_downgrades if int(q) < int(current_quality)]
+        
+    print(quality_downgrades)
+    for next_quality in quality_downgrades:
+        if file_size_mb > 50:
+            print(f"🔻 Понижение до {next_quality}p")
+            await del_media_content(file_path)
+            current_quality = next_quality  # Запоминаем текущее качество
+
+            data = await fetch_youtube_data(url, user_folder, current_quality)
+            if "error" in data:
+                return await bot.send_message(
+                    chat_id=chat_id,
+                    business_connection_id=business_connection_id,
+                    text=translations["unavaliable_content"][chat_language]
+                )
+
+            file_path = data["file_path"]
+            file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+            print(f"Размер {current_quality}p: {file_size_mb}MB")
+
+            if file_size_mb <= 50:
                 return await send_video(bot, chat_id, chat_language, business_connection_id, file_path, video_title, thumbnail_path, duration)
 
-            await del_media_content(file_path)
-            if thumbnail_path:
-                await del_media_content(thumbnail_path)
+    # 🔹 Если даже 144p >50MB, то ошибка
+    return await bot.send_message(
+        chat_id=chat_id,
+        business_connection_id=business_connection_id,
+        text=translations["large_content"][chat_language]
+    )
 
-    return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language])
+
+
 
 async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
