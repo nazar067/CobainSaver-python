@@ -6,10 +6,10 @@ import math
 from aiogram import Bot
 from aiogram.types import FSInputFile
 from downloader.media import del_media_content
-from downloader.youtube.youtube import download_thumbnail
 from keyboard import generate_playlist_keyboard
 from typing import Optional
 from user.get_user_path import get_user_path
+from utils.fetch_data import download_thumbnail
 from utils.spotify_helper import extract_spotify_id, get_spotify_client
 
 PAGE_SIZE = 10
