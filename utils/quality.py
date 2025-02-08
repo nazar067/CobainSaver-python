@@ -1,7 +1,7 @@
 import os
 
 from downloader.media import del_media_content
-from utils.fetch_data import download_thumbnail, fetch_youtube_data
+from utils.fetch_data import download_file, fetch_youtube_data
 
 
 async def select_optimal_quality(url: str, user_folder: str, initial_quality: str) -> dict:
@@ -35,7 +35,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
     if video_id:
         thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
         thumbnail_path = os.path.join(user_folder, f"{video_id}_thumbnail.jpg")
-        download_thumbnail(thumbnail_url, thumbnail_path)
+        await download_file(thumbnail_url, thumbnail_path)
 
     file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
     print(f"Размер {current_quality}p: {file_size_mb}MB")  # Лог для отладки

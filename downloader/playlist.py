@@ -9,7 +9,7 @@ from downloader.media import del_media_content
 from keyboard import generate_playlist_keyboard
 from typing import Optional
 from user.get_user_path import get_user_path
-from utils.fetch_data import download_thumbnail
+from utils.fetch_data import download_file
 from utils.spotify_helper import extract_spotify_id, get_spotify_client
 
 PAGE_SIZE = 10
@@ -92,7 +92,7 @@ async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
             cover_path = os.path.join(user_folder, f"{playlist_id}_thumbnail.jpg")
 
             if cover_url:
-                download_thumbnail(cover_url, cover_path)
+                await download_file(cover_url, cover_path)
 
             return {
                 "title": title,
@@ -146,7 +146,7 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
         # 📌 Загружаем обложку
         cover_path = os.path.join(user_folder, f"{spotify_id}_thumbnail.jpg")
         if cover_url:
-            download_thumbnail(cover_url, cover_path)
+            await download_file(cover_url, cover_path)
 
         return {
             "title": title,

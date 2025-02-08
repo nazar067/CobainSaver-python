@@ -38,7 +38,7 @@ async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_
             chat_id=chat_id,
             audio=audio,
             title=title,
-            duration=duration,
+            duration=0,
             thumbnail=thumbnail,
             performer=author
         )
@@ -48,6 +48,7 @@ async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_
 
         return
     except Exception as e:
+        print(e)
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     
         
 async def del_media_content(file_path):

@@ -3,6 +3,8 @@ import os
 import requests
 import yt_dlp
 
+from utils.get_name import get_random_file_name
+
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
 
 async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
@@ -11,7 +13,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
     ydl_opts = {
         'format': f"bestvideo[height<={quality}]+bestaudio/best",
-        'outtmpl': f'{user_folder}/%(title)s.%(ext)s',
+        'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
         'noplaylist': True,
         'quiet': True,
@@ -32,8 +34,8 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         thumbnail_path = None
         if video_id:
             thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
-            thumbnail_path = os.path.join(user_folder, f"{video_id}_thumbnail.jpg")
-            download_thumbnail(thumbnail_url, thumbnail_path)
+            thumbnail_path = os.path.join(user_folder, get_random_file_name("jpg"))
+            await download_file(thumbnail_url, thumbnail_path)
 
         return {
             "file_path": file_path,
@@ -52,7 +54,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     """
     ydl_opts = {
         'format': 'bestaudio/best',
-        'outtmpl': f'{user_folder}/%(title)s.%(ext)s',
+        'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'quiet': True,
         'noplaylist': True,
         'postprocessors': [
@@ -80,8 +82,8 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         thumbnail_path = None
         if audio_id:
             thumbnail_url = f"https://img.youtube.com/vi/{audio_id}/maxresdefault.jpg"
-            thumbnail_path = os.path.join(user_folder, f"{audio_id}_thumbnail.jpg")
-            download_thumbnail(thumbnail_url, thumbnail_path)
+            thumbnail_path = os.path.join(user_folder, get_random_file_name("jpg"))
+            await download_file(thumbnail_url, thumbnail_path)
 
         return {
             "file_path": file_path,
@@ -95,7 +97,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     except Exception as e:
         return {"error": f"{str(e)}"}
 
-def download_thumbnail(thumbnail_url: str, save_path: str) -> None:
+async def download_file(thumbnail_url: str, save_path: str, isThumbnail: bool = True) -> None:
     """
     Скачивает превью по URL. В случае ошибки загружает резервное изображение.
     """
@@ -108,12 +110,14 @@ def download_thumbnail(thumbnail_url: str, save_path: str) -> None:
             return
     except:
         print()
-
-    try:
-        response = requests.get(DEFAULT_THUMBNAIL_URL, stream=True, timeout=10)
-        if response.status_code == 200:
-            with open(save_path, "wb") as f:
-                for chunk in response.iter_content(1024):
-                    f.write(chunk)
-    except Exception as e:
-        print()
+        
+    if isThumbnail:
+        try:
+            response = requests.get(DEFAULT_THUMBNAIL_URL, stream=True, timeout=10)
+            if response.status_code == 200:
+                with open(save_path, "wb") as f:
+                    for chunk in response.iter_content(1024):
+                        f.write(chunk)
+        except Exception as e:
+            print()
+    
