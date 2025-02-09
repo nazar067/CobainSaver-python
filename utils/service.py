@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 from aiogram import Dispatcher
 from aiogram.types import Message
 from downloader.spotify import process_spotify_track
-from downloader.tiktok import fetch_tiktok_video
+from downloader.tiktok.process_tiktok import fetch_tiktok_video
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
 from utils.get_url import delete_not_url
