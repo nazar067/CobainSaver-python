@@ -4,7 +4,7 @@ from localisation.set_language import set_language
 from localisation.translations.general import translations
 from asyncpg import Record
 
-async def start_handler(bot: Bot, message: Message, dp: Dispatcher):
+async def start_handler(bot: Bot, message: Message, dp: Dispatcher, business_connection_id):
     """
     Обработка команды /start
     """
@@ -25,4 +25,4 @@ async def start_handler(bot: Bot, message: Message, dp: Dispatcher):
     else:
         chat_language = existing_language["language_code"]
         
-    await bot.send_message(chat_id, translations["welcome"][chat_language])
+    await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["welcome"][chat_language])

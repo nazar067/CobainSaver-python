@@ -20,7 +20,7 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         # 📌 **Извлекаем данные**
         data = await extract_tiktok_data(url)
         if "error" in data:
-            return await bot.send_message(chat_id, text=data["error"])
+            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data["error"])
 
         if data["type"] == "photo":
             await send_tiktok_images(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"])

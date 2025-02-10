@@ -46,7 +46,7 @@ async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher
             print(f"✅ Найдено: {youtube_music_url}")
             asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id))
         else:
-            await bot.send_message(chat_id, "❌ Не удалось найти трек на YouTube Music.")
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text="❌ Не удалось найти трек на YouTube Music.")
     
     except Exception as e:
         await bot.send_message(chat_id, f"❌ Ошибка при обработке Spotify трека: {str(e)}")

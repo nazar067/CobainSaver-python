@@ -29,7 +29,7 @@ async def process_music_playlist(bot: Bot, business_connection_id: Optional[str]
         source = "Y"
 
     if "error" in playlist_info:
-        return await bot.send_message(chat_id, playlist_info["error"])
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=playlist_info["error"])
 
     title = playlist_info.get("title", "Без названия")
     owner = playlist_info.get("owner", "Неизвестный")

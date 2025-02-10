@@ -19,7 +19,7 @@ async def start(message: Message):
     """
     Команда /start
     """
-    await start_handler(bot, message, dp)
+    await start_handler(bot, message, dp, message.business_connection_id)
 
 @dp.message()
 async def echo_handler(message: Message):
