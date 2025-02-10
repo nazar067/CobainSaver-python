@@ -12,7 +12,7 @@ async def send_video(bot: Bot, chat_id: int, chat_language, business_connection_
     try:
         video = get_media_source(file_path_or_url)
         thumbnail = get_media_source(thumbnail_path_or_url)
-
+        print(thumbnail)
         await bot.send_video(
             business_connection_id=business_connection_id,
             chat_id=chat_id,
@@ -22,18 +22,18 @@ async def send_video(bot: Bot, chat_id: int, chat_language, business_connection_
             duration=duration
         )
 
-        if not file_path_or_url.startswith("http"):
-            await del_media_content(file_path_or_url)
-
-        if thumbnail_path_or_url and not thumbnail_path_or_url.startswith("http"):
-            await del_media_content(thumbnail_path_or_url)
-
     except Exception as e:
         if attempt:
             return 2
         else:
             print(f"Ошибка при отправке видео: {str(e)}")
             return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])
+    finally:
+        if not file_path_or_url.startswith("http"):
+            await del_media_content(file_path_or_url)
+
+        if thumbnail_path_or_url and not thumbnail_path_or_url.startswith("http"):
+            await del_media_content(thumbnail_path_or_url) 
         
 async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author) -> str:
     """
@@ -60,6 +60,11 @@ async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_
     except Exception as e:
         print(e)
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     
+    finally:
+        await del_media_content(file_path)
+        if thumbnail_path:
+            await del_media_content(thumbnail_path)     
+        
         
 async def del_media_content(file_path):
     os.remove(file_path)

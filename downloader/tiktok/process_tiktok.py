@@ -29,5 +29,4 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
 
     except Exception as e:
         print(f"❌ Ошибка обработки TikTok: {str(e)}")
-        await bot.send_message(chat_id, text="❌ Ошибка при обработке TikTok")
 

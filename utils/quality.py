@@ -28,14 +28,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
     file_path = data["file_path"]
     video_title = data["video_title"]
     duration = data["duration"]
-    video_id = data["video_id"]
-
-    # 📌 Загружаем превью
-    thumbnail_path = None
-    if video_id:
-        thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
-        thumbnail_path = os.path.join(user_folder, f"{video_id}_thumbnail.jpg")
-        await download_file(thumbnail_url, thumbnail_path)
+    thumbnail_path = data["thumbnail_path"]
 
     file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
     print(f"Размер {current_quality}p: {file_size_mb}MB")  # Лог для отладки
@@ -57,6 +50,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
     if next_quality:
         print(f"⚡ Переход к {next_quality}p")
         await del_media_content(file_path)
+        await del_media_content(thumbnail_path)
         current_quality = next_quality
 
         data = await fetch_youtube_data(url, user_folder, current_quality)
@@ -64,6 +58,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
             return {"error": data["error"]}
 
         file_path = data["file_path"]
+        thumbnail_path = data["thumbnail_path"]
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         print(f"Размер {current_quality}p: {file_size_mb}MB")
 
@@ -84,6 +79,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
     for next_quality in quality_downgrades:
         print(f"🔻 Понижение до {next_quality}p")
         await del_media_content(file_path)
+        await del_media_content(thumbnail_path)
         current_quality = next_quality
 
         data = await fetch_youtube_data(url, user_folder, current_quality)
@@ -91,6 +87,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
             return {"error": data["error"]}
 
         file_path = data["file_path"]
+        thumbnail_path = data["thumbnail_path"]
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         print(f"Размер {current_quality}p: {file_size_mb}MB")
 
@@ -106,4 +103,6 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
             }
 
     # Если даже 144p >50MB, возвращаем ошибку
+    await del_media_content(file_path)
+    await del_media_content(thumbnail_path)
     return {"error": "large_content"}
