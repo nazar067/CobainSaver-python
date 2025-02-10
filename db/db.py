@@ -17,3 +17,12 @@ async def init_db(pool):
                 language_code TEXT NOT NULL
             )
         """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS links (
+                id SERIAL PRIMARY KEY,
+                chat_id INT NOT NULL,
+                user_id INT NOT NULL,
+                link TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT NOW()
+            )
+        """)
