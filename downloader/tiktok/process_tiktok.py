@@ -4,12 +4,13 @@ from downloader.tiktok.download_audio import download_and_send_tiktok_audio
 from downloader.tiktok.download_video import download_and_send_tiktok_video
 from downloader.tiktok.extract_tiktok_data import extract_tiktok_data
 from downloader.tiktok.internet_video import send_tiktok_video
+from downloader.tiktok.send_images import send_tiktok_images
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 
 async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id) -> None:
     """
-    Главная функция: извлекает данные, скачивает и отправляет TikTok-контент.
+    Главная функция: извлекает данные, скачивает и отправляет TikTok-контент (видео или фото).
     """
     try:
         pool = dp["db_pool"]
@@ -21,10 +22,11 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         if "error" in data:
             return await bot.send_message(chat_id, text=data["error"])
 
-        # 📥 **Скачиваем и отправляем видео**
-        await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder)
+        if data["type"] == "photo":
+            await send_tiktok_images(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"])
+        else:
+            await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder)
 
-        # 🎵 **Скачиваем и отправляем аудио**
         await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder)
 
     except Exception as e:

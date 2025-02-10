@@ -12,7 +12,6 @@ async def send_video(bot: Bot, chat_id: int, chat_language, business_connection_
     try:
         video = get_media_source(file_path_or_url)
         thumbnail = get_media_source(thumbnail_path_or_url)
-        print(thumbnail)
         await bot.send_video(
             business_connection_id=business_connection_id,
             chat_id=chat_id,
@@ -52,9 +51,6 @@ async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_
             thumbnail=thumbnail,
             performer=author
         )
-        await del_media_content(file_path)
-        if thumbnail_path:
-            await del_media_content(thumbnail_path)
 
         return
     except Exception as e:
@@ -63,7 +59,18 @@ async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_
     finally:
         await del_media_content(file_path)
         if thumbnail_path:
-            await del_media_content(thumbnail_path)     
+            await del_media_content(thumbnail_path)  
+            
+async def send_media_group(bot: Bot, chat_id: int, chat_language, business_connection_id: Optional[str], media_album: str):
+    try:
+        await bot.send_media_group(
+            chat_id=chat_id, 
+            business_connection_id=business_connection_id, 
+            media=media_album)
+    except Exception as e:
+        print(e)
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     
+   
         
         
 async def del_media_content(file_path):

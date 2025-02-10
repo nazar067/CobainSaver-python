@@ -21,10 +21,7 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
     await download_file(data["audio_url"], audio_path)
 
     # 📥 **Скачивание превью (если есть)**
-    if data["audio_thumbnail_url"]:
-        await download_file(data["audio_thumbnail_url"], audio_thumbnail_path, False)
-    else:
-        audio_thumbnail_path = None
+    await download_file(data["audio_thumbnail_url"], audio_thumbnail_path)
 
     # 📤 **Отправка аудио**
     await send_audio(
