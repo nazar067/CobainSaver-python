@@ -4,6 +4,7 @@ from aiogram.types import Message
 from db.add_link import insert_link_into_db
 from downloader.spotify import process_spotify_track
 from downloader.tiktok.process_tiktok import fetch_tiktok_video
+from downloader.x.fetch_data import fetch_twitter_content
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
 from utils.get_url import delete_not_url
@@ -51,3 +52,5 @@ async def choose_service(bot, message: Message, business_connection_id, dp: Disp
         return await process_spotify_track(bot, url, chat_id, dp, business_connection_id)
     elif service is "TikTok":
         return await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id)
+    elif service is "Twitter/X":
+        return await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id)

@@ -1,11 +1,12 @@
 from aiohttp import ClientSession
+from config import TIKTOK_API
 
+api_url = TIKTOK_API
 
 async def extract_tiktok_data(url: str) -> dict:
     """
     Извлекает данные TikTok из API: ссылки на видео, аудио, размеры, превью или изображения.
     """
-    api_url = "https://www.tikwm.com/api/"
 
     async with ClientSession() as session:
         payload = {"url": url, "hd": "1"}
