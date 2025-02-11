@@ -8,11 +8,11 @@ async def send_social_media_album(bot, chat_id, chat_language, business_connecti
     📩 Отправляет альбом из фото и видео (по 10 файлов за раз).
     Поддерживает TikTok и Twitter.
     """
-    caption = re.sub(r"#\S+", "", caption).strip()  # Удаляем хэштеги
-    caption = caption[:800] + "..." if len(caption) > 800 else caption  # Ограничение 800 символов
+    caption = re.sub(r"#\S+", "", caption).strip()
+    caption = caption[:800] + "..." if len(caption) > 800 else caption 
 
     media_album = []
-    count = 0  # Контроль первой подписи
+    count = 0
 
     for media_url in media_list:
         file_type = detect_file_type(media_url)
@@ -31,7 +31,6 @@ async def send_social_media_album(bot, chat_id, chat_language, business_connecti
             else:
                 media_album.append(InputMediaVideo(media=media_url))
 
-    # 🔹 Отправка альбома по 10 файлов за раз
     batch_size = 10
     for i in range(0, len(media_album), batch_size):
         batch = media_album[i:i + batch_size]

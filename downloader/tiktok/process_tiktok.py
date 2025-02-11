@@ -12,23 +12,19 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     """
     Главная функция: извлекает данные, скачивает и отправляет TikTok-контент (видео или фото).
     """
-    try:
-        pool = dp["db_pool"]
-        chat_language = await get_language(pool, chat_id)
-        save_folder = await get_user_path(chat_id)
+    pool = dp["db_pool"]
+    chat_language = await get_language(pool, chat_id)
+    save_folder = await get_user_path(chat_id)
 
-        # 📌 **Извлекаем данные**
-        data = await extract_tiktok_data(url)
-        if "error" in data:
-            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data["error"])
+    # 📌 **Извлекаем данные**
+    data = await extract_tiktok_data(url)
+    if "error" in data:
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data["error"])
 
-        if data["type"] == "photo":
-            await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"])
-        else:
-            await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder)
+    if data["type"] == "photo":
+        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"])
+    else:
+        await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder)
 
-        await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder)
-
-    except Exception as e:
-        print(f"❌ Ошибка обработки TikTok: {str(e)}")
+    await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder)
 

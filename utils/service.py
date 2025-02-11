@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 from aiogram import Dispatcher
 from aiogram.types import Message
 from db.add_link import insert_link_into_db
+from downloader.instagram.fetch_data import fetch_instagram_content
 from downloader.spotify import process_spotify_track
 from downloader.tiktok.process_tiktok import fetch_tiktok_video
 from downloader.x.fetch_data import fetch_twitter_content
@@ -54,3 +55,5 @@ async def choose_service(bot, message: Message, business_connection_id, dp: Disp
         return await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id)
     elif service is "Twitter/X":
         return await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id)
+    elif service is "Instagram":
+        return await fetch_instagram_content(bot, url, chat_id, dp, business_connection_id)
