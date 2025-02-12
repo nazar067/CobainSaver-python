@@ -27,7 +27,7 @@ async def identify_service(url: str) -> str:
         "Reddit": ["reddit.com", "redd.it"],
         "Twitter/X": ["x.com", "twitter.com"],
         "Instagram": ["instagram.com", "www.instagram.com"],
-        "PornHub": ["rt.pornhub.com"],
+        "PornHub": ["rt.pornhub.com", "www.pornhub.com"],
         "Pinterest": ["pinterest.com", "pin.it", "ru.pinterest.com"],
         "Twitch": ["clips.twitch.tv", "twitch.tv"]
     }
