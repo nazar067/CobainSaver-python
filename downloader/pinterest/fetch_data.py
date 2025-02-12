@@ -102,7 +102,6 @@ async def fetch_pinterest_images(url: str) -> list:
         html_content = response.text
         image_urls = []
 
-        # Поиск изображений в HTML-коде страницы
         for line in html_content.split('"'):
             if line.startswith("https://i.pinimg.com/originals/"):
                 image_urls.append(line)

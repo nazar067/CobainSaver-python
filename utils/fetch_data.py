@@ -108,8 +108,8 @@ async def download_file(thumbnail_url: str, save_path: str, isThumbnail: bool = 
                 for chunk in response.iter_content(1024):
                     f.write(chunk)
             return
-    except:
-        print()
+    except Exception as e:
+        print(e)
         
     if isThumbnail:
         try:
@@ -119,5 +119,5 @@ async def download_file(thumbnail_url: str, save_path: str, isThumbnail: bool = 
                     for chunk in response.iter_content(1024):
                         f.write(chunk)
         except Exception as e:
-            print()
+            print(e)
     
