@@ -11,32 +11,28 @@ def get_media_source(media_input: Optional[Union[str, List[str], List[Union[Inpu
     - Если передан список путей или ссылок, возвращает список объектов `InputMediaPhoto` или `InputMediaVideo`.
     """
 
-    # Если пусто, возвращаем None
     if not media_input:
         return None
 
-    # Если уже передан список `InputMediaPhoto` или `InputMediaVideo`, возвращаем его без изменений
     if isinstance(media_input, list) and all(isinstance(item, (InputMediaPhoto, InputMediaVideo)) for item in media_input):
         return media_input
 
-    # Если передана одиночная строка (URL или путь к файлу)
     if isinstance(media_input, str):
         if media_input.startswith("http"):
             return media_input
         return FSInputFile(media_input) if os.path.exists(media_input) else None
 
-    # Если передан список файлов или ссылок
     elif isinstance(media_input, list):
         media_album = []
 
         for media_path in media_input:
             if isinstance(media_path, str):
-                if media_path.startswith("http"):  # Ссылка
+                if media_path.startswith("http"):
                     if any(media_path.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
                         media_album.append(InputMediaPhoto(media=media_path))
                     elif any(media_path.lower().endswith(ext) for ext in [".mp4", ".mov", ".mkv"]):
                         media_album.append(InputMediaVideo(media=media_path))
-                elif os.path.exists(media_path):  # Локальный файл
+                elif os.path.exists(media_path):
                     if any(media_path.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
                         media_album.append(InputMediaPhoto(media=FSInputFile(media_path)))
                     elif any(media_path.lower().endswith(ext) for ext in [".mp4", ".mov", ".mkv"]):

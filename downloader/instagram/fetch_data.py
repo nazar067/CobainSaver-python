@@ -31,8 +31,6 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     matching_files = [
         os.path.join(directory, file) for file in os.listdir(directory) if random_name in file
     ]
-    
-    print("📂 Найденные файлы:", matching_files)
 
     if matching_files:
         await send_media_group(bot, chat_id, chat_language, business_connection_id, matching_files)

@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 from aiogram import Bot
-from aiogram.types import FSInputFile
+from aiogram.types import FSInputFile, InputMediaPhoto
 from localisation.translations.erros import translations
 from utils.media_source import get_media_source
 
@@ -71,8 +71,17 @@ async def send_media_group(bot: Bot, chat_id: int, chat_language, business_conne
     except Exception as e:
         print(e)
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     
-   
-        
+    finally:
+        await del_media_group(media_album)
         
 async def del_media_content(file_path):
-    os.remove(file_path)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+    
+async def del_media_group(media):
+    try:
+        for file in media:
+            if os.path.exists(file):
+                os.remove(file)
+    except:
+        print()
