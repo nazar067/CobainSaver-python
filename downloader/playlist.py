@@ -16,7 +16,7 @@ from localisation.translations.downloader import translations
 
 PAGE_SIZE = 10
 
-async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_id: Optional[str], chat_id: int, url: str, page: int = 1, msg_id: Optional[int] = None):
+async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_id: Optional[str], chat_id: int, url: str, page: int = 1, msg_id: Optional[int] = None, user_msg_id = None):
     """
     Универсальная функция обработки плейлистов с разных платформ (Spotify, YouTube Music).
     """
@@ -55,10 +55,9 @@ async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_i
         page=page,
         total_pages=total_pages
     )
-    #caption = f"🎵 <b>{title}</b>\n👤 {owner}\n📀 Плейлист\n🎧 Треков: {total_tracks}\n📃 Страница {page}/{total_pages}\n⬇ Выберите песню для скачивания"
-
+    
     if msg_id is None:
-        message = await bot.send_photo(business_connection_id=business_connection_id, chat_id=chat_id, photo=FSInputFile(cover_path), caption=caption, parse_mode="HTML")
+        message = await bot.send_photo(business_connection_id=business_connection_id, chat_id=chat_id, photo=FSInputFile(cover_path), caption=caption, parse_mode="HTML", reply_to_message_id=user_msg_id)
         msg_id = message.message_id
 
     msg_id = int(msg_id)
