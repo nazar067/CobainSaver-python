@@ -1,5 +1,6 @@
 import asyncio
 import os
+import aiohttp
 import requests
 import yt_dlp
 
@@ -97,16 +98,16 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     except Exception as e:
         return {"error": f"{str(e)}"}
 
-async def download_file(thumbnail_url: str, save_path: str, isThumbnail: bool = True) -> None:
+async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> None:
     """
     Скачивает превью по URL. В случае ошибки загружает резервное изображение.
     """
     try:
-        response = requests.get(thumbnail_url, stream=True, timeout=10)
-        if response.status_code == 200:
-            with open(save_path, "wb") as f:
-                for chunk in response.iter_content(1024):
-                    f.write(chunk)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    with open(save_path, "wb") as f:
+                        f.write(await resp.read())
             return
     except Exception as e:
         print(e)

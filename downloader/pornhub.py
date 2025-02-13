@@ -10,10 +10,8 @@ from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
-from utils.quality import select_optimal_quality
 
 
-MAX_SIZE_MB = 50  # Максимальный размер видео
 
 async def fetch_pornhub_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id):
     """
@@ -28,32 +26,35 @@ async def fetch_pornhub_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, 
         'quiet': True
     }
 
-    def download_video():
+    def extract_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=False)
+    def download_video(options):
+        with yt_dlp.YoutubeDL(options) as ydl:
+            ydl.download([video_url])
 
     try:
-        info = await asyncio.to_thread(download_video)
+        info = await asyncio.to_thread(extract_info)
         
         video_url = info["formats"][0]["url"]
         video_title = info.get("title", "")
         video_duration = info.get("duration", 0)
         video_thumbnail = info.get("thumbnail", None)
+        if video_duration > 1101:
+            return await bot.send_message(
+                chat_id=chat_id,
+                business_connection_id=business_connection_id,
+                text="Video more than 50MB"
+            ) 
 
         video_path = os.path.join(save_folder, f"{random_name}mp4")
         thumbnail_path = os.path.join(save_folder, f"{random_name}jpg") if video_thumbnail else None
 
         ydl_opts["outtmpl"] = video_path
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([video_url])
+        await download_file(video_url, video_path)
 
         if video_thumbnail:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(video_thumbnail) as resp:
-                    if resp.status == 200:
-                        with open(thumbnail_path, "wb") as f:
-                            f.write(await resp.read())
-
+            await download_file(video_thumbnail, thumbnail_path)
 
         await send_video(bot, chat_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
 
