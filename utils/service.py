@@ -2,9 +2,9 @@ from urllib.parse import urlparse
 from aiogram import Dispatcher
 from aiogram.types import Message
 from db.add_link import insert_link_into_db
+from downloader.base_ytdlp_downloader import fetch_base_video
 from downloader.instagram.fetch_data import fetch_instagram_content
 from downloader.pinterest.fetch_data import fetch_pinterest_content
-from downloader.pornhub import fetch_pornhub_video
 from downloader.spotify import process_spotify_track
 from downloader.tiktok.process_tiktok import fetch_tiktok_video
 from downloader.x.fetch_data import fetch_twitter_content
@@ -62,4 +62,8 @@ async def choose_service(bot, message: Message, business_connection_id, dp: Disp
     elif service is "Pinterest":
         return await fetch_pinterest_content(bot, url, chat_id, dp, business_connection_id)
     elif service is "PornHub":
-        return await fetch_pornhub_video(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id)
+    elif service is "Twitch":
+        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id)
+    elif service is "Another":
+        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id)

@@ -13,10 +13,7 @@ from localisation.translations.downloader import translations
 
 
 
-async def fetch_pornhub_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id):
-    """
-    Загружает видео с PornHub через yt-dlp, ограничивая размер файла до 50MB.
-    """
+async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id):
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
@@ -29,9 +26,6 @@ async def fetch_pornhub_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, 
     def extract_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=False)
-    def download_video(options):
-        with yt_dlp.YoutubeDL(options) as ydl:
-            ydl.download([video_url])
 
     try:
         info = await asyncio.to_thread(extract_info)
@@ -51,6 +45,11 @@ async def fetch_pornhub_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, 
         thumbnail_path = os.path.join(save_folder, f"{random_name}jpg") if video_thumbnail else None
 
         ydl_opts["outtmpl"] = video_path
+        await bot.send_message(
+                chat_id=chat_id,
+                business_connection_id=business_connection_id,
+                text="Downloading..."
+            ) 
         await download_file(video_url, video_path)
         
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
@@ -67,8 +66,4 @@ async def fetch_pornhub_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, 
         await send_video(bot, chat_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
 
     except Exception as e:
-        return await bot.send_message(
-            chat_id=chat_id,
-            business_connection_id=business_connection_id,
-            text=f"❌ Ошибка скачивания: {str(e)}"
-        )
+        return 
