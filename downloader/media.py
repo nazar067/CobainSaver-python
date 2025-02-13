@@ -3,15 +3,17 @@ from typing import Optional
 from aiogram import Bot
 from aiogram.types import FSInputFile, InputMediaPhoto
 from localisation.translations.erros import translations
+from utils.get_name import get_clear_name
 from utils.media_source import get_media_source
 
-async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None) -> None:
+async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None, isAds = True) -> None:
     """
     Отправляет скачанное видео в чат (по ссылке или из файла).
     """
     try:
         video = get_media_source(file_path_or_url)
         thumbnail = get_media_source(thumbnail_path_or_url)
+        title = await get_clear_name(title)
         await bot.send_video(
             business_connection_id=business_connection_id,
             chat_id=chat_id,
@@ -21,7 +23,8 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             duration=duration,
             reply_to_message_id=msg_id
         )
-
+        if isAds:
+            await bot.send_message(chat_id, "ads", reply_to_message_id=msg_id)
     except Exception as e:
         if attempt:
             return 2
@@ -51,9 +54,10 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             duration=0,
             thumbnail=thumbnail,
             performer=author,
-            reply_to_message_id=msg_id
+            reply_to_message_id=msg_id,
+            caption="by CobainSaver"
         )
-
+        await bot.send_message(chat_id, "ads", reply_to_message_id=msg_id)
         return
     except Exception as e:
         print(e)
@@ -72,6 +76,7 @@ async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, busine
             media=media,
             reply_to_message_id=msg_id
             )
+        await bot.send_message(chat_id, "ads", reply_to_message_id=msg_id)
     except Exception as e:
         print(e)
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     
