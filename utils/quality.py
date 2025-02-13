@@ -102,4 +102,4 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
 
     await del_media_content(file_path)
     await del_media_content(thumbnail_path)
-    return {"error": "large_content"}
+    return "large"

@@ -27,7 +27,13 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
 
     quality_result = await select_optimal_quality(url, user_folder, initial_quality="360")
 
-    if "error" in quality_result:
+    if quality_result is "large":
+        return await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["large_content"][chat_language]
+        )
+    elif "error" in quality_result:
         return await bot.send_message(
             chat_id=chat_id,
             business_connection_id=business_connection_id,

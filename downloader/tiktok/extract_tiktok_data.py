@@ -45,7 +45,7 @@ async def extract_tiktok_data(url: str) -> dict:
     elif play_size_mb > 0 and play_size_mb < 49:
         video_url = data["data"]["play"]
     else:
-        return {"error": "❌ Видео больше 50MB и не может быть скачано"}
+        return "large"
 
     return {
         "type": "video",

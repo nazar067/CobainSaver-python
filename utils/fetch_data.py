@@ -47,7 +47,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         }
 
     except Exception as e:
-        return {"error": f"Ошибка при скачивании: {str(e)}"}
+        return {"error": f"Error with download: {str(e)}"}
     
 async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     """
