@@ -6,6 +6,7 @@ from downloader.send_album import send_media_group
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from utils.get_name import get_random_file_name
+from localisation.translations.downloader import translations
 
 async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     pool = dp["db_pool"]
@@ -35,4 +36,4 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     if matching_files:
         await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, matching_files)
     else:
-        await bot.send_message(chat_id, text="❌ Ошибка: Файлы не найдены.")
+        await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language])

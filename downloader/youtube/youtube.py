@@ -1,7 +1,3 @@
-import asyncio
-import requests
-import yt_dlp
-import os
 from aiogram import Bot, Dispatcher
 
 from downloader.media import send_video
@@ -32,11 +28,10 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     quality_result = await select_optimal_quality(url, user_folder, initial_quality="360")
 
     if "error" in quality_result:
-        error_key = quality_result["error"]
         return await bot.send_message(
             chat_id=chat_id,
             business_connection_id=business_connection_id,
-            text=translations[error_key][chat_language]
+            text=translations["unavaliable_content"][chat_language]
         )
 
     file_path = quality_result["file_path"]

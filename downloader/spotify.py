@@ -3,7 +3,9 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from downloader.youtube.youtube_music import process_youtube_music
 from downloader.playlist import process_music_playlist
+from localisation.get_language import get_language
 from utils.spotify_helper import extract_track_id, get_spotify_client
+from localisation.translations.downloader import translations
 
 async def find_song_on_ytmusic(query: str) -> str:
     ydl_opts = {
@@ -28,25 +30,24 @@ async def find_song_on_ytmusic(query: str) -> str:
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None, msg_id = None):
     if "/playlist/" in url or "/album/" in url:
-        await process_music_playlist(bot, business_connection_id, chat_id, url)
+        await process_music_playlist(bot, dp, business_connection_id, chat_id, url)
         return
+    pool = dp["db_pool"]
+    chat_language = await get_language(pool, chat_id)
     spotify = get_spotify_client()
     track_id = extract_track_id(url)
 
-    try:
-        track = spotify.track(track_id)
-        artist = track["artists"][0]["name"]
-        track_name = track["name"]
-        search_query = f"{artist} {track_name} audio"
-        print(f"🔍 Ищем на YouTube Music: {search_query}")
+    track = spotify.track(track_id)
+    artist = track["artists"][0]["name"]
+    track_name = track["name"]
+    search_query = f"{artist} {track_name} audio"
+    print(f"🔍 Ищем на YouTube Music: {search_query}")
 
-        youtube_music_url = await find_song_on_ytmusic(search_query)
+    youtube_music_url = await find_song_on_ytmusic(search_query)
 
-        if youtube_music_url:
-            print(f"✅ Найдено: {youtube_music_url}")
-            asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id, msg_id))
-        else:
-            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text="❌ Не удалось найти трек на YouTube Music.")
+    if youtube_music_url:
+        print(f"✅ Найдено: {youtube_music_url}")
+        asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id, msg_id))
+    else:
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language])
     
-    except Exception as e:
-        await bot.send_message(chat_id, f"❌ Ошибка при обработке Spotify трека: {str(e)}")

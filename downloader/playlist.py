@@ -3,23 +3,27 @@ import yt_dlp
 import os
 import requests
 import math
-from aiogram import Bot
+from aiogram import Bot, Dispatcher
 from aiogram.types import FSInputFile
 from downloader.media import del_media_content
 from keyboard import generate_playlist_keyboard
 from typing import Optional
+from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.spotify_helper import extract_spotify_id, get_spotify_client
+from localisation.translations.downloader import translations
 
 PAGE_SIZE = 10
 
-async def process_music_playlist(bot: Bot, business_connection_id: Optional[str], chat_id: int, url: str, page: int = 1, msg_id: Optional[int] = None):
+async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_id: Optional[str], chat_id: int, url: str, page: int = 1, msg_id: Optional[int] = None):
     """
     Универсальная функция обработки плейлистов с разных платформ (Spotify, YouTube Music).
     """
     user_folder = await get_user_path(chat_id)
     source = ""
+    pool = dp["db_pool"]
+    chat_language = await get_language(pool, chat_id)
 
     if "spotify" in url:
         playlist_info = await fetch_spotify_data(url, user_folder)
@@ -29,10 +33,10 @@ async def process_music_playlist(bot: Bot, business_connection_id: Optional[str]
         source = "Y"
 
     if "error" in playlist_info:
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=playlist_info["error"])
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language])
 
-    title = playlist_info.get("title", "Без названия")
-    owner = playlist_info.get("owner", "Неизвестный")
+    title = playlist_info.get("title", "")
+    owner = playlist_info.get("owner", "")
     tracks = playlist_info.get("tracks", [])
     cover_path = playlist_info.get("cover_path", None)
     content_type = playlist_info.get("content_type", "p")
@@ -45,8 +49,13 @@ async def process_music_playlist(bot: Bot, business_connection_id: Optional[str]
     end_idx = start_idx + PAGE_SIZE
     songs_for_current_page = tracks[start_idx:end_idx]
         
-
-    caption = f"🎵 <b>{title}</b>\n👤 {owner}\n📀 Плейлист\n🎧 Треков: {total_tracks}\n📃 Страница {page}/{total_pages}\n⬇ Выберите песню для скачивания"
+    caption = translations["playlist_info"][chat_language].format(
+        title=title,
+        total_tracks=total_tracks,
+        page=page,
+        total_pages=total_pages
+    )
+    #caption = f"🎵 <b>{title}</b>\n👤 {owner}\n📀 Плейлист\n🎧 Треков: {total_tracks}\n📃 Страница {page}/{total_pages}\n⬇ Выберите песню для скачивания"
 
     if msg_id is None:
         message = await bot.send_photo(business_connection_id=business_connection_id, chat_id=chat_id, photo=FSInputFile(cover_path), caption=caption, parse_mode="HTML")
@@ -77,8 +86,8 @@ async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
             info = ydl.extract_info(url, download=False)
 
         if "_type" in info and info["_type"] == "playlist":
-            title = info.get("title", "Без названия")
-            owner = info.get("uploader", "Неизвестный исполнитель")
+            title = info.get("title", "")
+            owner = info.get("uploader", "")
             playlist_id = info.get("id", None)
 
             # 📌 Формируем список треков
@@ -127,7 +136,7 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
             return {"error": "❌ Неверный URL Spotify"}
 
         # 📌 Получаем информацию
-        title = data.get("name", "Без названия")
+        title = data.get("name", "")
         owner = data["owner"]["display_name"] if "playlist" in url else data["artists"][0]["name"]
         playlist_id = data["id"]  # ✅ Теперь сохраняем ID плейлиста/альбома
         cover_url = data["images"][0]["url"] if data.get("images") else None
