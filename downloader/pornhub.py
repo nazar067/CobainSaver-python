@@ -52,6 +52,14 @@ async def fetch_pornhub_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, 
 
         ydl_opts["outtmpl"] = video_path
         await download_file(video_url, video_path)
+        
+        file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
+        if file_size_mb >= 50:
+            return await bot.send_message(
+                chat_id=chat_id,
+                business_connection_id=business_connection_id,
+                text="Video more than 50MB"
+            )
 
         if video_thumbnail:
             await download_file(video_thumbnail, thumbnail_path)
