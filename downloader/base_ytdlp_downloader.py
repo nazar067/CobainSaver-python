@@ -3,7 +3,7 @@ import os
 from aiogram import Bot, Dispatcher
 import aiohttp
 import yt_dlp
-from downloader.media import send_video
+from downloader.media import del_media_content, send_video
 
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
@@ -54,6 +54,7 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         
         file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
         if file_size_mb >= 50:
+            await del_media_content(video_path)
             return await bot.send_message(
                 chat_id=chat_id,
                 business_connection_id=business_connection_id,
