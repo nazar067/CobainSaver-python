@@ -5,7 +5,7 @@ from aiogram.types import FSInputFile, InputMediaPhoto
 from localisation.translations.erros import translations
 from utils.media_source import get_media_source
 
-async def send_video(bot: Bot, chat_id: int, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None) -> None:
+async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None) -> None:
     """
     Отправляет скачанное видео в чат (по ссылке или из файла).
     """
@@ -18,7 +18,8 @@ async def send_video(bot: Bot, chat_id: int, chat_language, business_connection_
             video=video,
             caption=title,
             thumbnail=thumbnail,
-            duration=duration
+            duration=duration,
+            reply_to_message_id=msg_id
         )
 
     except Exception as e:
@@ -34,7 +35,7 @@ async def send_video(bot: Bot, chat_id: int, chat_language, business_connection_
         if thumbnail_path_or_url and not thumbnail_path_or_url.startswith("http"):
             await del_media_content(thumbnail_path_or_url) 
         
-async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author) -> str:
+async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author) -> str:
     """
     Отправляет аудио в чат.
     """
@@ -49,7 +50,8 @@ async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_
             title=title,
             duration=0,
             thumbnail=thumbnail,
-            performer=author
+            performer=author,
+            reply_to_message_id=msg_id
         )
 
         return
@@ -61,13 +63,15 @@ async def send_audio(bot: Bot, chat_id: int, chat_language, business_connection_
         if thumbnail_path:
             await del_media_content(thumbnail_path)  
             
-async def send_media_group(bot: Bot, chat_id: int, chat_language, business_connection_id: Optional[str], media_album: str):
+async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str):
     try:
         media = get_media_source(media_album)
         await bot.send_media_group(
             chat_id=chat_id, 
             business_connection_id=business_connection_id, 
-            media=media)
+            media=media,
+            reply_to_message_id=msg_id
+            )
     except Exception as e:
         print(e)
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     

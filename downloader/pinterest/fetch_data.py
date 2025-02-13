@@ -16,7 +16,7 @@ from utils.get_name import get_random_file_name
 MAX_VIDEO_SIZE_MB = 50
 
 
-async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id):
+async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     """
     Загружает контент (видео/фото) с Pinterest и отправляет пользователю.
     """
@@ -39,13 +39,13 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
                 text="❌ Видео больше 50MB и не может быть отправлено."
             )
 
-        await send_video(bot, chat_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path)
+        await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path)
         return
 
     image_urls = await fetch_pinterest_images(url)
 
     if image_urls:
-        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, image_urls, "")
+        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, image_urls, "", msg_id)
         return
 
     await bot.send_message(chat_id=chat_id, text="❌ Контент не найден или недоступен.")

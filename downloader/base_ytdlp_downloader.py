@@ -13,7 +13,7 @@ from localisation.translations.downloader import translations
 
 
 
-async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id):
+async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
@@ -63,7 +63,7 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         if video_thumbnail:
             await download_file(video_thumbnail, thumbnail_path)
 
-        await send_video(bot, chat_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
+        await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
 
     except Exception as e:
         return 

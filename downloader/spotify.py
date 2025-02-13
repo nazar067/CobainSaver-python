@@ -26,7 +26,7 @@ async def find_song_on_ytmusic(query: str) -> str:
         print(f"❌ Ошибка при поиске YouTube Music: {str(e)}")
         return None
 
-async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None):
+async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None, msg_id = None):
     if "/playlist/" in url or "/album/" in url:
         await process_music_playlist(bot, business_connection_id, chat_id, url)
         return
@@ -44,7 +44,7 @@ async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher
 
         if youtube_music_url:
             print(f"✅ Найдено: {youtube_music_url}")
-            asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id))
+            asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id, msg_id))
         else:
             await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text="❌ Не удалось найти трек на YouTube Music.")
     

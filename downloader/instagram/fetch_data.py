@@ -7,7 +7,7 @@ from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from utils.get_name import get_random_file_name
 
-async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id):
+async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     random_name = get_random_file_name("") + "insta"
@@ -33,6 +33,6 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     ]
 
     if matching_files:
-        await send_media_group(bot, chat_id, chat_language, business_connection_id, matching_files)
+        await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, matching_files)
     else:
         await bot.send_message(chat_id, text="❌ Ошибка: Файлы не найдены.")

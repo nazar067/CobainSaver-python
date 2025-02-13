@@ -8,7 +8,7 @@ from downloader.tiktok.internet_video import send_tiktok_video
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 
-async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id) -> None:
+async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id) -> None:
     """
     Главная функция: извлекает данные, скачивает и отправляет TikTok-контент (видео или фото).
     """
@@ -22,9 +22,9 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data["error"])
 
     if data["type"] == "photo":
-        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"])
+        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"], msg_id)
     else:
-        await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder)
+        await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id)
 
-    await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder)
+    await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id)
 

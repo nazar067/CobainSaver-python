@@ -43,27 +43,28 @@ async def choose_service(bot, message: Message, business_connection_id, dp: Disp
     service = await identify_service(url)
     chat_id = message.chat.id
     user_id = message.from_user.id
+    msg_id = message.message_id
 
     if url is not "":
         await insert_link_into_db(dp, chat_id, user_id, url)
     
     if service is "YouTube":
-        return await process_youtube_video(bot, url, chat_id, dp, business_connection_id)
+        return await process_youtube_video(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "YouTubeMusic":
-        return await process_youtube_music(bot, url, chat_id, dp, business_connection_id)
+        return await process_youtube_music(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "Spotify":
-        return await process_spotify_track(bot, url, chat_id, dp, business_connection_id)
+        return await process_spotify_track(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "TikTok":
-        return await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "Twitter/X":
-        return await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "Instagram":
-        return await fetch_instagram_content(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_instagram_content(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "Pinterest":
-        return await fetch_pinterest_content(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_pinterest_content(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "PornHub":
-        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "Twitch":
-        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
     elif service is "Another":
-        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id)
+        return await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
