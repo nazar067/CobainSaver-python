@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
-from aiogram import Dispatcher
+from aiogram import Bot, Dispatcher
 from aiogram.types import Message
+from aiogram.enums.chat_action import ChatAction
 from db.add_link import insert_link_into_db
 from downloader.base_ytdlp_downloader import fetch_base_video
 from downloader.instagram.fetch_data import fetch_instagram_content
@@ -10,6 +11,7 @@ from downloader.tiktok.process_tiktok import fetch_tiktok_video
 from downloader.x.fetch_data import fetch_twitter_content
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
+from utils.bot_action import send_bot_action
 from utils.get_url import delete_not_url
 
 async def identify_service(url: str) -> str:
@@ -38,13 +40,14 @@ async def identify_service(url: str) -> str:
 
     return "Another"
 
-async def choose_service(bot, message: Message, business_connection_id, dp: Dispatcher):
+async def choose_service(bot: Bot, message: Message, business_connection_id, dp: Dispatcher):
     url = await delete_not_url(message.text)
     if url is not "":
         service = await identify_service(url)
         chat_id = message.chat.id
         user_id = message.from_user.id
         msg_id = message.message_id
+        await send_bot_action(bot, chat_id, business_connection_id, "text")
 
         await insert_link_into_db(dp, chat_id, user_id, url)
         
