@@ -30,7 +30,7 @@ async def find_song_on_ytmusic(query: str) -> str:
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None, msg_id = None):
     if "/playlist/" in url or "/album/" in url:
-        await process_music_playlist(bot, dp, business_connection_id, chat_id, url)
+        await process_music_playlist(bot, dp, business_connection_id, chat_id, url, user_msg_id=msg_id)
         return
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
