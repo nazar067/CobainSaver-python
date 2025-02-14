@@ -45,4 +45,4 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     if matching_files:
         await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, caption, msg_id, pool=pool)
     else:
-        await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language])
+        await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)

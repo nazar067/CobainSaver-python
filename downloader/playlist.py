@@ -33,7 +33,7 @@ async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_i
         source = "Y"
 
     if "error" in playlist_info:
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language])
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
 
     title = playlist_info.get("title", "")
     owner = playlist_info.get("owner", "")

@@ -11,6 +11,7 @@ async def start_handler(bot: Bot, message: Message, dp: Dispatcher, business_con
     pool = dp["db_pool"]
     chat_id = message.chat.id
     language_code = message.from_user.language_code or "en"
+    msg_id = message.message_id
 
     async with pool.acquire() as connection:
         existing_language: Record = await connection.fetchrow("""
@@ -25,4 +26,4 @@ async def start_handler(bot: Bot, message: Message, dp: Dispatcher, business_con
     else:
         chat_language = existing_language["language_code"]
         
-    await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["welcome"][chat_language])
+    await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["welcome"][chat_language], reply_to_message_id=msg_id)

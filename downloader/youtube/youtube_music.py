@@ -29,7 +29,7 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     chat_language = await get_language(pool, chat_id)
 
     if "error" in data:
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language])
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
 
     file_path = data["file_path"]
     audio_title = data["audio_title"]
@@ -45,4 +45,4 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         if thumbnail_path:
             await del_media_content(thumbnail_path)
 
-    return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language])
+    return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language], reply_to_message_id=msg_id)

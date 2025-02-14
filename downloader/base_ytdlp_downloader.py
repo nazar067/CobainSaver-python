@@ -38,7 +38,8 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
             return await bot.send_message(
                 chat_id=chat_id,
                 business_connection_id=business_connection_id,
-                text=translations["large_content"][chat_language]
+                text=translations["large_content"][chat_language],
+                reply_to_message_id=msg_id
             ) 
 
         video_path = os.path.join(save_folder, f"{random_name}mp4")
@@ -48,7 +49,8 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         await bot.send_message(
                 chat_id=chat_id,
                 business_connection_id=business_connection_id,
-                text=translations["downloading"][chat_language]
+                text=translations["downloading"][chat_language],
+                reply_to_message_id=msg_id
             ) 
         await download_file(video_url, video_path)
         
@@ -58,7 +60,8 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
             return await bot.send_message(
                 chat_id=chat_id,
                 business_connection_id=business_connection_id,
-                text=translations["large_content"][chat_language]
+                text=translations["large_content"][chat_language],
+                reply_to_message_id=msg_id
             )
 
         if video_thumbnail:

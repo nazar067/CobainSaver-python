@@ -20,7 +20,8 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         return await bot.send_message(
             chat_id=chat_id,
             business_connection_id=business_connection_id,
-            text=translations["live_unavaliable_content"][chat_language]
+            text=translations["live_unavaliable_content"][chat_language],
+            reply_to_message_id=msg_id
         )
 
     user_folder = await get_user_path(chat_id)
@@ -31,13 +32,15 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         return await bot.send_message(
             chat_id=chat_id,
             business_connection_id=business_connection_id,
-            text=translations["large_content"][chat_language]
+            text=translations["large_content"][chat_language],
+            reply_to_message_id=msg_id
         )
     elif "error" in quality_result:
         return await bot.send_message(
             chat_id=chat_id,
             business_connection_id=business_connection_id,
-            text=translations["unavaliable_content"][chat_language]
+            text=translations["unavaliable_content"][chat_language],
+            reply_to_message_id=msg_id
         )
 
     file_path = quality_result["file_path"]

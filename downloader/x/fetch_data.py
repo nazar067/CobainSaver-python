@@ -15,7 +15,7 @@ async def fetch_twitter_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher
 
     data = await extract_twitter_data(url)
     if "error" in data:
-        return await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language])
+        return await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
 
     media_urls = data["media_urls"]
     caption = re.sub(r"#\S+", "", data["caption"]).strip() 
