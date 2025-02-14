@@ -24,7 +24,7 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language])
 
     if data["type"] == "photo":
-        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"], msg_id)
+        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"], msg_id, False)
     else:
         await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id)
 

@@ -26,7 +26,8 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             reply_to_message_id=msg_id
         )
         if isAds:
-            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text="ads")
+            if business_connection_id is "":
+                await bot.send_message(chat_id=chat_id, text="ads")
     except Exception as e:
         if attempt:
             return 2
@@ -60,7 +61,8 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             reply_to_message_id=msg_id,
             caption="by CobainSaver"
         )
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text="ads")
+        if business_connection_id is "":
+            await bot.send_message(chat_id=chat_id, text="ads")
         return
     except Exception as e:
         print(e)
@@ -70,7 +72,7 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         if thumbnail_path:
             await del_media_content(thumbnail_path)  
             
-async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str):
+async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path, isAds = True):
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "photo")
         media = get_media_source(media_album)
@@ -80,12 +82,14 @@ async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, busine
             media=media,
             reply_to_message_id=msg_id
             )
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text="ads")
+        if isAds:
+            if business_connection_id is "":
+                await bot.send_message(chat_id=chat_id, text="ads")
     except Exception as e:
         print(e)
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language])     
     finally:
-        await del_media_group(media_album)
+        await del_media_group(file_path)
         
 async def del_media_content(file_path):
     if os.path.exists(file_path):
@@ -96,5 +100,5 @@ async def del_media_group(media):
         for file in media:
             if os.path.exists(file):
                 os.remove(file)
-    except:
-        print()
+    except Exception as e:
+        print(e)

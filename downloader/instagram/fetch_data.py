@@ -2,7 +2,7 @@ import os
 import instaloader
 from aiogram import Bot, Dispatcher
 
-from downloader.send_album import send_media_group
+from downloader.send_album import send_social_media_album
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from utils.get_name import get_random_file_name
@@ -33,7 +33,16 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
         os.path.join(directory, file) for file in os.listdir(directory) if random_name in file
     ]
 
+    caption = ""
+    txt_file_path = next((os.path.join(directory, file) for file in os.listdir(directory) if random_name in file and file.endswith(".txt")), None)
+    
+    if txt_file_path:
+        try:
+            with open(txt_file_path, "r", encoding="utf-8") as f:
+                caption = f.read().strip()
+        except Exception as e:
+            print(e)
     if matching_files:
-        await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, matching_files)
+        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, caption, msg_id)
     else:
         await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language])
