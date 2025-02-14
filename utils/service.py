@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.enums.chat_action import ChatAction
-from db.add_link import insert_link_into_db
+from db.links import insert_link_into_db
 from downloader.base_ytdlp_downloader import fetch_base_video
 from downloader.instagram.fetch_data import fetch_instagram_content
 from downloader.pinterest.fetch_data import fetch_pinterest_content
@@ -49,7 +49,7 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
         msg_id = message.message_id
         await send_bot_action(bot, chat_id, business_connection_id, "text")
 
-        await insert_link_into_db(dp, chat_id, user_id, url)
+        await insert_link_into_db(dp, chat_id, user_id, url, msg_id)
         
         if service is "YouTube":
             return await process_youtube_video(bot, url, chat_id, dp, business_connection_id, msg_id)

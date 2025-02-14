@@ -40,13 +40,13 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
                 text=translations["large_content"][chat_language]
             )
 
-        await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path)
+        await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, pool=pool)
         return
 
     image_urls = await fetch_pinterest_images(url)
 
     if image_urls:
-        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, image_urls, "", msg_id)
+        await send_social_media_album(bot, chat_id, chat_language, business_connection_id, image_urls, "", msg_id, pool=pool)
         return
 
     await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language])

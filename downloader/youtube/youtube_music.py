@@ -39,7 +39,7 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     if os.path.exists(file_path):
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         if file_size_mb <= MAX_SIZE_MB:
-            return await send_audio(bot, chat_id, msg_id, chat_language, business_connection_id, file_path, audio_title, thumbnail_path, duration, author)
+            return await send_audio(bot, chat_id, msg_id, chat_language, business_connection_id, file_path, audio_title, thumbnail_path, duration, author, pool)
 
         await del_media_content(file_path)
         if thumbnail_path:

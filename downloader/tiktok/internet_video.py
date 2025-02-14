@@ -4,7 +4,7 @@ from downloader.media import send_video
 from downloader.tiktok.download_video import download_and_send_tiktok_video
 
 
-async def send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_connection_id: str, data: dict, save_folder, msg_id):
+async def send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_connection_id: str, data: dict, save_folder, msg_id, pool):
     attempt = await send_video(
         bot,
         chat_id,
@@ -16,8 +16,9 @@ async def send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_conn
         None,
         data["video_duration"],
         1,
-        False
+        False,
+        pool=pool
     )
 
     if attempt is 2:
-        await download_and_send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id)
+        await download_and_send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool)

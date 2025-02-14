@@ -20,4 +20,4 @@ async def fetch_twitter_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     media_urls = data["media_urls"]
     caption = re.sub(r"#\S+", "", data["caption"]).strip() 
 
-    await send_social_media_album(bot, chat_id, chat_language, business_connection_id, media_urls, caption, msg_id)
+    await send_social_media_album(bot, chat_id, chat_language, business_connection_id, media_urls, caption, msg_id, pool=pool)

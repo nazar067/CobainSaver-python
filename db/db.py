@@ -23,6 +23,8 @@ async def init_db(pool):
                 chat_id INT NOT NULL,
                 user_id INT NOT NULL,
                 link TEXT NOT NULL,
-                timestamp TIMESTAMP DEFAULT NOW()
+                msg_id INT NOT NULL,
+                timestamp TIMESTAMP DEFAULT NOW(),
+                success_send BOOLEAN DEFAULT FALSE
             )
         """)
