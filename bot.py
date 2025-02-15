@@ -2,6 +2,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart
+from admin.send_to_users import send_message_to_chats
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
 from downloader.music_selector import select_music
@@ -27,7 +28,6 @@ async def echo_handler(message: Message):
 
 @dp.business_message()
 async def business_echo_handler(message: Message):
-    """ Обработка бизнес-сообщений без удаления очереди обновлений """
     await choose_service(bot, message, message.business_connection_id, dp)
 
 @dp.callback_query(lambda c: c.data.startswith("P "))

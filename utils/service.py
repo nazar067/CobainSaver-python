@@ -12,6 +12,7 @@ from downloader.x.fetch_data import fetch_twitter_content
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
 from utils.bot_action import send_bot_action
+from utils.commands import choose_command
 from utils.get_url import delete_not_url
 
 async def identify_service(url: str) -> str:
@@ -41,6 +42,8 @@ async def identify_service(url: str) -> str:
     return "Another"
 
 async def choose_service(bot: Bot, message: Message, business_connection_id, dp: Dispatcher):
+    if message.text.startswith("/"):
+        return await choose_command(bot, message, dp)
     url = await delete_not_url(message.text)
     if url is not "":
         service = await identify_service(url)

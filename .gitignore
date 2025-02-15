@@ -4,6 +4,8 @@ config.py
 
 .cache
 
+users.txt
+
 __pycache__/
 *.pyc
 *.pyo
