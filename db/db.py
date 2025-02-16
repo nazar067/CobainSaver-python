@@ -28,3 +28,13 @@ async def init_db(pool):
                 success_send BOOLEAN DEFAULT FALSE
             )
         """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS settings (
+                id SERIAL PRIMARY KEY,
+                chat_id INT NOT NULL,
+                send_tiktok_music BOOLEAN DEFAULT TRUE,
+                auto_pick_yt_quality BOOLEAN DEFAULT TRUE,
+                send_ads BOOLEAN DEFAULT TRUE,
+                time_start_off_ads TIMESTAMP DEFAULT NULL
+            )
+        """)

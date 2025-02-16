@@ -6,6 +6,7 @@ from admin.send_to_users import send_message_to_chats
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
 from downloader.music_selector import select_music
+from handlers.settings_keyboard_handler import toggle_audio_callback
 from handlers.start_handler import start_handler
 from utils.pagination import playlist_pagination
 from utils.service import choose_service
@@ -37,6 +38,10 @@ async def pagination_button(callback: CallbackQuery):
 @dp.callback_query(lambda c: c.data.startswith(("Y ", "S ")))
 async def select_track(callback: CallbackQuery):
     await select_music(callback, dp)
+    
+@dp.callback_query(lambda c: c.data.startswith(("toggle_audio")))
+async def change_audio(callback: CallbackQuery):
+    await toggle_audio_callback(callback, dp)
 
 async def main():
     print("Bot started")

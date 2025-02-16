@@ -7,7 +7,7 @@ from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
 
 
-async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_connection_id: str, data: dict, save_folder: str, msg_id, pool):
+async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_connection_id: str, data: dict, save_folder: str, msg_id, pool, is_Ads = False):
     """
     Скачивает TikTok-видео и отправляет его в чат.
     """
@@ -31,6 +31,6 @@ async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, 
         data["video_title"],
         video_thumbnail_path,
         data["video_duration"],
-        isAds=False,
+        isAds=is_Ads,
         pool=pool
     )

@@ -33,3 +33,21 @@ async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, 
             builder.row(*navigation_buttons)
 
     return builder.as_markup()
+
+async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send_ads: bool):
+    builder = InlineKeyboardBuilder()
+
+    audio_text = "✅ Включить аудио" if not send_tiktok_music else "❌ Выключить аудио"
+    builder.button(
+        text=audio_text,
+        callback_data=f"toggle_audio {chat_id} {int(not send_tiktok_music)}"
+    )
+
+    ads_text = "✅ Включить рекламу" if not send_ads else "❌ Выключить рекламу"
+    builder.button(
+        text=ads_text,
+        callback_data=f"toggle_ads {chat_id} {int(not send_ads)}"
+    )
+    builder.adjust(1)
+
+    return builder.as_markup()
