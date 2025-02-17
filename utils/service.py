@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.enums.chat_action import ChatAction
+from ads.send_ads import send_ad
 from db.links import insert_link_into_db, update_link_status
 from downloader.base_ytdlp_downloader import fetch_base_video
 from downloader.instagram.fetch_data import fetch_instagram_content
@@ -43,7 +44,7 @@ async def identify_service(url: str) -> str:
 
 async def choose_service(bot: Bot, message: Message, business_connection_id, dp: Dispatcher):
     if message.text.startswith("/"):
-        return await choose_command(bot, message, dp)
+        return await choose_command(bot, message, dp, business_connection_id)
     url = await delete_not_url(message.text)
     if url is not "":
         service = await identify_service(url)
@@ -77,5 +78,5 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
             is_success = await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
         if is_success is True:
             await update_link_status(dp, chat_id, msg_id, True)
-            await bot.send_message(chat_id=chat_id, text="ads")
+            await send_ad(dp, chat_id, bot, business_connection_id)
         return

@@ -38,7 +38,8 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
             return await bot.send_message(
                 chat_id=chat_id,
                 text=translations["large_content"][chat_language],
-                reply_to_message_id=msg_id
+                reply_to_message_id=msg_id,
+                business_connection_id=business_connection_id
             )
 
         return await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path)
@@ -48,7 +49,7 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     if image_urls:
         return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, image_urls, "", msg_id)
 
-    await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+    await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id)
 
 
 async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) -> dict:
