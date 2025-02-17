@@ -38,6 +38,9 @@ async def send_social_media_album(bot, chat_id, chat_language, business_connecti
                 media_album.append(InputMediaVideo(media=media_url))
 
     batch_size = 10
+    is_success = False
     for i in range(0, len(media_album), batch_size):
         batch = media_album[i:i + batch_size]
-        await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list, isAds, pool)
+        is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list)
+    
+    return is_success

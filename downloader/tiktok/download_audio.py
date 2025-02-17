@@ -11,20 +11,16 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
     Скачивает TikTok-аудио и отправляет его в чат.
     """
     if not data["audio_url"]:
-        return  # 🔇 Если аудио отсутствует, ничего не делаем
+        return
 
-    # 📌 Пути для сохранения файлов
     audio_path = os.path.join(save_folder, get_random_file_name("mp3"))
     audio_thumbnail_path = os.path.join(save_folder, get_random_file_name("jpg"))
 
-    # 📥 **Скачивание аудио**
     await download_file(data["audio_url"], audio_path)
 
-    # 📥 **Скачивание превью (если есть)**
     await download_file(data["audio_thumbnail_url"], audio_thumbnail_path)
 
-    # 📤 **Отправка аудио**
-    await send_audio(
+    return await send_audio(
         bot,
         chat_id,
         msg_id,
@@ -35,5 +31,4 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
         audio_thumbnail_path,
         data["audio_duration"],
         data["audio_author"],
-        pool
     )

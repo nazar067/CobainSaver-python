@@ -18,6 +18,8 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     save_folder = await get_user_path(chat_id)
     settings = await get_settings(pool, chat_id)
     is_audio = settings["send_tiktok_music"]
+    is_media_success = False
+    is_audio_success = False
 
     data = await extract_tiktok_data(url)
     if data is "large":
@@ -26,16 +28,15 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
 
     if data["type"] == "photo":
-        if is_audio:
-            await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"], msg_id, False, pool=pool)
-        else: 
-            await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"], msg_id, True, pool=pool)
+        is_media_success = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"], msg_id, False, pool=pool)
     else:
-        if is_audio:
-            await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, False)
-        else: 
-            await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, True)
+        is_media_success = await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, False)
     
     if is_audio:
-        await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool)
+        is_audio_success = await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool)
+    else:
+        is_audio_success = True
+    
+    if is_media_success and is_audio_success:
+        return True
 

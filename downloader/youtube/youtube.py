@@ -47,4 +47,4 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     video_title = quality_result["video_title"]
     thumbnail_path = quality_result["thumbnail_path"]
     duration = quality_result["duration"]
-    return await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, file_path, video_title, thumbnail_path, duration, pool=pool)
+    return await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, file_path, video_title, thumbnail_path, duration)

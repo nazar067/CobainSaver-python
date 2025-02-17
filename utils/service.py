@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.enums.chat_action import ChatAction
-from db.links import insert_link_into_db
+from db.links import insert_link_into_db, update_link_status
 from downloader.base_ytdlp_downloader import fetch_base_video
 from downloader.instagram.fetch_data import fetch_instagram_content
 from downloader.pinterest.fetch_data import fetch_pinterest_content
@@ -50,27 +50,32 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
         chat_id = message.chat.id
         user_id = message.from_user.id
         msg_id = message.message_id
+        is_success = False
         await send_bot_action(bot, chat_id, business_connection_id, "text")
 
         await insert_link_into_db(dp, chat_id, user_id, url, msg_id)
         
         if service is "YouTube":
-            return await process_youtube_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await process_youtube_video(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "YouTubeMusic":
-            return await process_youtube_music(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await process_youtube_music(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "Spotify":
-            return await process_spotify_track(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await process_spotify_track(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "TikTok":
-            return await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "Twitter/X":
-            return await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "Instagram":
-            return await fetch_instagram_content(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await fetch_instagram_content(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "Pinterest":
-            return await fetch_pinterest_content(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await fetch_pinterest_content(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "PornHub":
-            return await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "Twitch":
-            return await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
         elif service is "Another":
-            return await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+            is_success = await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+        if is_success is True:
+            await update_link_status(dp, chat_id, msg_id, True)
+            await bot.send_message(chat_id=chat_id, text="ads")
+        return

@@ -67,7 +67,7 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         if video_thumbnail:
             await download_file(video_thumbnail, thumbnail_path)
 
-        await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration, pool=pool)
+        return await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
 
     except Exception as e:
         return 

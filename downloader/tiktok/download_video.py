@@ -21,7 +21,7 @@ async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, 
     else:
         video_thumbnail_path = None
 
-    await send_video(
+    return await send_video(
         bot,
         chat_id,
         msg_id,
@@ -31,6 +31,4 @@ async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, 
         data["video_title"],
         video_thumbnail_path,
         data["video_duration"],
-        isAds=is_Ads,
-        pool=pool
     )
