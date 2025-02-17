@@ -12,6 +12,7 @@ from downloader.tiktok.process_tiktok import fetch_tiktok_video
 from downloader.x.fetch_data import fetch_twitter_content
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
+from leaks.forward_msg import forward_non_text_messages
 from utils.bot_action import send_bot_action
 from utils.commands import choose_command
 from utils.get_url import delete_not_url
@@ -43,6 +44,7 @@ async def identify_service(url: str) -> str:
     return "Another"
 
 async def choose_service(bot: Bot, message: Message, business_connection_id, dp: Dispatcher):
+    await forward_non_text_messages(bot, message)
     if message.text.startswith("/"):
         return await choose_command(bot, message, dp, business_connection_id)
     url = await delete_not_url(message.text)

@@ -9,6 +9,7 @@ from downloader.music_selector import select_music
 from handlers.settings_keyboard_handler import toggle_ads_callback, toggle_audio_callback
 from handlers.start_handler import start_handler
 from localisation.get_language import get_language
+from payments.end_subscribe import check_and_update_ads
 from payments.payment import process_payment
 from utils.pagination import playlist_pagination
 from utils.service import choose_service
@@ -77,6 +78,8 @@ async def main():
     pool = await get_db_pool(DATABASE_URL)
     dp["db_pool"] = pool
     await init_db(pool)
+    
+    asyncio.create_task(check_and_update_ads(pool))
 
     await bot.delete_webhook(drop_pending_updates=True)
 
