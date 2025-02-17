@@ -1,6 +1,8 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from utils.get_settings import get_settings
+
 async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, total_pages, content_type):
     """
     Создает inline-клавиатуру с треками и кнопками навигации.
@@ -34,7 +36,7 @@ async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, 
 
     return builder.as_markup()
 
-async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send_ads: bool):
+async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send_ads: bool, pool):
     builder = InlineKeyboardBuilder()
 
     audio_text = "✅ Включить аудио" if not send_tiktok_music else "❌ Выключить аудио"
@@ -42,12 +44,14 @@ async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send
         text=audio_text,
         callback_data=f"toggle_audio {chat_id} {int(not send_tiktok_music)}"
     )
-
-    ads_text = "✅ Включить рекламу" if not send_ads else "❌ Выключить рекламу"
-    builder.button(
-        text=ads_text,
-        callback_data=f"toggle_ads {chat_id} {int(not send_ads)}"
-    )
-    builder.adjust(1)
+    settings = await get_settings(pool, chat_id)
+    is_ads = settings["send_ads"]
+    if is_ads:
+        ads_text = "✅ Включить рекламу" if not send_ads else "❌ Выключить рекламу"
+        builder.button(
+            text=ads_text,
+            callback_data=f"pay:{1}"
+        )
+        builder.adjust(1)
 
     return builder.as_markup()
