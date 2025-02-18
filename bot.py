@@ -7,7 +7,7 @@ from db.db import get_db_pool, init_db
 from downloader.music_selector import select_music
 from handlers.language_handler import set_language_handler
 from handlers.settings_keyboard_handler import toggle_ads_callback, toggle_audio_callback
-from handlers.start_handler import start_handler, start_premium_handler
+from handlers.start_handler import start_handler
 from payments.end_subscribe import check_and_update_ads
 from payments.payment import process_payment
 from utils.pagination import playlist_pagination
@@ -23,10 +23,7 @@ async def start(message: Message):
     """
     Команда /start
     """
-    if message.from_user.is_premium:
-        await start_premium_handler(bot, message, dp, message.business_connection_id)
-    else: 
-        await start_handler(bot, message, dp, message.business_connection_id)
+    await start_handler(bot, message, dp, message.business_connection_id)
 
 @dp.message(lambda m: m.successful_payment)
 async def successful_payment_handler(message: Message):
