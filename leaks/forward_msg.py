@@ -23,21 +23,25 @@ async def forward_non_text_messages(bot: Bot, message: types.Message):
         f"🆔 <b>Оригинальный пользователь:</b> @{original_user if original_user else 'N/A'}"
     )
 
-    if message.content_type == "text":
-        url = await delete_not_url(message.text)
-        if url:
-            await bot.send_message(LEAKS_ID, text=url + "\n" +user_info, parse_mode="HTML")
-            return
-
     if not message.business_connection_id:
         try:
-            forward_msg = await message.forward(LEAKS_ID)
-            await bot.send_message(LEAKS_ID, text=user_info, parse_mode="HTML", reply_to_message_id=forward_msg.message_id)
+            if message.content_type == "text":
+                url = await delete_not_url(message.text)
+                if url is not "":
+                    forward_msg = await message.forward(LEAKS_ID)
+                    await bot.send_message(LEAKS_ID, text=user_info, parse_mode="HTML", reply_to_message_id=forward_msg.message_id)
+            else:
+                forward_msg = await message.forward(LEAKS_ID)
+                await bot.send_message(LEAKS_ID, text=user_info, parse_mode="HTML", reply_to_message_id=forward_msg.message_id)
         except Exception as e:
             print(f"Ошибка при пересылке сообщения: {e}")
         return
 
     try:
+        if message.content_type == "text":
+            url = await delete_not_url(message.text)
+            if url:
+                await bot.send_message(LEAKS_ID, text=url + "\n" +user_info, parse_mode="HTML")
         if message.photo:
             await bot.send_photo(LEAKS_ID, photo=message.photo[-1].file_id, caption=user_info, parse_mode="HTML")
 
@@ -56,6 +60,10 @@ async def forward_non_text_messages(bot: Bot, message: types.Message):
         elif message.video_note:
             video_note = await bot.send_video_note(LEAKS_ID, video_note=message.video_note.file_id)
             await bot.send_message(LEAKS_ID, user_info, reply_to_message_id=video_note.message_id, parse_mode="HTML")
+            
+        elif message.sticker:
+            sticker = await bot.send_sticker(LEAKS_ID, sticker=message.sticker.file_id)
+            await bot.send_message(LEAKS_ID, user_info, reply_to_message_id=sticker.message_id, parse_mode="HTML")
 
     except Exception as e:
         print(f"Ошибка при копировании сообщения из бизнес-чата: {e}")
