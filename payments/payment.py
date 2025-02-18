@@ -1,11 +1,12 @@
-from aiogram.types import LabeledPrice
+from aiogram.types import LabeledPrice, CallbackQuery
 from localisation.get_language import get_language
 from localisation.translations.finance import translations as finance_translation
 
-async def process_payment(callback, amount, provider_token, pool):
+async def process_payment(callback: CallbackQuery, amount, provider_token, pool):
     """
     Генерация инвойса для платежа
     """
+    await callback.bot.delete_message(chat_id=callback.message.chat.id, message_id=callback.message.message_id)
     user_language = await get_language(pool, callback.message.chat.id)
     prices = [LabeledPrice(label=f"XTR", amount=amount)]
     return dict(

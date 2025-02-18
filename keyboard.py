@@ -56,7 +56,7 @@ async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send
             ads_text = general_translations["turn_on_ads_btn"][chat_language] if not send_ads else general_translations["turn_off_ads_btn"][chat_language]
             builder.button(
                 text=ads_text,
-                callback_data=f"pay:{1}"
+                callback_data=f"pay:{25}"
             )
             builder.adjust(1)
 
