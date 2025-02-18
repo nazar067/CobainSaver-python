@@ -55,7 +55,7 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
             user_id = message.from_user.id
             msg_id = message.message_id
             is_success = False
-            await send_bot_action(bot, chat_id, business_connection_id, "text")
+            await send_bot_action(bot, chat_id, business_connection_id, "document")
 
             await insert_link_into_db(dp, chat_id, user_id, url, msg_id)
             

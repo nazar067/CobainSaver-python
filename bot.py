@@ -5,6 +5,7 @@ from aiogram.filters import CommandStart
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
 from downloader.music_selector import select_music
+from handlers.language_handler import set_language_handler
 from handlers.settings_keyboard_handler import toggle_ads_callback, toggle_audio_callback
 from handlers.start_handler import start_handler
 from payments.end_subscribe import check_and_update_ads
@@ -70,6 +71,11 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery):
     Обработка PreCheckoutQuery
     """
     await pre_checkout_query.answer(ok=True)
+
+@dp.callback_query(lambda callback: callback.data.startswith("set_language:"))
+async def language_handler(callback: CallbackQuery):
+    pool = dp["db_pool"]
+    await set_language_handler(callback, pool)
 
 async def main():
     print("Bot started")

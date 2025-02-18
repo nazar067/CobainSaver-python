@@ -1,5 +1,5 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
 from utils.get_settings import get_settings
 
@@ -54,4 +54,16 @@ async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send
         )
         builder.adjust(1)
 
+    return builder.as_markup()
+
+def language_keyboard(message: Message) -> InlineKeyboardMarkup:
+    """
+    Создание клавиатуры для смены языка.
+    """
+    msg_id = message.message_id
+    builder = InlineKeyboardBuilder()
+    builder.button(text="English", callback_data=f"set_language:en {str(msg_id)}")
+    builder.button(text="Русский", callback_data=f"set_language:ru {str(msg_id)}")
+    builder.button(text="Українська", callback_data=f"set_language:uk {str(msg_id)}")
+    builder.adjust(1)
     return builder.as_markup()
