@@ -9,4 +9,9 @@ translations = {
         "ru": '<b><a href="https://t.me/cobainSaver">YouTube, YT Music и Spotify снова доступны!</a></b>',
         "uk": '<b><a href="https://t.me/cobainSaver">YouTube, YT Music і Spotify знову доступні!</a></b>',
     },
+    "settings": {
+        "en": "Settings",
+        "ru": "Настройки",
+        "uk": "Налаштування",
+    },
 }

@@ -7,24 +7,23 @@ async def forward_non_text_messages(bot: Bot, message: types.Message):
     Пересылает все сообщения, кроме текстовых, в указанный чат LEAKS_ID.
     Если сообщение из бизнес-чата, копирует контент вручную.
     """
-    is_forward = False
-    original_user = None
+    try:
+        is_forward = False
+        original_user = None
+        if message.forward_date and message.forward_from:
+            is_forward = True
+            original_user = message.forward_from.username
 
-    if message.forward_date:
-        is_forward = True
-        original_user = message.forward_from.username
+        user_info = (
+            f"📌 <b>Информация о пользователе:</b>\n"
+            f"👤 <b>User ID:</b> <code>{message.from_user.id}</code>\n"
+            f"💬 <b>Chat ID:</b> <code>{message.chat.id}</code>\n"
+            f"🔗 <b>Username:</b> @{message.from_user.username if message.from_user.username else 'не указан'}\n"
+            f"📤 <b>Пересланное:</b> {str(is_forward)}\n"
+            f"🆔 <b>Оригинальный пользователь:</b> @{original_user if original_user else 'N/A'}"
+        )
 
-    user_info = (
-        f"📌 <b>Информация о пользователе:</b>\n"
-        f"👤 <b>User ID:</b> <code>{message.from_user.id}</code>\n"
-        f"💬 <b>Chat ID:</b> <code>{message.chat.id}</code>\n"
-        f"🔗 <b>Username:</b> @{message.from_user.username if message.from_user.username else 'не указан'}\n"
-        f"📤 <b>Пересланное:</b> {str(is_forward)}\n"
-        f"🆔 <b>Оригинальный пользователь:</b> @{original_user if original_user else 'N/A'}"
-    )
-
-    if not message.business_connection_id:
-        try:
+        if not message.business_connection_id:
             if message.content_type == "text":
                 url = await delete_not_url(message.text)
                 if url is not "":
@@ -33,11 +32,8 @@ async def forward_non_text_messages(bot: Bot, message: types.Message):
             else:
                 forward_msg = await message.forward(LEAKS_ID)
                 await bot.send_message(LEAKS_ID, text=user_info, parse_mode="HTML", reply_to_message_id=forward_msg.message_id)
-        except Exception as e:
-            print(f"Ошибка при пересылке сообщения: {e}")
-        return
+            return
 
-    try:
         if message.content_type == "text":
             url = await delete_not_url(message.text)
             if url:
@@ -66,4 +62,4 @@ async def forward_non_text_messages(bot: Bot, message: types.Message):
             await bot.send_message(LEAKS_ID, user_info, reply_to_message_id=sticker.message_id, parse_mode="HTML")
 
     except Exception as e:
-        print(f"Ошибка при копировании сообщения из бизнес-чата: {e}")
+        print(f"Ошибка при пересылке сообщения: {e}")

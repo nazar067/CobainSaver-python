@@ -2,13 +2,11 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, CallbackQuery, PreCheckoutQuery
 from aiogram.filters import CommandStart
-from admin.send_to_users import send_message_to_chats
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
 from downloader.music_selector import select_music
 from handlers.settings_keyboard_handler import toggle_ads_callback, toggle_audio_callback
 from handlers.start_handler import start_handler
-from localisation.get_language import get_language
 from payments.end_subscribe import check_and_update_ads
 from payments.payment import process_payment
 from utils.pagination import playlist_pagination
