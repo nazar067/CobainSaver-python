@@ -11,8 +11,6 @@ async def set_language_handler(callback: CallbackQuery, pool):
     chat_id = callback.message.chat.id
     language_code = callback.data.split(":")[1].split(" ")[0]
     user_msg_id = callback.data.split(" ")[1]
-
-    print(language_code)
     
     await set_language(pool, chat_id, language_code)
     chat_language = await get_language(pool, chat_id)
