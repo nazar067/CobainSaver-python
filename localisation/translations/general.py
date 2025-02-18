@@ -24,4 +24,24 @@ translations = {
         "ru": "✅ Язык успешно изменён",
         "uk": "✅ Мова успішно змінена",
     },
+    "turn_on_ads_btn": {
+        "en": "✅ Enable advertising",
+        "ru": "✅ Включить рекламу",
+        "uk": "✅ Увімкнути рекламу",
+    },
+    "turn_off_ads_btn": {
+        "en": "❌ Disable ads",
+        "ru": "❌ Выключить рекламу",
+        "uk": "❌ Вимкнути рекламу",
+    },
+    "turn_on_audio_btn": {
+        "en": "✅ TikTok audio",
+        "ru": "✅ TikTok аудио",
+        "uk": "✅ TikTok аудіо",
+    },
+    "turn_off_audio_btn": {
+        "en": "❌ TikTok audio",
+        "ru": "❌ TikTok аудио",
+        "uk": "❌ TikTok аудіо",
+    },
 }

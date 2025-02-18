@@ -61,7 +61,7 @@ async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_i
         msg_id = message.message_id
 
     msg_id = int(msg_id)
-    inline_keyboard = await generate_playlist_keyboard(songs_for_current_page, source, playlist_id, page, total_pages, content_type)
+    inline_keyboard = await generate_playlist_keyboard(songs_for_current_page, source, playlist_id, page, total_pages, content_type, dp, chat_id)
     await bot.edit_message_caption(business_connection_id=business_connection_id, chat_id=chat_id, message_id=msg_id, caption=caption, reply_markup=inline_keyboard, parse_mode="HTML")
 
     if cover_path:

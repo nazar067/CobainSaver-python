@@ -1,15 +1,19 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
+from localisation.get_language import get_language
 from utils.get_settings import get_settings
+from localisation.translations.downloader import translations as downloader_translations
+from localisation.translations.general import translations as general_translations
 
-async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, total_pages, content_type):
+async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, total_pages, content_type, dp, chat_id):
     """
     Создает inline-клавиатуру с треками и кнопками навигации.
     `source` - 'Y' (YouTube) или 'S' (Spotify).
     """
+    pool = dp["db_pool"]
     builder = InlineKeyboardBuilder()
-
+    chat_language = await get_language(pool, chat_id)
     # Добавляем кнопки треков
     for track in tracks:
         builder.button(
@@ -24,11 +28,11 @@ async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, 
         navigation_buttons = []
         if current_page > 1:
             navigation_buttons.append(
-                InlineKeyboardButton(text="◀️ Назад", callback_data=f"P {source} {content_type} {playlist_id} {current_page - 1}")
+                InlineKeyboardButton(text=downloader_translations["playlist_previous_btn"][chat_language], callback_data=f"P {source} {content_type} {playlist_id} {current_page - 1}")
             )
         if current_page < total_pages:
             navigation_buttons.append(
-                InlineKeyboardButton(text="Вперед ▶️", callback_data=f"P {source} {content_type} {playlist_id} {current_page + 1}")
+                InlineKeyboardButton(text=downloader_translations["playlist_next_btn"][chat_language], callback_data=f"P {source} {content_type} {playlist_id} {current_page + 1}")
             )
 
         if navigation_buttons:
@@ -38,21 +42,23 @@ async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, 
 
 async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send_ads: bool, pool, business_connection_id=None):
     builder = InlineKeyboardBuilder()
-
-    audio_text = "✅ Включить аудио" if not send_tiktok_music else "❌ Выключить аудио"
+    
+    chat_language = await get_language(pool, chat_id)
+    audio_text = general_translations["turn_on_audio_btn"][chat_language] if not send_tiktok_music else general_translations["turn_off_audio_btn"][chat_language]
     builder.button(
         text=audio_text,
         callback_data=f"toggle_audio {chat_id} {int(not send_tiktok_music)}"
     )
     settings = await get_settings(pool, chat_id)
     is_ads = settings["send_ads"]
-    if is_ads and business_connection_id is "":
-        ads_text = "✅ Включить рекламу" if not send_ads else "❌ Выключить рекламу"
-        builder.button(
-            text=ads_text,
-            callback_data=f"pay:{1}"
-        )
-        builder.adjust(1)
+    if is_ads:
+        if business_connection_id is "" or business_connection_id is None:
+            ads_text = general_translations["turn_on_ads_btn"][chat_language] if not send_ads else general_translations["turn_off_ads_btn"][chat_language]
+            builder.button(
+                text=ads_text,
+                callback_data=f"pay:{1}"
+            )
+            builder.adjust(1)
 
     return builder.as_markup()
 
