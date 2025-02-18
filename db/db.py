@@ -20,7 +20,7 @@ async def init_db(pool):
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS links (
                 id SERIAL PRIMARY KEY,
-                chat_id INT NOT NULL,
+                chat_id BIGINT NOT NULL,
                 user_id INT NOT NULL,
                 link TEXT NOT NULL,
                 msg_id INT NOT NULL,
@@ -31,7 +31,7 @@ async def init_db(pool):
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS settings (
                 id SERIAL PRIMARY KEY,
-                chat_id INT NOT NULL,
+                chat_id BIGINT NOT NULL,
                 send_tiktok_music BOOLEAN DEFAULT TRUE,
                 auto_pick_yt_quality BOOLEAN DEFAULT TRUE,
                 send_ads BOOLEAN DEFAULT TRUE,
