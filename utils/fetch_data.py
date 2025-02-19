@@ -20,6 +20,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         'noplaylist': True,
         'quiet': True,
         'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
+        'external_downloader_args': ['-headers', 'Referer: https://www.youtube.com/'],
     }
 
     def download_video():
@@ -62,6 +63,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         'quiet': True,
         'noplaylist': True,
         'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
+        'external_downloader_args': ['-headers', 'Referer: https://www.youtube.com/'],
         'postprocessors': [
             {
                 'key': 'FFmpegExtractAudio',
