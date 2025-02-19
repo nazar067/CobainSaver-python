@@ -4,11 +4,43 @@ import os
 import aiohttp
 import requests
 import yt_dlp
+import time
 
 from fake_useragent import UserAgent
+from stem import Signal
+from stem.control import Controller
 from utils.get_name import get_random_file_name
 
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
+
+class TorProxy:
+    """Tor Proxy Manager"""
+
+    def __init__(self, ip="127.0.0.1", port=1881, password="Passwort", control_port=9051, delay=5):
+        self.ip = ip
+        self.port = port
+        self.password = password
+        self.control_port = control_port
+        self.delay = delay
+
+        self.controller = Controller.from_port(port=self.control_port)
+        self.controller.authenticate(self.password)
+
+    @property
+    def proxy(self):
+        return {
+            'http': f'socks5://{self.ip}:{self.port}',
+            'https': f'socks5://{self.ip}:{self.port}',
+        }
+
+    def get_next(self):
+        self.controller.signal(Signal.NEWNYM)
+        time.sleep(self.delay)
+        return self.proxy
+
+
+# Используем TorProxy
+proxy_manager = TorProxy()
 
 async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
@@ -22,6 +54,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         'noplaylist': True,
         'quiet': True,
         'http_headers': {'User-Agent': ua.random},
+        'proxy': proxy_manager.get_next()["http"],
     }
 
     def download_video():
@@ -65,6 +98,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         'quiet': True,
         'noplaylist': True,
         'http_headers': {'User-Agent': ua.random},
+        'proxy': proxy_manager.get_next()["http"],
         'postprocessors': [
             {
                 'key': 'FFmpegExtractAudio',
@@ -112,7 +146,7 @@ async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> N
     """
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
+            async with session.get(url, proxy=proxy_manager.get_next()["http"]) as resp:
                 if resp.status == 200:
                     with open(save_path, "wb") as f:
                         f.write(await resp.read())
@@ -129,4 +163,3 @@ async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> N
                         f.write(chunk)
         except Exception as e:
             logging.error(e)
-    
