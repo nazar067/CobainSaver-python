@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from aiogram import Bot, Dispatcher
 import aiohttp
@@ -70,4 +71,4 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         return await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
 
     except Exception as e:
-        return 
+        logging.error(e) 

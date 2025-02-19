@@ -1,3 +1,4 @@
+import logging
 import os
 import instaloader
 from aiogram import Bot, Dispatcher
@@ -41,7 +42,7 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
             with open(txt_file_path, "r", encoding="utf-8") as f:
                 caption = f.read().strip()
         except Exception as e:
-            print(e)
+            logging.error(e)
     if matching_files:
         return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, caption, msg_id, pool=pool)
     else:

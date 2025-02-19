@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import requests
 import yt_dlp
@@ -88,7 +89,7 @@ async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) ->
         }
 
     except Exception as e:
-        print(f"Ошибка при скачивании видео: {str(e)}")
+        logging.error(f"Ошибка при скачивании видео: {str(e)}")
         return None
 
 
@@ -111,6 +112,6 @@ async def fetch_pinterest_images(url: str) -> list:
         return image_urls if image_urls else None
 
     except Exception as e:
-        print(f"Ошибка при скачивании изображений: {str(e)}")
+        logging.error(f"Ошибка при скачивании изображений: {str(e)}")
         return None
 

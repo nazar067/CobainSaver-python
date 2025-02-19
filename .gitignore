@@ -6,11 +6,12 @@ config.py
 
 users.txt
 
+serverLogs.txt
+
 __pycache__/
 *.pyc
 *.pyo
 
-logs/
 *.log
 *.tmp
 

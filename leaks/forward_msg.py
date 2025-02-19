@@ -1,3 +1,4 @@
+import logging
 from aiogram import Bot, types
 from config import LEAKS_ID
 from utils.get_url import delete_not_url
@@ -62,4 +63,4 @@ async def forward_non_text_messages(bot: Bot, message: types.Message):
             await bot.send_message(LEAKS_ID, user_info, reply_to_message_id=sticker.message_id, parse_mode="HTML")
 
     except Exception as e:
-        print(f"Ошибка при пересылке сообщения: {e}")
+        logging.error(f"Ошибка при пересылке сообщения: {e}")

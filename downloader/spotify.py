@@ -1,3 +1,4 @@
+import logging
 import yt_dlp
 import asyncio
 from aiogram import Bot, Dispatcher
@@ -25,7 +26,7 @@ async def find_song_on_ytmusic(query: str) -> str:
             return f"https://music.youtube.com/watch?v={video_id}"
         return None
     except Exception as e:
-        print(f"❌ Ошибка при поиске YouTube Music: {str(e)}")
+        logging.error(f"❌ Ошибка при поиске YouTube Music: {str(e)}")
         return None
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None, msg_id = None):

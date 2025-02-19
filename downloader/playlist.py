@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import yt_dlp
 import os
 import requests
@@ -114,6 +115,7 @@ async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
             return {"error": "Ошибка: Не удалось получить информацию о плейлисте."}
 
     except Exception as e:
+        logging.error(e)
         return {"error": f"Ошибка при извлечении плейлиста: {str(e)}"}
     
 
@@ -166,4 +168,5 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
         }
     
     except Exception as e:
+        logging.error(e)
         return {"error": f"Ошибка при обработке Spotify: {str(e)}"}

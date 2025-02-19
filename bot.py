@@ -1,3 +1,6 @@
+from logs.write_server_errors import setup_logging
+setup_logging()
+
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, CallbackQuery, PreCheckoutQuery
