@@ -59,8 +59,9 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             thumbnail=thumbnail,
             performer=author,
             reply_to_message_id=msg_id,
-            caption="by CobainSaver"
-        )
+            caption='<a href="https://t.me/cobainSaver_bot"><i>by CobainSaver</i></a>',
+            parse_mode="HTML"
+            )
         return True
     except Exception as e:
         logging.error(e)

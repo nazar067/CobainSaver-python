@@ -7,6 +7,9 @@ from aiogram.types import Message, CallbackQuery, PreCheckoutQuery
 from aiogram.filters import CommandStart
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
+from bot_settings.commands import set_bot_commands
+from bot_settings.description import set_bot_description
+from bot_settings.short_description import set_bot_short_description
 from downloader.music_selector import select_music
 from handlers.language_handler import set_language_handler
 from handlers.settings_keyboard_handler import toggle_ads_callback, toggle_audio_callback
@@ -85,6 +88,10 @@ async def main():
     pool = await get_db_pool(DATABASE_URL)
     dp["db_pool"] = pool
     await init_db(pool)
+    
+    await set_bot_description(bot)
+    await set_bot_commands(bot)
+    await set_bot_short_description(bot)
     
     asyncio.create_task(check_and_update_ads(pool))
 
