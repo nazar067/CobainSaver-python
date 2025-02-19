@@ -50,7 +50,7 @@ async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher
 
     if youtube_music_url:
         print(f"✅ Найдено: {youtube_music_url}")
-        asyncio.create_task(process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id, msg_id))
+        return await process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id, msg_id)
     else:
         await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
     
