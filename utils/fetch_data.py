@@ -5,6 +5,7 @@ import aiohttp
 import requests
 import yt_dlp
 
+from fake_useragent import UserAgent
 from utils.get_name import get_random_file_name
 
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
@@ -13,14 +14,14 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
     Асинхронно извлекает данные видео, скачивает видео и превью.
     """
+    ua = UserAgent()
     ydl_opts = {
         'format': f"bestvideo[height<={quality}]+bestaudio/best",
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
         'noplaylist': True,
         'quiet': True,
-        'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
-        'external_downloader_args': ['-headers', 'Referer: https://www.youtube.com/'],
+        'http_headers': {'User-Agent': ua.random},
     }
 
     def download_video():
@@ -57,13 +58,13 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     """
     Асинхронно извлекает данные аудио и скачивает его с YouTube Music.
     """
+    ua = UserAgent()
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'quiet': True,
         'noplaylist': True,
-        'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
-        'external_downloader_args': ['-headers', 'Referer: https://www.youtube.com/'],
+        'http_headers': {'User-Agent': ua.random},
         'postprocessors': [
             {
                 'key': 'FFmpegExtractAudio',
