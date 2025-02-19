@@ -16,32 +16,7 @@ from leaks.forward_msg import forward_non_text_messages
 from utils.bot_action import send_bot_action
 from utils.commands import choose_command
 from utils.get_url import delete_not_url
-
-async def identify_service(url: str) -> str:
-    """
-    Определяет, с какого сервиса была получена ссылка.
-    """
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc.lower()
-
-    services = {
-        "YouTubeMusic": ["music.youtube.com"],
-        "YouTube": ["youtube.com", "youtu.be", "m.youtube.com"],
-        "Spotify": ["open.spotify.com"],
-        "TikTok": ["vm.tiktok.com", "tiktok.com", "m.tiktok.com", "vt.tiktok.com"],
-        "Reddit": ["reddit.com", "redd.it"],
-        "Twitter/X": ["x.com", "twitter.com"],
-        "Instagram": ["instagram.com", "www.instagram.com"],
-        "PornHub": ["rt.pornhub.com", "www.pornhub.com"],
-        "Pinterest": ["pinterest.com", "pin.it", "ru.pinterest.com"],
-        "Twitch": ["clips.twitch.tv", "twitch.tv"]
-    }
-
-    for service, domains in services.items():
-        if any(domain.endswith(d) for d in domains):
-            return service
-
-    return "Another"
+from utils.service_identifier import identify_service
 
 async def choose_service(bot: Bot, message: Message, business_connection_id, dp: Dispatcher):
     await forward_non_text_messages(bot, message)

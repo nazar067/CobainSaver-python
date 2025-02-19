@@ -14,7 +14,7 @@ from handlers.start_handler import start_handler
 from payments.end_subscribe import check_and_update_ads
 from payments.payment import process_payment
 from utils.pagination import playlist_pagination
-from utils.service import choose_service
+from utils.select_service import choose_service
 
 TOKEN = API_TOKEN
 
