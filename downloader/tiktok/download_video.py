@@ -20,8 +20,6 @@ async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, 
         await download_file(data["video_thumbnail_url"], video_thumbnail_path, False)
     else:
         video_thumbnail_path = None
-
-    print(video_path)
     
     return await send_video(
         bot,

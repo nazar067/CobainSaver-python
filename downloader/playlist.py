@@ -57,7 +57,7 @@ async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_i
         total_pages=total_pages
     )
     
-    if msg_id is None:
+    if msg_id == None:
         message = await bot.send_photo(business_connection_id=business_connection_id, chat_id=chat_id, photo=FSInputFile(cover_path), caption=caption, parse_mode="HTML", reply_to_message_id=user_msg_id)
         msg_id = message.message_id
 
@@ -123,7 +123,6 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
     """
     Универсальная функция получения информации о плейлисте или альбоме Spotify.
     """
-    print("fetch")
     spotify = get_spotify_client()
     spotify_id = extract_spotify_id(url)
 

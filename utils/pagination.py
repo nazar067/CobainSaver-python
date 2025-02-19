@@ -10,10 +10,8 @@ async def playlist_pagination(callback: CallbackQuery, dp):
     if source == "Y":
         await process_music_playlist(callback.bot, dp, business_connection_id, int(chat_id), f"https://music.youtube.com/playlist?list={playlist_id}", int(new_page), int(msg_id))
     elif source == "S":
-        print(content_type is "p")
-        if content_type is "a":
+        if content_type == "a":
             await process_music_playlist(callback.bot, dp, business_connection_id, int(chat_id), f"https://open.spotify.com/album/{playlist_id}", int(new_page), int(msg_id))
-        elif content_type is "p":
-            print("pagination")
+        elif content_type == "p":
             await process_music_playlist(callback.bot, dp, business_connection_id, int(chat_id), f"https://open.spotify.com/playlist/{playlist_id}", int(new_page), int(msg_id))
     await callback.answer()

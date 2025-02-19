@@ -18,6 +18,6 @@ async def send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_conn
         1,
     )
 
-    if attempt is False:
+    if attempt == False:
         return await download_and_send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, is_Ads)
     return attempt

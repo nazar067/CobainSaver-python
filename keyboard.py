@@ -52,7 +52,7 @@ async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send
     settings = await get_settings(pool, chat_id)
     is_ads = settings["send_ads"]
     if is_ads:
-        if business_connection_id is "" or business_connection_id is None:
+        if business_connection_id == "" or business_connection_id == None:
             ads_text = general_translations["turn_on_ads_btn"][chat_language] if not send_ads else general_translations["turn_off_ads_btn"][chat_language]
             builder.button(
                 text=ads_text,

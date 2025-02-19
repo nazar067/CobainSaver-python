@@ -22,7 +22,7 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     is_audio_success = False
 
     data = await extract_tiktok_data(url)
-    if data is "large":
+    if data == "large":
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language], reply_to_message_id=msg_id)
     elif "error" in data:
         return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)

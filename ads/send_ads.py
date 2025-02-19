@@ -4,7 +4,7 @@ from localisation.translations.ads import translations
 
 
 async def send_ad(dp, chat_id, bot, business_connection_id):
-    if business_connection_id is "":
+    if business_connection_id == "":
         pool = dp["db_pool"]
         chat_language = await get_language(pool, chat_id)
         settings = await get_settings(pool, chat_id)

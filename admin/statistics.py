@@ -8,7 +8,7 @@ async def get_statistics(pool, date=None):
     """
     Извлекает статистику за определенную дату (по умолчанию - сегодня).
     """
-    if date is None:
+    if date == None:
         date = datetime.now().date()
 
     async with pool.acquire() as conn:
