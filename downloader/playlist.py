@@ -78,7 +78,8 @@ async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
     ydl_opts = {
         'quiet': True,
         'extract_flat': True,
-        'force_generic_extractor': True
+        'force_generic_extractor': True,
+        'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
     }
 
     try:

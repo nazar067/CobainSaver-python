@@ -14,6 +14,8 @@ async def find_song_on_ytmusic(query: str) -> str:
         "default_search": "ytsearch1",
         "format": "bestaudio/best",
         "noplaylist": True,
+        'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
+
     }
     def search():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:

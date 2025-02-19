@@ -21,7 +21,8 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
     random_name = get_random_file_name("")
 
     ydl_opts = {
-        'quiet': True
+        'quiet': True,
+        'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
     }
 
     def extract_info():
