@@ -123,6 +123,7 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
     """
     Универсальная функция получения информации о плейлисте или альбоме Spotify.
     """
+    print("fetch")
     spotify = get_spotify_client()
     spotify_id = extract_spotify_id(url)
 
