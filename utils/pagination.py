@@ -7,6 +7,8 @@ async def playlist_pagination(callback: CallbackQuery, dp):
     chat_id = callback.message.chat.id
     msg_id = callback.message.message_id
     business_connection_id = callback.message.business_connection_id
+    print(source)
+    print(content_type)
     if source == "Y":
         await process_music_playlist(callback.bot, dp, business_connection_id, int(chat_id), f"https://music.youtube.com/playlist?list={playlist_id}", int(new_page), int(msg_id))
     elif source == "S":
