@@ -21,7 +21,7 @@ async def init_db(pool):
             CREATE TABLE IF NOT EXISTS links (
                 id SERIAL PRIMARY KEY,
                 chat_id BIGINT NOT NULL,
-                user_id INT NOT NULL,
+                user_id BIGINT NOT NULL,
                 link TEXT NOT NULL,
                 msg_id INT NOT NULL,
                 timestamp TIMESTAMP DEFAULT NOW(),
