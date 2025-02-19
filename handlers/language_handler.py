@@ -15,7 +15,10 @@ async def set_language_handler(callback: CallbackQuery, pool):
     await set_language(pool, chat_id, language_code)
     chat_language = await get_language(pool, chat_id)
     
+    if callback.message.chat.type == "private":    
+        await callback.answer(translations["success_lang"][chat_language], show_alert=True)
+    else: 
+        await callback.bot.send_message(chat_id=chat_id, text=translations["success_lang"][chat_language])
+    
     await callback.bot.delete_message(callback.message.chat.id, callback.message.message_id)
     await callback.bot.delete_message(callback.message.chat.id, int(user_msg_id))
-
-    await callback.answer(translations["success_lang"][chat_language], show_alert=True)
