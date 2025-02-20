@@ -5,6 +5,7 @@ import aiohttp
 import requests
 import yt_dlp
 from utils.get_name import get_random_file_name
+from config import YT_USERNAME, YT_PASSWORD
 
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
 
@@ -13,6 +14,9 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     Асинхронно извлекает данные видео, скачивает видео и превью.
     """
     ydl_opts = {
+        'username': YT_USERNAME,
+        'password': YT_PASSWORD,
+        "cookies_from_browser": ("firefox"),
         'format': f"bestvideo[height<={quality}]+bestaudio/best",
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
@@ -56,6 +60,9 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     Асинхронно извлекает данные аудио и скачивает его с YouTube Music.
     """
     ydl_opts = {
+        'username': YT_USERNAME,
+        'password': YT_PASSWORD,
+        "cookies_from_browser": ("firefox"),
         'format': 'bestaudio/best',
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'quiet': True,
