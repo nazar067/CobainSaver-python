@@ -6,6 +6,7 @@ import requests
 import yt_dlp
 from utils.get_name import get_random_file_name
 from config import YT_USERNAME, YT_PASSWORD
+from utils.proxy import get_random_proxy
 
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
 
@@ -13,6 +14,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
     Асинхронно извлекает данные видео, скачивает видео и превью.
     """
+    proxy = get_random_proxy()
     ydl_opts = {
         'username': YT_USERNAME,
         'password': YT_PASSWORD,
@@ -25,6 +27,9 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
     }
 
+    if proxy:
+        ydl_opts["proxy"] = proxy
+    
     def download_video():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=True)
@@ -59,6 +64,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     """
     Асинхронно извлекает данные аудио и скачивает его с YouTube Music.
     """
+    proxy = get_random_proxy()
     ydl_opts = {
         'username': YT_USERNAME,
         'password': YT_PASSWORD,
@@ -77,6 +83,9 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         ],
     }
 
+    if proxy:
+        ydl_opts["proxy"] = proxy
+    
     def download_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=True)
