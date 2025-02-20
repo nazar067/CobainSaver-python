@@ -18,7 +18,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     ydl_opts = {
         'username': YT_USERNAME,
         'password': YT_PASSWORD,
-        "cookies_from_browser": ("firefox"),
+        "cookies_from_browser": "chromium:~/Library/Application Support/Arc/User Data/Default",
         'format': f"bestvideo[height<={quality}]+bestaudio/best",
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
