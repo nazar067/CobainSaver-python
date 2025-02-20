@@ -5,19 +5,13 @@ import aiohttp
 import requests
 import yt_dlp
 from utils.get_name import get_random_file_name
-from utils.proxy import get_random_proxy, restart_tor
 
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
-
 
 async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     """
     Асинхронно извлекает данные видео, скачивает видео и превью.
     """
-    await restart_tor()
-    await asyncio.sleep(1)
-    random_proxy = await get_random_proxy()
-    print(random_proxy)
     ydl_opts = {
         'format': f"bestvideo[height<={quality}]+bestaudio/best",
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
@@ -25,7 +19,6 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         'noplaylist': True,
         'quiet': True,
         'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
-        'proxy': random_proxy,
     }
 
     def download_video():
@@ -62,17 +55,12 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     """
     Асинхронно извлекает данные аудио и скачивает его с YouTube Music.
     """
-    await restart_tor()
-    await asyncio.sleep(1)
-    random_proxy = await get_random_proxy()
-    print(random_proxy)
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'quiet': True,
         'noplaylist': True,
         'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
-        'proxy': random_proxy,
         'postprocessors': [
             {
                 'key': 'FFmpegExtractAudio',
