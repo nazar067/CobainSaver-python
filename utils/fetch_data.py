@@ -4,6 +4,7 @@ import os
 import aiohttp
 import requests
 import yt_dlp
+from logs.write_server_errors import log_error
 from utils.get_name import get_random_file_name, sanitize_filename
 from config import YT_USERNAME, YT_PASSWORD
 
@@ -52,7 +53,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         }
 
     except Exception as e:
-        logging.error(e)
+        log_error(url, str(e))
         return {"error": f"Error with download: {str(e)}"}
     
 async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
@@ -113,7 +114,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         }
 
     except Exception as e:
-        logging.error(e)
+        log_error(url, str(e))
         return {"error": f"{str(e)}"}
 
 async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> None:
@@ -128,7 +129,7 @@ async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> N
                         f.write(await resp.read())
             return
     except Exception as e:
-        logging.error(e)
+        log_error(url, str(e))
         
     if isThumbnail:
         try:
@@ -138,5 +139,5 @@ async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> N
                     for chunk in response.iter_content(1024):
                         f.write(chunk)
         except Exception as e:
-            logging.error(e)
+            log_error(url, str(e))
     

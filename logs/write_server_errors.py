@@ -30,3 +30,10 @@ def setup_logging():
     logger = logging.getLogger()
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
+
+def log_error(url: str, error_message: str):
+    """
+    Логирует ошибку с указанием URL, вызвавшего проблему.
+    """
+    logger = logging.getLogger()
+    logger.error(f"Ошибка при обработке URL: {url}\nСообщение об ошибке: {error_message}")

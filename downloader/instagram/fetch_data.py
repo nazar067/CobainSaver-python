@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 
 from downloader.send_album import send_social_media_album
 from localisation.get_language import get_language
+from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
 from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
@@ -42,7 +43,7 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
             with open(txt_file_path, "r", encoding="utf-8") as f:
                 caption = f.read().strip()
         except Exception as e:
-            logging.error(e)
+            log_error(url, str(e))
     if matching_files:
         return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, caption, msg_id, pool=pool)
     else:

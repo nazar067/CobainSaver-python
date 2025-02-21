@@ -7,6 +7,7 @@ import yt_dlp
 from downloader.media import del_media_content, send_video
 
 from localisation.get_language import get_language
+from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
@@ -72,4 +73,4 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         return await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
 
     except Exception as e:
-        logging.error(e) 
+        log_error(url, str(e))

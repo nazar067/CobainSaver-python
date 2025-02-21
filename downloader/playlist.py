@@ -10,6 +10,7 @@ from downloader.media import del_media_content
 from keyboard import generate_playlist_keyboard
 from typing import Optional
 from localisation.get_language import get_language
+from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.spotify_helper import extract_spotify_id, get_spotify_client
@@ -116,7 +117,7 @@ async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
             return {"error": "Ошибка: Не удалось получить информацию о плейлисте."}
 
     except Exception as e:
-        logging.error(e)
+        log_error(url, str(e))
         return {"error": f"Ошибка при извлечении плейлиста: {str(e)}"}
     
 
@@ -169,5 +170,5 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
         }
     
     except Exception as e:
-        logging.error(e)
+        log_error(url, str(e))
         return {"error": f"Ошибка при обработке Spotify: {str(e)}"}

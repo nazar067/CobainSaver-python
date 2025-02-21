@@ -9,6 +9,7 @@ from aiogram import Bot, Dispatcher
 from downloader.media import send_video
 from downloader.send_album import send_social_media_album
 from localisation.get_language import get_language
+from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
@@ -90,7 +91,7 @@ async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) ->
         }
 
     except Exception as e:
-        logging.error(f"Ошибка при скачивании видео: {str(e)}")
+        log_error(url, str(e))
         return None
 
 
@@ -113,6 +114,6 @@ async def fetch_pinterest_images(url: str) -> list:
         return image_urls if image_urls else None
 
     except Exception as e:
-        logging.error(f"Ошибка при скачивании изображений: {str(e)}")
+        log_error(url, str(e))
         return None
 
