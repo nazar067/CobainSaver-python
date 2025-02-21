@@ -3,7 +3,7 @@ from aiogram import Bot
 
 from downloader.media import send_audio
 from utils.fetch_data import download_file
-from utils.get_name import get_random_file_name
+from utils.get_name import get_random_file_name, sanitize_filename
 
 
 async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, business_connection_id: str, data: dict, save_folder: str, msg_id, pool):
@@ -13,7 +13,14 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
     if not data["audio_url"]:
         return
 
-    audio_path = os.path.join(save_folder, get_random_file_name("mp3"))
+    # Оригинальное название
+    original_title = data["audio_title"]
+    sanitized_title = sanitize_filename(original_title)
+
+    if not sanitized_title:
+        sanitized_title = get_random_file_name("")
+
+    audio_path = os.path.join(save_folder, f"{sanitized_title}.mp3")
     audio_thumbnail_path = os.path.join(save_folder, get_random_file_name("jpg"))
 
     await download_file(data["audio_url"], audio_path)
@@ -27,7 +34,7 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
         chat_language,
         business_connection_id,
         audio_path,
-        data["audio_title"],
+        original_title,
         audio_thumbnail_path,
         data["audio_duration"],
         data["audio_author"],
