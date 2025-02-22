@@ -1,0 +1,38 @@
+import logging
+import os
+import time
+import asyncio
+from datetime import datetime, timedelta
+
+DOWNLOADS_FOLDER = "downloads"
+CHECK_INTERVAL = 600
+
+async def delete_old_files():
+    """
+    Функция, которая каждые 10 минут проверяет папки в 'downloads/' и удаляет файлы старше 10 минут.
+    """
+    while True:
+        now = datetime.now()
+
+        if not os.path.exists(DOWNLOADS_FOLDER):
+            os.makedirs(DOWNLOADS_FOLDER)
+
+        for folder_name in os.listdir(DOWNLOADS_FOLDER):
+            folder_path = os.path.join(DOWNLOADS_FOLDER, folder_name)
+
+            if not os.path.isdir(folder_path):
+                continue
+
+            for file_name in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, file_name)
+
+                file_creation_time = datetime.fromtimestamp(os.path.getctime(file_path))
+
+                if now - file_creation_time > timedelta(minutes=10):
+                    try:
+                        os.remove(file_path)
+                    except Exception as e:
+                        logging.error(f"❌ Ошибка при удалении {file_path}: {e}")
+
+        await asyncio.sleep(CHECK_INTERVAL)
+
