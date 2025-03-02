@@ -15,8 +15,8 @@ Install PostgreSQL on your machine. You can download it from the official Postgr
 
 2. Create a Database
 
-Once PostgreSQL is installed, create a database named payments_db. You can do this using the following commands in the PostgreSQL shell:
-`CREATE DATABASE payments_db;`
+Once PostgreSQL is installed, create a database named cobainsaver. You can do this using the following commands in the PostgreSQL shell:
+`CREATE DATABASE cobainsaver;`
 
 3. Clone the Repository
 
@@ -68,7 +68,7 @@ Example:
 
 `API_TOKEN = "your_telegram_bot_token"`
 
-`DATABASE_URL = "postgresql://username:password@localhost:5432/payments_db"`
+`DATABASE_URL = "postgresql://username:password@localhost:5432/cobainsaver"`
 
 `ADMIN_ID = "753848394"`
 
