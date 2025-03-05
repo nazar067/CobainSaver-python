@@ -38,3 +38,11 @@ async def init_db(pool):
                 time_start_off_ads TIMESTAMP DEFAULT NULL
             )
         """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS threads (
+                id SERIAL PRIMARY KEY,
+                chat_id BIGINT NOT NULL,
+                topic_id BIGINT NOT NULL,
+                timestamp TIMESTAMP DEFAULT NOW()
+            )
+        """)
