@@ -31,9 +31,9 @@ async def get_forum_thread(bot: Bot, dp, message: Message):
         thread_group_id = int(THREAD_GROUP_ID)
         chat_id = message.chat.id
         thread_name = message.chat.full_name
-
+        
         if chat_id == thread_group_id:
-            return None
+            return
 
         topic_id = await is_thread_exists(pool, chat_id)
 
