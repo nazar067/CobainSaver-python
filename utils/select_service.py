@@ -22,14 +22,11 @@ from utils.service_identifier import identify_service
 from config import THREAD_GROUP_ID
 
 async def choose_service(bot: Bot, message: Message, business_connection_id, dp: Dispatcher):
-    try:
-        await forward_non_text_messages(bot, message)
-        
-        if message.chat.id != int(THREAD_GROUP_ID):
-            await forward_message_to_thread(message, bot, dp)
-    except:
-        print("Error in choose_service")
-        
+    await forward_non_text_messages(bot, message)
+    
+    if message.chat.id != int(THREAD_GROUP_ID):
+        await forward_message_to_thread(message, bot, dp)
+    
     if message.content_type == "text":
         if message.text.startswith("/"):
             return await choose_command(bot, message, dp, business_connection_id)
