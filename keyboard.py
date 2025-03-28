@@ -40,15 +40,17 @@ async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, 
 
     return builder.as_markup()
 
-async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send_ads: bool, pool, business_connection_id=None):
+async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send_ads: bool, hd_size: bool, pool, business_connection_id=None):
     builder = InlineKeyboardBuilder()
     
     chat_language = await get_language(pool, chat_id)
     audio_text = general_translations["turn_on_audio_btn"][chat_language] if not send_tiktok_music else general_translations["turn_off_audio_btn"][chat_language]
+    hd_size_text = general_translations["turn_on_hd_size"][chat_language] if not hd_size else general_translations["turn_off_hd_size"][chat_language]
     builder.button(
         text=audio_text,
         callback_data=f"toggle_audio {chat_id} {int(not send_tiktok_music)}"
     )
+    
     settings = await get_settings(pool, chat_id)
     is_ads = settings["send_ads"]
     if is_ads:
@@ -58,7 +60,12 @@ async def generate_settings_keyboard(chat_id: int, send_tiktok_music: bool, send
                 text=ads_text,
                 callback_data=f"pay:{25}"
             )
-            builder.adjust(1)
+            
+    builder.button(
+        text=hd_size_text,
+        callback_data=f"toggle_hd_size {chat_id} {int(not hd_size)}"
+    )
+    builder.adjust(1)
 
     return builder.as_markup()
 

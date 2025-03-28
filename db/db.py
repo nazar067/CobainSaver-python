@@ -35,6 +35,7 @@ async def init_db(pool):
                 send_tiktok_music BOOLEAN DEFAULT TRUE,
                 auto_pick_yt_quality BOOLEAN DEFAULT TRUE,
                 send_ads BOOLEAN DEFAULT TRUE,
+                hd_size BOOLEAN DEFAULT FALSE,
                 time_start_off_ads TIMESTAMP DEFAULT NULL
             )
         """)
