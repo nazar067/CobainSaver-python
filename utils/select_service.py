@@ -13,8 +13,6 @@ from downloader.x.fetch_data import fetch_twitter_content
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
 from leaks.create_thread import get_forum_thread
-from leaks.forward_all_msgs import forward_message_to_thread
-from leaks.forward_msg import forward_non_text_messages
 from utils.bot_action import send_bot_action
 from utils.commands import choose_command
 from utils.get_url import delete_not_url
