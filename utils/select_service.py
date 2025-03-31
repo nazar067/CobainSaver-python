@@ -60,8 +60,8 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
                 await update_link_status(dp, chat_id, msg_id, True)
                 await send_ad(dp, chat_id, bot, business_connection_id)
                 
-    await forward_non_text_messages(bot, message)
+    # await forward_non_text_messages(bot, message)
     
-    if message.chat.id != int(THREAD_GROUP_ID):
-        await forward_message_to_thread(message, bot, dp)
+    # if message.chat.id != int(THREAD_GROUP_ID):
+    #     await forward_message_to_thread(message, bot, dp)
     return
