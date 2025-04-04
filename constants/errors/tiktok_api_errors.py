@@ -1,0 +1,1 @@
+API_LIMIT = "{'code': -1, 'msg': 'Free Api Limit: 1 request/second.'}"

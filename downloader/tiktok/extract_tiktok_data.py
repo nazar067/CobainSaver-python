@@ -1,26 +1,51 @@
 from aiohttp import ClientSession
 from config import TIKTOK_API
+from constants.errors.tiktok_api_errors import API_LIMIT
 from utils.get_settings import get_settings
+import asyncio
 
 api_url = TIKTOK_API
+
+tiktok_request_queue = asyncio.Queue()
+tiktok_request_lock = asyncio.Lock()
+
+async def tiktok_request_worker():
+    while True:
+        job = await tiktok_request_queue.get()
+        if job:
+            url, session, payload, future = job
+            try:
+                async with session.post(api_url, data=payload) as response:
+                    if response.status != 200:
+                        future.set_result({"error": "Ошибка API"})
+                    else:
+                        result = await response.json()
+                        if result.get("msg") == API_LIMIT:
+                            await asyncio.sleep(1)
+                            await tiktok_request_queue.put((url, session, payload, future))
+                        else:
+                            future.set_result(result)
+            except Exception as e:
+                future.set_result({"error": str(e)})
+            await asyncio.sleep(1)
+        tiktok_request_queue.task_done()
 
 async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
     """
     Извлекает данные TikTok из API: ссылки на видео, аудио, размеры, превью или изображения.
+    Обрабатывает лимит API: 1 запрос в секунду.
     """
+    payload = {"url": url, "hd": "1"}
 
     async with ClientSession() as session:
-        payload = {"url": url, "hd": "1"}
-        async with session.post(api_url, data=payload) as response:
-            if response.status != 200:
-                return {"error": "Ошибка API"}
-
-            data = await response.json()
+        future = asyncio.get_event_loop().create_future()
+        await tiktok_request_queue.put((url, session, payload, future))
+        data = await future
 
     if "data" not in data:
         return {"error": "Контент не найден"}
 
-    # 📸 **Обработка фото**
+    # 📸 Фото
     if "images" in data["data"]:
         return {
             "type": "photo",
@@ -33,11 +58,10 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
             "audio_author": data["data"]["music_info"].get("author", "Unknown Artist"),
         }
 
-    # 🎥 **Обработка видео**
+    # 🎥 Видео
     if "play" not in data["data"]:
         return {"error": "Видео не найдено"}
 
-    # 📌 Проверяем размеры видео
     hd_size_mb = data["data"].get("hd_size", 0) / (1024 * 1024)
     play_size_mb = data["data"].get("size", 0) / (1024 * 1024)
 

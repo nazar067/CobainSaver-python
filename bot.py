@@ -1,3 +1,4 @@
+from downloader.tiktok.extract_tiktok_data import tiktok_request_worker
 from logs.write_server_errors import setup_logging
 from utils.auto_del import delete_old_files
 setup_logging()
@@ -100,6 +101,7 @@ async def main():
     
     asyncio.create_task(check_and_update_ads(pool))
     asyncio.create_task(delete_old_files())
+    asyncio.create_task(tiktok_request_worker())
 
     await bot.delete_webhook(drop_pending_updates=True)
 
