@@ -11,7 +11,7 @@ async def get_settings(pool, chat_id):
     """
     async with pool.acquire() as conn:
         result = await conn.fetchrow(
-            "SELECT send_tiktok_music, auto_pick_yt_quality, send_ads, time_start_off_ads FROM settings WHERE chat_id = $1",
+            "SELECT send_tiktok_music, auto_pick_yt_quality, send_ads, hd_size, time_start_off_ads FROM settings WHERE chat_id = $1",
             chat_id
         )
 
@@ -20,6 +20,7 @@ async def get_settings(pool, chat_id):
                 "send_tiktok_music": result["send_tiktok_music"],
                 "auto_pick_yt_quality": result["auto_pick_yt_quality"],
                 "send_ads": result["send_ads"],
+                "hd_size": result["hd_size"],
                 "time_start_off_ads": result["time_start_off_ads"]
             }
         else:
@@ -27,5 +28,6 @@ async def get_settings(pool, chat_id):
                 "send_tiktok_music": True,
                 "auto_pick_yt_quality": True,
                 "send_ads": True,
+                "hd_size": False,
                 "time_start_off_ads": None
             }

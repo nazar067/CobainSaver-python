@@ -13,14 +13,14 @@ from downloader.tiktok.process_tiktok import fetch_tiktok_video
 from downloader.x.fetch_data import fetch_twitter_content
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
-from leaks.forward_msg import forward_non_text_messages
+from leaks.create_thread import get_forum_thread
 from utils.bot_action import send_bot_action
 from utils.commands import choose_command
 from utils.get_url import delete_not_url
 from utils.service_identifier import identify_service
+from config import THREAD_GROUP_ID
 
 async def choose_service(bot: Bot, message: Message, business_connection_id, dp: Dispatcher):
-    await forward_non_text_messages(bot, message)
     if message.content_type == "text":
         if message.text.startswith("/"):
             return await choose_command(bot, message, dp, business_connection_id)
@@ -60,4 +60,9 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
             if is_success == True:
                 await update_link_status(dp, chat_id, msg_id, True)
                 await send_ad(dp, chat_id, bot, business_connection_id)
+                
+    # await forward_non_text_messages(bot, message)
+    
+    # if message.chat.id != int(THREAD_GROUP_ID):
+    #     await forward_message_to_thread(message, bot, dp)
     return

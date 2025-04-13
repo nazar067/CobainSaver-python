@@ -38,9 +38,9 @@ translations = {
         "uk": '<b><a href="https://t.me/cobainSaver">YouTube, YT Music і Spotify знову доступні!</a></b>',
     },
     "settings": {
-        "en": "Settings",
-        "ru": "Настройки",
-        "uk": "Налаштування",
+        "en": "Settings:",
+        "ru": "Настройки:",
+        "uk": "Налаштування:",
     },
     "choose_lang": {
         "en": "🌐 Select a language:",
@@ -63,13 +63,23 @@ translations = {
         "uk": "❌ Вимкнути рекламу",
     },
     "turn_on_audio_btn": {
+        "en": "TikTok audio",
+        "ru": "TikTok аудио",
+        "uk": "TikTok аудіо",
+    },
+    "turn_off_audio_btn": {
         "en": "✅ TikTok audio",
         "ru": "✅ TikTok аудио",
         "uk": "✅ TikTok аудіо",
     },
-    "turn_off_audio_btn": {
-        "en": "❌ TikTok audio",
-        "ru": "❌ TikTok аудио",
-        "uk": "❌ TikTok аудіо",
+    "turn_on_hd_size": {
+        "en": "TikTok HD size",
+        "ru": "TikTok HD размер",
+        "uk": "TikTok HD розмір",
+    },
+    "turn_off_hd_size": {
+        "en": "✅ TikTok HD size",
+        "ru": "✅ TikTok HD размер",
+        "uk": "✅ TikTok HD розмір",
     },
 }

@@ -1,4 +1,6 @@
+from downloader.tiktok.extract_tiktok_data import tiktok_request_worker
 from logs.write_server_errors import setup_logging
+from utils.auto_del import delete_old_files
 setup_logging()
 
 import asyncio
@@ -12,7 +14,7 @@ from bot_settings.description import set_bot_description
 from bot_settings.short_description import set_bot_short_description
 from downloader.music_selector import select_music
 from handlers.language_handler import set_language_handler
-from handlers.settings_keyboard_handler import toggle_ads_callback, toggle_audio_callback
+from handlers.settings_keyboard_handler import toggle_ads_callback, toggle_audio_callback, toggle_hd_size_callback
 from handlers.start_handler import start_handler
 from payments.end_subscribe import check_and_update_ads
 from payments.payment import process_payment
@@ -57,6 +59,10 @@ async def select_track(callback: CallbackQuery):
 @dp.callback_query(lambda c: c.data.startswith(("toggle_audio")))
 async def change_audio(callback: CallbackQuery):
     await toggle_audio_callback(callback, dp)
+    
+@dp.callback_query(lambda c: c.data.startswith(("toggle_hd_size")))
+async def change_tt_size(callback: CallbackQuery):
+    await toggle_hd_size_callback(callback, dp)
 
 @dp.callback_query(lambda c: c.data.startswith(("pay:")))
 async def pay_stars_handler(callback: CallbackQuery):
@@ -94,6 +100,8 @@ async def main():
     await set_bot_short_description(bot)
     
     asyncio.create_task(check_and_update_ads(pool))
+    asyncio.create_task(delete_old_files())
+    asyncio.create_task(tiktok_request_worker())
 
     await bot.delete_webhook(drop_pending_updates=True)
 
