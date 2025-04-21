@@ -47,3 +47,11 @@ async def init_db(pool):
                 timestamp TIMESTAMP DEFAULT NOW()
             )
         """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_marks (
+                id SERIAL PRIMARY KEY,
+                chat_id BIGINT NOT NULL,
+                mark INT NOT NULL,
+                timestamp TIMESTAMP DEFAULT NOW()
+            )
+        """)

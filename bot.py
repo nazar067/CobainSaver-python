@@ -1,11 +1,13 @@
 from downloader.tiktok.extract_tiktok_data import tiktok_request_worker
 from logs.write_server_errors import setup_logging
+from polls.send_review_poll import daily_feedback_task
+from polls.write_review_result import handle_poll_answer
 from utils.auto_del import delete_old_files
 setup_logging()
 
 import asyncio
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message, CallbackQuery, PreCheckoutQuery
+from aiogram.types import Message, CallbackQuery, PreCheckoutQuery, PollAnswer
 from aiogram.filters import CommandStart
 from config import API_TOKEN, DATABASE_URL
 from db.db import get_db_pool, init_db
@@ -88,6 +90,12 @@ async def pre_checkout_handler(pre_checkout_query: PreCheckoutQuery):
 async def language_handler(callback: CallbackQuery):
     pool = dp["db_pool"]
     await set_language_handler(callback, pool)
+    
+@dp.poll_answer()
+async def on_poll_answer(poll_answer: PollAnswer):
+    pool = dp["db_pool"]
+    await handle_poll_answer(poll_answer, pool)
+
 
 async def main():
     print("Bot started")
@@ -102,11 +110,12 @@ async def main():
     asyncio.create_task(check_and_update_ads(pool))
     asyncio.create_task(delete_old_files())
     asyncio.create_task(tiktok_request_worker())
+    asyncio.create_task(daily_feedback_task(bot, dp))
 
     await bot.delete_webhook(drop_pending_updates=True)
 
     try:
-        await dp.start_polling(bot, allowed_updates=["message", "callback_query", "pre_checkout_query", "business_message"])
+        await dp.start_polling(bot, allowed_updates=["message", "callback_query", "pre_checkout_query", "business_message", "poll_answer"])
     finally:
         await pool.close()
         await bot.session.close()
