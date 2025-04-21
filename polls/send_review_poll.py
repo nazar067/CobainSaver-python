@@ -4,21 +4,27 @@ import logging
 from aiogram import Bot, Dispatcher
 from asyncpg import Pool
 
+from localisation.get_language import get_language
 from utils.user_rate import get_active_chats_last_month
+from localisation.translations.polls import translations
 
 async def send_feedback_polls(bot: Bot, pool: Pool):
     try:
         chat_ids = await get_active_chats_last_month(pool)
+        
         print("chats", chat_ids)
 
         for chat_id in chat_ids:
+            chat_language = await get_language(pool, chat_id)
+            options = translations["rate"][chat_language].splitlines()
             try:
                 await bot.send_poll(
                     chat_id=chat_id,
-                    question="📝 На какую оценку бот сработал за последний месяц?",
-                    options=["5 - Отлично", "4 - Хорошо", "3 - Нормально", "2 - Плохо", "1 - Ужасно"],
+                    question=translations["send_review_poll"][chat_language],
+                    options=options,
                     is_anonymous=False,
-                    allows_multiple_answers=False
+                    allows_multiple_answers=False,
+                    question_parse_mode="HTML",
                 )
             except Exception as e:
                 logging.error(f"Ошибка при отправке опроса пользователю {chat_id}: {e}", exc_info=True)
@@ -41,7 +47,5 @@ async def daily_feedback_task(bot: Bot, dp: Dispatcher):
                 pool = dp["db_pool"]
                 print("📊 Сегодня первое число. Отправка опросов...")
                 await send_feedback_polls(bot, pool)
-            else:
-                print("Не первое число. Опрос не отправляется.")
         except Exception as e:
             logging.error(f"Ошибка в daily_feedback_task: {e}", exc_info=True)
