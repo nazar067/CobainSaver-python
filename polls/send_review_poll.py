@@ -11,8 +11,6 @@ from localisation.translations.polls import translations
 async def send_feedback_polls(bot: Bot, pool: Pool):
     try:
         chat_ids = await get_active_chats_last_month(pool)
-        
-        print("chats", chat_ids)
 
         for chat_id in chat_ids:
             chat_language = await get_language(pool, chat_id)
@@ -24,7 +22,13 @@ async def send_feedback_polls(bot: Bot, pool: Pool):
                     options=options,
                     is_anonymous=False,
                     allows_multiple_answers=False,
-                    question_parse_mode="HTML",
+                )
+                await bot.send_message(
+                    chat_id=chat_id,
+                    text=translations["text_after_review_poll"][chat_language],
+                    parse_mode="HTML",
+                    disable_notification=True,
+                    disable_web_page_preview=True,
                 )
             except Exception as e:
                 logging.error(f"Ошибка при отправке опроса пользователю {chat_id}: {e}", exc_info=True)
@@ -43,9 +47,8 @@ async def daily_feedback_task(bot: Bot, dp: Dispatcher):
 
         try:
             today = datetime.now()
-            if today.day == 22:
+            if today.day == 1:
                 pool = dp["db_pool"]
-                print("📊 Сегодня первое число. Отправка опросов...")
                 await send_feedback_polls(bot, pool)
         except Exception as e:
             logging.error(f"Ошибка в daily_feedback_task: {e}", exc_info=True)
