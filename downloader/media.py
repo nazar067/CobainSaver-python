@@ -47,8 +47,9 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
     """
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "audio")
-        audio = FSInputFile(file_path)
-        thumbnail = FSInputFile(thumbnail_path) if thumbnail_path else None
+
+        audio = FSInputFile(file_path, filename=os.path.basename(file_path))
+        thumbnail = FSInputFile(thumbnail_path) if thumbnail_path and os.path.exists(thumbnail_path) else None
 
         await bot.send_audio(
             business_connection_id=business_connection_id,
@@ -61,15 +62,16 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             reply_to_message_id=msg_id,
             caption='<a href="https://t.me/cobainSaver_bot"><i>by CobainSaver</i></a>',
             parse_mode="HTML"
-            )
+        )
         return True
+
     except Exception as e:
         logging.error(e)
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)     
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id) 
     finally:
         await del_media_content(file_path)
         if thumbnail_path:
-            await del_media_content(thumbnail_path)  
+            await del_media_content(thumbnail_path)
             
 async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path):
     try:
