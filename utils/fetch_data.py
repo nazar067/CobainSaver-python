@@ -5,6 +5,7 @@ import aiohttp
 import requests
 import yt_dlp
 from logs.write_server_errors import log_error
+from utils.get_file_size import get_music_size
 from utils.get_name import get_random_file_name, sanitize_filename
 from config import YT_USERNAME, YT_PASSWORD
 
@@ -60,36 +61,46 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     """
     Асинхронно извлекает данные аудио и скачивает его с YouTube Music.
     """
-    ydl_opts = {
+    base_ydl_opts = {
         'username': YT_USERNAME,
         'password': YT_PASSWORD,
         "cookies_from_browser": ("firefox"),
         'format': 'bestaudio/best',
-        'outtmpl': os.path.join(user_folder, "%(title)s.%(ext)s"),
         'quiet': True,
         'noplaylist': True,
-        'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
-        'postprocessors': [
-            {
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }
-        ],
+        'http_headers': {'User-Agent': 'Mozilla/5.0 ... Chrome/92.0.4515.115 Safari/537.36'},
     }
 
-    def download_info():
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    def get_metadata():
+        with yt_dlp.YoutubeDL(base_ydl_opts) as ydl:
+            return ydl.extract_info(url, download=False)
+
+    def download_info(yt_opts):
+        with yt_dlp.YoutubeDL(yt_opts) as ydl:
             return ydl.extract_info(url, download=True)
 
     try:
-        info_dict = await asyncio.to_thread(download_info)
+        info_for_size = await asyncio.to_thread(get_metadata)
+        original_title = info_for_size.get("title", "audio")
+        
+        size = await get_music_size(192, info_for_size.get("duration", 0))
+        if size > 49:
+            return {
+                "large": True,
+                "audio_title": original_title
+            }
 
-        original_title = info_dict.get("title", "audio")
-        sanitized_title = sanitize_filename(original_title)
+        sanitized_title = sanitize_filename(original_title) or get_random_file_name("")
 
-        if not sanitized_title:
-            sanitized_title = get_random_file_name("")
+        ydl_opts = base_ydl_opts.copy()
+        ydl_opts['outtmpl'] = os.path.join(user_folder, f"{sanitized_title}.%(ext)s")
+        ydl_opts['postprocessors'] = [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }]
+
+        info_dict = await asyncio.to_thread(lambda: download_info(ydl_opts))
 
         file_extension = "mp3"
         file_path = os.path.join(user_folder, f"{sanitized_title}.{file_extension}")

@@ -30,12 +30,17 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
 
     if "error" in data:
         await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+        return
+    elif "large" in data:
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data['audio_title'] + " - " + translations["large_content"][chat_language], reply_to_message_id=msg_id)
+        return
 
     file_path = data["file_path"]
     audio_title = data["audio_title"]
     duration = data["duration"]
     thumbnail_path = data["thumbnail_path"]
     author = data["author"]
+
     if os.path.exists(file_path):
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         if file_size_mb <= MAX_SIZE_MB:
