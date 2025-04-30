@@ -16,7 +16,7 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         await send_bot_action(bot, chat_id, business_connection_id, "video")
         video = get_media_source(file_path_or_url)
         thumbnail = get_media_source(thumbnail_path_or_url)
-        title = await get_clear_name(title)
+        title = await get_clear_name(title, 800)
         await bot.send_video(
             business_connection_id=business_connection_id,
             chat_id=chat_id,

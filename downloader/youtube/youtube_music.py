@@ -14,7 +14,7 @@ from utils.fetch_data import fetch_youtube_music_data
 
 MAX_SIZE_MB = 50 
 
-async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: Optional[str] = None, msg_id = None) -> str:
+async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: Optional[str] = None, msg_id = None, short_track_name = None) -> str:
     """
     Обрабатывает скачивание аудио с YouTube Music и отправляет его пользователю.
     """
@@ -29,7 +29,7 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     chat_language = await get_language(pool, chat_id)
 
     if "error" in data:
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text= short_track_name + " - " + translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
         return
     elif "large" in data:
         await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data['audio_title'] + " - " + translations["large_content"][chat_language], reply_to_message_id=msg_id)

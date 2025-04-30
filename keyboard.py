@@ -2,6 +2,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
 from localisation.get_language import get_language
+from utils.get_name import get_clear_name, get_name_for_button_data
 from utils.get_settings import get_settings
 from localisation.translations.downloader import translations as downloader_translations
 from localisation.translations.general import translations as general_translations
@@ -16,9 +17,10 @@ async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, 
     chat_language = await get_language(pool, chat_id)
     # Добавляем кнопки треков
     for track in tracks:
+        clear_tittle = await get_name_for_button_data(track["title"], 7)
         builder.button(
             text=track["title"],
-            callback_data=f"{source} {track['id']} {playlist_id}"
+            callback_data=f"{source} {track['id']} {playlist_id} {clear_tittle}"
         )
 
     builder.adjust(2)

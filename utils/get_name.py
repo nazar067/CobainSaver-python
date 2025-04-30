@@ -11,9 +11,9 @@ def get_random_file_name(extension: str) -> str:
     random_number = random.randint(1, 1000)
     return f"{timestamp}_{random_number}.{extension}"
 
-async def get_clear_name(name: str):
+async def get_clear_name(name: str, max_symbols: int):
     name = re.sub(r"#\S+", "", name).strip()
-    name = name[:800] + "..." if len(name) > 800 else name 
+    name = name[:max_symbols] + "..." if len(name) > max_symbols else name 
     return name
 
 def sanitize_filename(filename: str) -> str:
@@ -21,3 +21,10 @@ def sanitize_filename(filename: str) -> str:
     sanitized_name = re.sub(invalid_chars, "", filename).strip()
 
     return sanitized_name if sanitized_name else get_random_file_name("")
+
+async def get_name_for_button_data(name: str, max_symbols: int = 10):
+    name = re.sub(r"#\S+", "", name).strip()
+    name = name.replace(" ", "_")
+    name = name[:max_symbols] + "" if len(name) > max_symbols else name
+    print(name)
+    return name
