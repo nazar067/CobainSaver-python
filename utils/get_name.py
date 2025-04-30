@@ -26,5 +26,4 @@ async def get_name_for_button_data(name: str, max_symbols: int = 10):
     name = re.sub(r"#\S+", "", name).strip()
     name = name.replace(" ", "_")
     name = name[:max_symbols] + "" if len(name) > max_symbols else name
-    print(name)
     return name
