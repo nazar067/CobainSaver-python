@@ -1,3 +1,4 @@
+from collections import Counter
 import asyncpg
 from aiogram import Bot
 from datetime import datetime
@@ -105,3 +106,23 @@ async def send_statistics(bot: Bot, pool, chat_id=ADMIN_ID, date=None):
     stats_message = await format_statistics(statistics, services)
 
     await bot.send_message(chat_id=chat_id, text=stats_message, parse_mode="HTML")
+
+async def send_user_reviews(bot: Bot, pool, date=None):
+    if date is None:
+        date = datetime.now().date()
+
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT mark FROM user_marks
+            WHERE DATE(timestamp) = $1
+            """,
+            date
+        )
+
+    all_marks = [row["mark"] for row in rows]
+    counts = Counter(all_marks)
+    result_lines = [f"{mark} - {counts.get(mark, 0)}" for mark in range(1, 6)]
+
+    text = "<b>📊 Статистика оценок:</b>\n" + "\n".join(result_lines)
+    await bot.send_message(ADMIN_ID, text, parse_mode="HTML")
