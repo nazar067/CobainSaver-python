@@ -16,6 +16,7 @@ async def send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_conn
         None,
         data["video_duration"],
         1,
+        data["parse_mode"]
     )
 
     if attempt == False:

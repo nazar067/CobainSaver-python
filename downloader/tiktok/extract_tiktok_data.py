@@ -1,8 +1,12 @@
 from aiohttp import ClientSession
 from config import TIKTOK_API
 from constants.errors.tiktok_api_errors import API_LIMIT
+from logs.write_server_errors import log_error
+from utils.get_name import get_clear_name
 from utils.get_settings import get_settings
 import asyncio
+
+from utils.text_format import format_as_expandable_quote
 
 api_url = TIKTOK_API
 
@@ -43,19 +47,29 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
         data = await future
 
     if "data" not in data:
+        log_error(url, data)
         return {"error": "Контент не найден"}
+    
+    parse_mode = None
+    media_title = data["data"].get("title", "TikTok_Content")
+    if media_title:
+        media_title = await get_clear_name(media_title, 800)
+        if len(media_title) > 174:
+            media_title = format_as_expandable_quote(media_title)
+            parse_mode = "MarkdownV2"
 
     # 📸 Фото
     if "images" in data["data"]:
         return {
             "type": "photo",
             "images": data["data"]["images"],
-            "title": data["data"].get("title", "TikTok Photo"),
+            "title": media_title,
             "audio_url": data["data"]["music_info"].get("play", None),
             "audio_title": data["data"]["music_info"].get("title", "TikTok_Audio"),
             "audio_thumbnail_url": data["data"]["music_info"].get("cover", None),
             "audio_duration": data["data"]["music_info"].get("duration", 0),
             "audio_author": data["data"]["music_info"].get("author", "Unknown Artist"),
+            "parse_mode": parse_mode
         }
 
     # 🎥 Видео
@@ -78,11 +92,12 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
         "type": "video",
         "video_url": video_url,
         "video_thumbnail_url": data["data"].get("origin_cover", None),
-        "video_title": data["data"].get("title", "TikTok_Video"),
+        "video_title": media_title,
         "video_duration": data["data"].get("duration", 0),
         "audio_url": data["data"]["music_info"].get("play", None),
         "audio_title": data["data"]["music_info"].get("title", "TikTok_Audio"),
         "audio_thumbnail_url": data["data"]["music_info"].get("cover", None),
         "audio_duration": data["data"]["music_info"].get("duration", 0),
         "audio_author": data["data"]["music_info"].get("author", "Unknown Artist"),
+        "parse_mode": parse_mode
     }
