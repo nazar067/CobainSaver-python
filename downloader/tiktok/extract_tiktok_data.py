@@ -50,13 +50,11 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
         log_error(url, data)
         return {"error": "Контент не найден"}
     
-    parse_mode = None
     media_title = data["data"].get("title", "TikTok_Content")
     if media_title:
-        media_title = await get_clear_name(media_title, 800)
+        media_title = await get_clear_name(media_title, 760)
         if len(media_title) > 174:
             media_title = format_as_expandable_quote(media_title)
-            parse_mode = "MarkdownV2"
 
     # 📸 Фото
     if "images" in data["data"]:
@@ -69,7 +67,6 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
             "audio_thumbnail_url": data["data"]["music_info"].get("cover", None),
             "audio_duration": data["data"]["music_info"].get("duration", 0),
             "audio_author": data["data"]["music_info"].get("author", "Unknown Artist"),
-            "parse_mode": parse_mode
         }
 
     # 🎥 Видео
@@ -99,5 +96,4 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
         "audio_thumbnail_url": data["data"]["music_info"].get("cover", None),
         "audio_duration": data["data"]["music_info"].get("duration", 0),
         "audio_author": data["data"]["music_info"].get("author", "Unknown Artist"),
-        "parse_mode": parse_mode
     }

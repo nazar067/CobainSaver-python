@@ -31,5 +31,4 @@ async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, 
         data["video_title"],
         video_thumbnail_path,
         data["video_duration"],
-        parse_mode=data["parse_mode"]
     )

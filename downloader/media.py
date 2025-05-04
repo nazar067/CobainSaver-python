@@ -8,7 +8,7 @@ from utils.bot_action import send_bot_action
 from utils.get_name import get_clear_name
 from utils.media_source import get_media_source
 
-async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None, parse_mode = None) -> None:
+async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None) -> None:
     """
     Отправляет скачанное видео в чат (по ссылке или из файла).
     """
@@ -25,7 +25,7 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             thumbnail=thumbnail,
             duration=duration,
             reply_to_message_id=msg_id,
-            parse_mode=parse_mode
+            parse_mode="HTML"
         )
         return True
     except Exception as e:

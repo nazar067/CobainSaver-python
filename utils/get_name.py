@@ -13,7 +13,7 @@ def get_random_file_name(extension: str) -> str:
 
 async def get_clear_name(name: str, max_symbols: int):
     name = re.sub(r"#\S+", "", name).strip()
-    name = name[:max_symbols] + "||" if len(name) > max_symbols else name 
+    name = name[:max_symbols] + "..." if len(name) > max_symbols else name 
     return name
 
 def sanitize_filename(filename: str) -> str:
