@@ -23,22 +23,27 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
     ydl_opts = {
         'quiet': True,
         'http_headers': {'User-Agent': 'Mozilla/5.0'},
+        'outtmpl': os.path.join(save_folder, random_name + "%(ext)s"),
     }
 
-    def extract_info():
+    def extract_music_info():
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            return ydl.extract_info(url, download=True)
+    def extract_video_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=False)
 
     try:
-        info = await asyncio.to_thread(extract_info)
-        file_ext = info.get("ext", "").lower()
+        video_info = await asyncio.to_thread(extract_video_info)
+        print(video_info)
+        file_ext = video_info.get("ext", "").lower()
         is_audio = file_ext in audio_extensions
         is_video = file_ext in video_extensions
 
-        file_url = info["formats"][0]["url"]
-        title = info.get("title", "")
-        duration = info.get("duration", 0)
-        thumbnail = info.get("thumbnail", None)
+        file_url = video_info.get("url", "")
+        title = video_info.get("title", "")
+        duration = video_info.get("duration", 0)
+        thumbnail = video_info.get("thumbnail", None)
 
         if duration > 1101:
             return await bot.send_message(
@@ -55,8 +60,12 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
             reply_to_message_id=msg_id
         )
 
-        file_path = os.path.join(save_folder, f"{random_name}.{file_ext}")
-        await download_file(file_url, file_path)
+        file_path = os.path.join(save_folder, f"{random_name}{file_ext}")
+        if is_video:
+            file_url = video_info["formats"][0]["url"]
+            await download_file(file_url, file_path)
+        else:
+            audio_info = await asyncio.to_thread(extract_music_info)
 
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         if file_size_mb >= 50:
@@ -78,7 +87,7 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
             return await send_audio(
                 bot, chat_id, msg_id, chat_language,
                 business_connection_id, file_path, title,
-                thumbnail_path, duration, author=info.get("uploader", "CobainSaver")
+                thumbnail_path, duration, author=audio_info.get("uploader", "CobainSaver")
             )
 
         if is_video:
@@ -100,4 +109,10 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         )
 
     except Exception as e:
-        log_error(url, str(e))
+        await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["unavaliable_content"][chat_language],
+            reply_to_message_id=msg_id
+        )
+        log_error(url, e)
