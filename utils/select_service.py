@@ -4,7 +4,7 @@ from aiogram.types import Message
 from aiogram.enums.chat_action import ChatAction
 from ads.send_ads import send_ad
 from db.links import insert_link_into_db, update_link_status
-from downloader.base_ytdlp_downloader import fetch_base_video
+from downloader.base_ytdlp_downloader import fetch_base_media
 from downloader.instagram.fetch_data import fetch_instagram_content
 from downloader.pinterest.fetch_data import fetch_pinterest_content
 from downloader.spotify import process_spotify_track
@@ -49,11 +49,11 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
             elif service == "Pinterest":
                 is_success = await fetch_pinterest_content(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "PornHub":
-                is_success = await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+                is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Twitch":
-                is_success = await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+                is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Another":
-                is_success = await fetch_base_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+                is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             if is_success == True:
                 await update_link_status(dp, chat_id, msg_id, True)
                 await send_ad(dp, chat_id, bot, business_connection_id)

@@ -1,11 +1,9 @@
 import asyncio
-import logging
 import os
 from aiogram import Bot, Dispatcher
-import aiohttp
 import yt_dlp
-from downloader.media import del_media_content, send_video
 
+from downloader.media import del_media_content, send_video, send_audio
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
@@ -13,17 +11,18 @@ from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
 
-
-
-async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
+async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
     random_name = get_random_file_name("")
 
+    video_extensions = ["mp4", "mov", "avi", "webm", "mkv", "flv"]
+    audio_extensions = ["mp3", "wav", "m4a", "aac", "ogg", "flac", "opus"]
+
     ydl_opts = {
         'quiet': True,
-        'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
+        'http_headers': {'User-Agent': 'Mozilla/5.0'},
     }
 
     def extract_info():
@@ -32,34 +31,16 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
 
     try:
         info = await asyncio.to_thread(extract_info)
-        
-        video_url = info["formats"][0]["url"]
-        video_title = info.get("title", "")
-        video_duration = info.get("duration", 0)
-        video_thumbnail = info.get("thumbnail", None)
-        if video_duration > 1101:
-            return await bot.send_message(
-                chat_id=chat_id,
-                business_connection_id=business_connection_id,
-                text=translations["large_content"][chat_language],
-                reply_to_message_id=msg_id
-            ) 
+        file_ext = info.get("ext", "").lower()
+        is_audio = file_ext in audio_extensions
+        is_video = file_ext in video_extensions
 
-        video_path = os.path.join(save_folder, f"{random_name}mp4")
-        thumbnail_path = os.path.join(save_folder, f"{random_name}jpg") if video_thumbnail else None
+        file_url = info["formats"][0]["url"]
+        title = info.get("title", "")
+        duration = info.get("duration", 0)
+        thumbnail = info.get("thumbnail", None)
 
-        ydl_opts["outtmpl"] = video_path
-        await bot.send_message(
-                chat_id=chat_id,
-                business_connection_id=business_connection_id,
-                text=translations["downloading"][chat_language],
-                reply_to_message_id=msg_id
-            ) 
-        await download_file(video_url, video_path)
-        
-        file_size_mb = os.path.getsize(video_path) / (1024 * 1024)
-        if file_size_mb >= 50:
-            await del_media_content(video_path)
+        if duration > 1101:
             return await bot.send_message(
                 chat_id=chat_id,
                 business_connection_id=business_connection_id,
@@ -67,10 +48,56 @@ async def fetch_base_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
                 reply_to_message_id=msg_id
             )
 
-        if video_thumbnail:
-            await download_file(video_thumbnail, thumbnail_path)
+        await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["downloading"][chat_language],
+            reply_to_message_id=msg_id
+        )
 
-        return await send_video(bot, chat_id, msg_id, chat_language, business_connection_id, video_path, video_title, thumbnail_path, video_duration)
+        file_path = os.path.join(save_folder, f"{random_name}.{file_ext}")
+        await download_file(file_url, file_path)
+
+        file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+        if file_size_mb >= 50:
+            await del_media_content(file_path)
+            return await bot.send_message(
+                chat_id=chat_id,
+                business_connection_id=business_connection_id,
+                text=translations["large_content"][chat_language],
+                reply_to_message_id=msg_id
+            )
+
+        if thumbnail:
+            thumbnail_path = os.path.join(save_folder, f"{random_name}.jpg")
+            await download_file(thumbnail, thumbnail_path)
+        else:
+            thumbnail_path = None
+
+        if is_audio:
+            return await send_audio(
+                bot, chat_id, msg_id, chat_language,
+                business_connection_id, file_path, title,
+                thumbnail_path, duration, author=info.get("uploader", "CobainSaver")
+            )
+
+        if is_video:
+            return await send_video(
+                bot, chat_id, msg_id, chat_language,
+                business_connection_id, file_path, title,
+                thumbnail_path, duration
+            )
+
+        # fallback
+        await del_media_content(file_path)
+        if thumbnail_path:
+            await del_media_content(thumbnail_path)
+        return await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text="⚠️ Unsupported file format.",
+            reply_to_message_id=msg_id
+        )
 
     except Exception as e:
         log_error(url, str(e))
