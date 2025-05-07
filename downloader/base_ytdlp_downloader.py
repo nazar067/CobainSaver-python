@@ -109,10 +109,4 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         )
 
     except Exception as e:
-        await bot.send_message(
-            chat_id=chat_id,
-            business_connection_id=business_connection_id,
-            text=translations["unavaliable_content"][chat_language],
-            reply_to_message_id=msg_id
-        )
         log_error(url, e)
