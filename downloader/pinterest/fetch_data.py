@@ -14,6 +14,7 @@ from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
+from utils.service_identifier import identify_service
 
 
 MAX_VIDEO_SIZE_MB = 50
@@ -91,7 +92,7 @@ async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) ->
         }
 
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e, 1111, await identify_service(url))
         return None
 
 
@@ -114,6 +115,6 @@ async def fetch_pinterest_images(url: str) -> list:
         return image_urls if image_urls else None
 
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e, 1111, await identify_service(url))
         return None
 

@@ -117,7 +117,7 @@ async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
             return {"error": "Ошибка: Не удалось получить информацию о плейлисте."}
 
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e)
         return {"error": f"Ошибка при извлечении плейлиста: {str(e)}"}
     
 
@@ -170,5 +170,5 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
         }
     
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e)
         return {"error": f"Ошибка при обработке Spotify: {str(e)}"}

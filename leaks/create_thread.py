@@ -4,6 +4,7 @@ import asyncpg
 from aiogram import Bot
 from aiogram.types import Message
 from config import THREAD_GROUP_ID
+from logs.write_server_errors import log_error
 
 async def save_thread(pool: asyncpg.Pool, chat_id: int, topic_id: int):
     async with pool.acquire() as conn:
@@ -47,5 +48,5 @@ async def get_forum_thread(bot: Bot, dp, message: Message):
         return topic.message_thread_id
 
     except Exception as e:
-        logging.error(f"Ошибка при создании темы: {e}")
+        log_error("url", e, chat_id)
         return None

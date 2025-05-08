@@ -4,6 +4,8 @@ import time
 import asyncio
 from datetime import datetime, timedelta
 
+from logs.write_server_errors import log_error
+
 DOWNLOADS_FOLDER = "downloads"
 CHECK_INTERVAL = 600
 
@@ -32,7 +34,7 @@ async def delete_old_files():
                     try:
                         os.remove(file_path)
                     except Exception as e:
-                        logging.error(f"❌ Ошибка при удалении {file_path}: {e}")
+                        log_error("url", e)
 
         await asyncio.sleep(CHECK_INTERVAL)
 

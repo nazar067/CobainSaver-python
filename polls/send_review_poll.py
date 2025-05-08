@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from asyncpg import Pool
 
 from localisation.get_language import get_language
+from logs.write_server_errors import log_error
 from utils.user_rate import get_active_chats_last_month
 from localisation.translations.polls import translations
 
@@ -31,10 +32,10 @@ async def send_feedback_polls(bot: Bot, pool: Pool):
                     disable_web_page_preview=True,
                 )
             except Exception as e:
-                logging.error(f"Ошибка при отправке опроса пользователю {chat_id}: {e}", exc_info=True)
+                log_error("url", e, chat_id)
 
     except Exception as e:
-        logging.error(f"Ошибка при извлечении списка активных пользователей: {e}", exc_info=True)
+        log_error("url", e, chat_id)
 
 
 async def daily_feedback_task(bot: Bot, dp: Dispatcher):
@@ -51,4 +52,4 @@ async def daily_feedback_task(bot: Bot, dp: Dispatcher):
                 pool = dp["db_pool"]
                 await send_feedback_polls(bot, pool)
         except Exception as e:
-            logging.error(f"Ошибка в daily_feedback_task: {e}", exc_info=True)
+            log_error("url", e)

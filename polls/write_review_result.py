@@ -3,6 +3,8 @@ from aiogram.types import PollAnswer
 from datetime import datetime
 from asyncpg import Pool
 
+from logs.write_server_errors import log_error
+
 async def handle_poll_answer(answer: PollAnswer, pool: Pool):
     try:
         user_id = answer.user.id
@@ -31,6 +33,6 @@ async def handle_poll_answer(answer: PollAnswer, pool: Pool):
                     user_id, mark
                 )
             else:
-                logging.error(f"Пользователь {user_id} уже голосовал сегодня.", exc_info=True)
+                log_error("url", e)
     except Exception as e:
-        logging.error(f"Ошибка при обработке ответа на опрос: {e}", exc_info=True)
+        log_error("url", e)

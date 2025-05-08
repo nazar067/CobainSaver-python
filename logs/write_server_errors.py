@@ -1,5 +1,6 @@
 import os
 import logging
+import traceback
 
 def setup_logging():
     """
@@ -9,19 +10,14 @@ def setup_logging():
     
     if not os.path.exists(log_file):
         open(log_file, "w").close()
-    
+
     class ReverseFileHandler(logging.FileHandler):
-        """
-        Кастомный FileHandler для записи новых логов в начало файла.
-        """
         def emit(self, record):
             log_message = self.format(record)
-            
             with open(self.baseFilename, "r", encoding="utf-8") as f:
                 existing_content = f.read()
-            
             with open(self.baseFilename, "w", encoding="utf-8") as f:
-                f.write(log_message + "\n" + existing_content)
+                f.write(log_message + "\n\n" + existing_content)
 
     handler = ReverseFileHandler(log_file, encoding="utf-8")
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -31,9 +27,27 @@ def setup_logging():
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
 
-def log_error(url: str, error_message: str):
+def log_error(url: str, error: Exception, chat_id: int = None, service: str = None):
     """
-    Логирует ошибку с указанием URL, вызвавшего проблему.
+    Логирует структурированную ошибку.
     """
     logger = logging.getLogger()
-    logger.error(f"Ошибка при обработке URL: {url}\nСообщение об ошибке: {error_message}")
+
+    tb_lines = traceback.extract_tb(error.__traceback__)
+    # Фильтруем только пользовательские пути (исключаем site-packages, frozen и stdlib)
+    user_frame = next(
+        (frame for frame in reversed(tb_lines) if "site-packages" not in frame.filename and "<frozen" not in frame.filename),
+        tb_lines[-1]
+    )
+    # Получаем абсолютный путь, если доступен
+    location = f"{user_frame.filename}:{user_frame.lineno}"
+
+    log_message = (
+        f"🧩 Ошибка в сервисе: {service or 'Неизвестно'}\n"
+        f"💬 Chat ID: {chat_id or 'Неизвестно'}\n"
+        f"📌 Место: {location}\n"
+        f"❗️Ошибка: {type(error).__name__}: {error}\n"
+        f"🌐 URL: {url or '—'}"
+    )
+
+    logger.error(log_message)

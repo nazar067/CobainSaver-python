@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 from downloader.youtube.youtube_music import process_youtube_music
 from downloader.playlist import process_music_playlist
 from localisation.get_language import get_language
+from logs.write_server_errors import log_error
 from utils.spotify_helper import extract_track_id, get_spotify_client
 from localisation.translations.downloader import translations
 
@@ -28,7 +29,7 @@ async def find_song_on_ytmusic(query: str) -> str:
             return f"https://music.youtube.com/watch?v={video_id}"
         return None
     except Exception as e:
-        logging.error(f"❌ Ошибка при поиске YouTube Music: {str(e)}")
+        log_error("url", e)
         return None
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None, msg_id = None):

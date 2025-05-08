@@ -10,6 +10,7 @@ from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
+from utils.service_identifier import identify_service
 
 async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     pool = dp["db_pool"]
@@ -35,7 +36,7 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
 
     try:
         video_info = await asyncio.to_thread(extract_video_info)
-        print(video_info)
+
         file_ext = video_info.get("ext", "").lower()
         is_audio = file_ext in audio_extensions
         is_video = file_ext in video_extensions
@@ -104,9 +105,9 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         return await bot.send_message(
             chat_id=chat_id,
             business_connection_id=business_connection_id,
-            text="⚠️ Unsupported file format.",
+            text=translations["unsupport_format"][chat_language],
             reply_to_message_id=msg_id
         )
 
     except Exception as e:
-        log_error(url, e)
+        log_error(url, e, chat_id, await identify_service(url))

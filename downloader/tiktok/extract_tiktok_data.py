@@ -1,3 +1,4 @@
+import logging
 from aiohttp import ClientSession
 from config import TIKTOK_API
 from constants.errors.tiktok_api_errors import API_LIMIT
@@ -47,7 +48,8 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
         data = await future
 
     if "data" not in data:
-        log_error(url, data)
+        error = url + data
+        logging.error(error)
         return {"error": "Контент не найден"}
     
     media_title = data["data"].get("title", "TikTok_Content")
