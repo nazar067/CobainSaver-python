@@ -48,5 +48,5 @@ async def get_forum_thread(bot: Bot, dp, message: Message):
         return topic.message_thread_id
 
     except Exception as e:
-        log_error("url", e, chat_id)
+        log_error("url", e, chat_id, "get forum thread")
         return None

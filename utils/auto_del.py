@@ -34,7 +34,7 @@ async def delete_old_files():
                     try:
                         os.remove(file_path)
                     except Exception as e:
-                        log_error("url", e)
+                        log_error("url", e, 1111, "del old files")
 
         await asyncio.sleep(CHECK_INTERVAL)
 

@@ -33,6 +33,6 @@ async def handle_poll_answer(answer: PollAnswer, pool: Pool):
                     user_id, mark
                 )
             else:
-                log_error("url", e)
+                log_error("url", e, 1111, "save user marks")
     except Exception as e:
-        log_error("url", e)
+        log_error("url", e, 1111, "save user marks")

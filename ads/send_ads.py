@@ -14,4 +14,4 @@ async def send_ad(dp, chat_id, bot, business_connection_id):
             if is_ads:
                 await bot.send_message(chat_id=chat_id, text=translations["cobain_news"][chat_language] + "\n\n" + translations["dice"][chat_language]+ "\n\n" + translations["disable_ads"][chat_language], parse_mode="HTML", disable_web_page_preview=True)
     except Exception as e:
-        log_error("url", e, chat_id)
+        log_error("url", e, chat_id, "send ads")

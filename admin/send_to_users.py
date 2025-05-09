@@ -17,4 +17,4 @@ async def send_message_to_chats(bot: Bot, dp):
             await bot.send_message(chat_id=chat_id, text=translations["update"][chat_language], parse_mode="HTML", disable_web_page_preview=True)
             await asyncio.sleep(0.5)
         except Exception as e:
-            log_error("url", e, chat_id)
+            log_error("url", e, chat_id, "send message to users")

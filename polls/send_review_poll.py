@@ -32,10 +32,10 @@ async def send_feedback_polls(bot: Bot, pool: Pool):
                     disable_web_page_preview=True,
                 )
             except Exception as e:
-                log_error("url", e, chat_id)
+                log_error("url", e, chat_id, "send feedback")
 
     except Exception as e:
-        log_error("url", e, chat_id)
+        log_error("url", e, chat_id, "send feedback")
 
 
 async def daily_feedback_task(bot: Bot, dp: Dispatcher):
@@ -52,4 +52,4 @@ async def daily_feedback_task(bot: Bot, dp: Dispatcher):
                 pool = dp["db_pool"]
                 await send_feedback_polls(bot, pool)
         except Exception as e:
-            log_error("url", e)
+            log_error("url", e, 1111, "loop feedback")

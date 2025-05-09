@@ -29,7 +29,7 @@ async def find_song_on_ytmusic(query: str) -> str:
             return f"https://music.youtube.com/watch?v={video_id}"
         return None
     except Exception as e:
-        log_error("url", e)
+        log_error("url", e, 1111, "find song on ytmusic")
         return None
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None, msg_id = None):
