@@ -37,6 +37,6 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     else:
         is_audio_success = True
     
-    if is_media_success and is_audio_success:
+    if is_media_success == True and is_audio_success == True:
         return True
 

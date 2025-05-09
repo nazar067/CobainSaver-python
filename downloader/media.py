@@ -35,7 +35,8 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             return False
         else:
             log_error("url", e, chat_id, "send video")
-            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)
+            return False
     finally:
         if file_path_or_url != "premium_guide.mp4":
             if not file_path_or_url.startswith("http"):
@@ -70,7 +71,8 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
 
     except Exception as e:
         log_error("url", e, chat_id, "send audio")
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id) 
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id) 
+        return False
     finally:
         await del_media_content(file_path)
         if thumbnail_path:
@@ -89,7 +91,8 @@ async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, busine
         return True
     except Exception as e:
         log_error("url", e, chat_id, "send media group")
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)     
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)     
+        return False
     finally:
         await del_media_group(file_path)
         
