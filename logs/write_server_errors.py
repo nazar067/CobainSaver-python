@@ -27,26 +27,32 @@ def setup_logging():
     logger.setLevel(logging.ERROR)
     logger.addHandler(handler)
 
-def log_error(url: str, error: Exception, chat_id: int = None, service: str = None):
+def log_error(url: str, error: Exception = None, chat_id: int = None, service: str = None, string_error: str = None):
     """
     Логирует структурированную ошибку.
     """
     logger = logging.getLogger()
+    location = "Not found"
+    correct_error = None
+    if error:
+        tb_lines = traceback.extract_tb(error.__traceback__)
+        # Фильтруем только пользовательские пути (исключаем site-packages, frozen и stdlib)
+        user_frame = next(
+            (frame for frame in reversed(tb_lines) if "site-packages" not in frame.filename and "<frozen" not in frame.filename),
+            tb_lines[-1]
+        )
+        # Получаем абсолютный путь, если доступен
+        location = f"{user_frame.filename}:{user_frame.lineno}"
+        correct_error = f"❗️Ошибка: {type(error).__name__}: {error}"
+    else:
+        correct_error = f"❗️Ошибка: {string_error}"
 
-    tb_lines = traceback.extract_tb(error.__traceback__)
-    # Фильтруем только пользовательские пути (исключаем site-packages, frozen и stdlib)
-    user_frame = next(
-        (frame for frame in reversed(tb_lines) if "site-packages" not in frame.filename and "<frozen" not in frame.filename),
-        tb_lines[-1]
-    )
-    # Получаем абсолютный путь, если доступен
-    location = f"{user_frame.filename}:{user_frame.lineno}"
 
     log_message = (
         f"🧩 Ошибка в сервисе: {service or 'Неизвестно'}\n"
         f"💬 Chat ID: {chat_id or 'Неизвестно'}\n"
         f"📌 Место: {location}\n"
-        f"❗️Ошибка: {type(error).__name__}: {error}\n"
+        f"{correct_error}\n"
         f"🌐 URL: {url or '—'}"
     )
 

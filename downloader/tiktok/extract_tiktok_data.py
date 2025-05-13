@@ -7,6 +7,7 @@ from utils.get_name import get_clear_name
 from utils.get_settings import get_settings
 import asyncio
 
+from utils.service_identifier import identify_service
 from utils.text_format import format_as_expandable_quote
 
 api_url = TIKTOK_API
@@ -48,8 +49,7 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
         data = await future
 
     if "data" not in data:
-        error = url + data
-        logging.error(error)
+        log_error(url, chat_id=chat_id, service=await identify_service(url), string_error=data)
         return {"error": "Контент не найден"}
     
     media_title = data["data"].get("title", "TikTok_Content")
