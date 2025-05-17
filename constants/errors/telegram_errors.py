@@ -1,0 +1,1 @@
+NOT_RIGHTS = "Telegram server says - Bad Request: not enough rights"

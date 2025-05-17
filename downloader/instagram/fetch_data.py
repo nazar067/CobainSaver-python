@@ -3,6 +3,7 @@ import os
 import instaloader
 from aiogram import Bot, Dispatcher
 
+from constants.errors.telegram_errors import NOT_RIGHTS
 from downloader.send_album import send_social_media_album
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
@@ -49,4 +50,7 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
             await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id)
     except Exception as e:
         log_error(url, e, chat_id, await identify_service(url))
+        if NOT_RIGHTS in str(e):
+            return False
         await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id)
+        return False
