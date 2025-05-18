@@ -28,8 +28,12 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     
     chat_language = await get_language(pool, chat_id)
 
+    error_text = translations["unavaliable_content"][chat_language]
+    if short_track_name != None:
+        error_text = short_track_name + " - " + translations["unavaliable_content"][chat_language]
+
     if "error" in data:
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text= short_track_name + " - " + translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=error_text, reply_to_message_id=msg_id)
         return
     elif "large" in data:
         await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data['audio_title'] + " - " + translations["large_content"][chat_language], reply_to_message_id=msg_id)
