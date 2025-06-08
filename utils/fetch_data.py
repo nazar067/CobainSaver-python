@@ -28,6 +28,9 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
         'http_headers': {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36'},
     }
 
+    sizes = await estimate_sizes_all_qualities(url)
+    print(f"Размеры видео: {sizes}")  # Лог для отладки
+
     def download_video():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=True)
@@ -153,3 +156,60 @@ async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> N
         except Exception as e:
             log_error(url, e, 1111, await identify_service(url))
     
+
+DEFAULT_VIDEO_BITRATES = {
+    144: 100,
+    240: 200,
+    360: 300,
+    480: 500,
+    720: 1000,
+    1080: 2000
+}
+
+DEFAULT_AUDIO_BITRATE = 128  # как раньше
+
+def estimate_video_size_mb(bitrate_kbps: float, duration_sec: int) -> float:
+    if not bitrate_kbps or not duration_sec:
+        return 0.0
+    return round((bitrate_kbps * duration_sec) / 8 / 1024, 2)
+
+async def estimate_sizes_all_qualities(url: str):
+    def extract_info():
+        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            return ydl.extract_info(url, download=False)
+
+    try:
+        info = await asyncio.to_thread(extract_info)
+        duration = info.get("duration", 0)
+        formats = info.get("formats", [])
+
+        # Получаем первый доступный аудиоформат
+        audio_format = next((f for f in formats if f.get("acodec") != "none" and f.get("vcodec") == "none"), None)
+        audio_bitrate = (
+            audio_format.get("abr") or
+            audio_format.get("tbr") or
+            DEFAULT_AUDIO_BITRATE
+        )
+
+        result = {}
+
+        for quality, default_vbr in DEFAULT_VIDEO_BITRATES.items():
+            # Берем видеоформат по высоте
+            video_format = next(
+                (f for f in formats if f.get("vcodec") != "none" and f.get("height") == quality),
+                None
+            )
+
+            if video_format:
+                video_bitrate = video_format.get("vbr") or video_format.get("tbr") or default_vbr
+            else:
+                video_bitrate = default_vbr  # используем дефолт, если формат не найден
+
+            total_bitrate = video_bitrate + audio_bitrate
+            result[quality] = estimate_video_size_mb(total_bitrate, duration)
+
+        return result
+
+    except Exception as e:
+        print(f"Ошибка при оценке размера: {e}")
+        return {"error": str(e)}
