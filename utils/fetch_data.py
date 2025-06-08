@@ -7,7 +7,6 @@ import yt_dlp
 from logs.write_server_errors import log_error
 from utils.get_file_size import get_music_size
 from utils.get_name import get_random_file_name, sanitize_filename
-from config import YT_USERNAME, YT_PASSWORD
 from utils.service_identifier import identify_service
 
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
@@ -17,9 +16,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     Асинхронно извлекает данные видео, скачивает видео и превью.
     """
     ydl_opts = {
-        'username': YT_USERNAME,
-        'password': YT_PASSWORD,
-        "cookies_from_browser": ("firefox"),
+        #"cookies_from_browser": ("firefox"),
         'format': f'bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
@@ -67,8 +64,6 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
     Асинхронно извлекает данные аудио и скачивает его с YouTube Music.
     """
     base_ydl_opts = {
-        'username': YT_USERNAME,
-        'password': YT_PASSWORD,
         "cookies_from_browser": ("firefox"),
         'format': 'bestaudio/best',
         'quiet': True,
