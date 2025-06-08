@@ -25,3 +25,5 @@ venv/
 .ipynb_checkpoints/
 
 .ytdl/
+
+cookies.txt
