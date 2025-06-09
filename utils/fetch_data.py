@@ -16,14 +16,14 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
     Асинхронно извлекает данные видео, скачивает видео и превью.
     """
     ydl_opts = {
-        #"cookies_from_browser": ("firefox"),
-        'format': f'bestvideo[height<={quality}][ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        "cookies_from_browser": ("firefox"),
+        'format': f"bestvideo[height<={quality}]+bestaudio/best",
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
         'noplaylist': True,
         'quiet': True,
-        'cookiefile': 'cookies.txt',
-        'cookies_from_browser': None,
+        #'cookiefile': 'cookies.txt',
+        #'cookies_from_browser': None,
         'http_headers': {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36',
         },
