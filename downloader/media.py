@@ -20,6 +20,7 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         video = get_media_source(file_path_or_url)
         thumbnail = get_media_source(thumbnail_path_or_url)
         title = await get_clear_name(title, 800)
+        parse_mode = "HTML" if len(title) > 174 else None
         await bot.send_video(
             business_connection_id=business_connection_id,
             chat_id=chat_id,
@@ -28,7 +29,7 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             thumbnail=thumbnail,
             duration=duration,
             reply_to_message_id=msg_id,
-            parse_mode="HTML"
+            parse_mode=parse_mode
         )
         return True
     except Exception as e:
