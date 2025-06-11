@@ -2,7 +2,7 @@ from datetime import datetime
 from aiogram.types import Message
 
 from admin.check_is_admin import is_user_admin
-from admin.send_to_users import send_message_to_chats
+from admin.send_to_users import send_message_to_chats, send_video_to_angron
 from admin.statistics import send_statistics, send_user_reviews
 from keyboard import language_keyboard
 from localisation.get_language import get_language
@@ -47,3 +47,7 @@ async def choose_command(bot, message: Message, dp, business_connection_id):
         else:
             date = datetime.now().date()
         await send_user_reviews(bot, pool, date)
+    if message.text.startswith("/sendAngron"):
+        if not is_user_admin(user_id):
+            return
+        await send_video_to_angron(bot)
