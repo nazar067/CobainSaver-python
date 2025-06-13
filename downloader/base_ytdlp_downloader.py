@@ -2,6 +2,7 @@ import asyncio
 import os
 from aiogram import Bot, Dispatcher
 import yt_dlp
+import subprocess
 
 from downloader.media import del_media_content, send_video, send_audio
 from localisation.get_language import get_language
@@ -53,13 +54,13 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
                 text=translations["large_content"][chat_language],
                 reply_to_message_id=msg_id
             )
-
-        await bot.send_message(
-            chat_id=chat_id,
-            business_connection_id=business_connection_id,
-            text=translations["downloading"][chat_language],
-            reply_to_message_id=msg_id
-        )
+        if is_video:
+            await bot.send_message(
+                chat_id=chat_id,
+                business_connection_id=business_connection_id,
+                text=translations["downloading"][chat_language],
+                reply_to_message_id=msg_id
+            )
 
         file_path = os.path.join(save_folder, f"{random_name}{file_ext}")
         if is_video:
@@ -84,18 +85,30 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         else:
             thumbnail_path = None
 
+        if is_audio and file_ext == "opus":
+            mp3_path = os.path.join(save_folder, f"{random_name}.mp3")
+            ffmpeg_command = [
+                "ffmpeg", "-y", "-i", file_path,
+                "-vn", "-ab", "192k", "-ar", "44100", "-f", "mp3", mp3_path
+            ]
+            subprocess.run(ffmpeg_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+            await del_media_content(file_path)
+
+            file_path = mp3_path
+        
         if is_audio:
             return await send_audio(
                 bot, chat_id, msg_id, chat_language,
                 business_connection_id, file_path, title,
-                thumbnail_path, duration, author=audio_info.get("uploader", "CobainSaver")
+                thumbnail_path, int(duration), author=audio_info.get("uploader", "CobainSaver")
             )
 
         if is_video:
             return await send_video(
                 bot, chat_id, msg_id, chat_language,
                 business_connection_id, file_path, title,
-                thumbnail_path, duration
+                thumbnail_path, int(duration)
             )
 
         # fallback

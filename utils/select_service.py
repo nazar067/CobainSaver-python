@@ -53,6 +53,8 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
                 is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Twitch":
                 is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
+            elif service == "SoundCloud":
+                is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Another":
                 is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             if is_success == True:

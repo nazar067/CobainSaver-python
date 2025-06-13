@@ -18,7 +18,8 @@ async def identify_service(url: str) -> str:
         "Instagram": ["instagram.com", "www.instagram.com"],
         "PornHub": ["rt.pornhub.com", "www.pornhub.com", "pornhub.com"],
         "Pinterest": ["pinterest.com", "pin.it", "ru.pinterest.com"],
-        "Twitch": ["clips.twitch.tv", "twitch.tv"]
+        "Twitch": ["clips.twitch.tv", "twitch.tv"],
+        "SoundCloud": ["soundcloud.com", "m.soundcloud.com", "on.soundcloud.com"]
     }
 
     for service, domains in services.items():
