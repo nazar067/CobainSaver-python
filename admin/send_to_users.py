@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from aiogram import Bot
-from config import ANGRON_ID
 from aiogram.types import FSInputFile
 from downloader.media import send_video
 from localisation.get_language import get_language
@@ -21,7 +20,3 @@ async def send_message_to_chats(bot: Bot, dp):
             await asyncio.sleep(0.5)
         except Exception as e:
             log_error("url", e, chat_id, "send message to users")
-
-async def send_video_to_angron(bot: Bot):
-    video = FSInputFile('happy_birthday.mp4')
-    await bot.send_video(chat_id=ANGRON_ID, video=video, caption="Happy birthday, GOY!")
