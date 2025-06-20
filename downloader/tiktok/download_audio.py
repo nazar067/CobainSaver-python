@@ -11,7 +11,7 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
     Скачивает TikTok-аудио и отправляет его в чат.
     """
     if not data["audio_url"]:
-        return
+        return True
 
     # Оригинальное название
     original_title = data["audio_title"]
