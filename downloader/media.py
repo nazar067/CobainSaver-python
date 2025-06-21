@@ -84,7 +84,7 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         if thumbnail_path:
             await del_media_content(thumbnail_path)
             
-async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path):
+async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path, attempt = None):
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "photo")
         media = get_media_source(media_album)
@@ -99,7 +99,8 @@ async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, busine
         log_error("url", e, chat_id, "send media group")
         if NOT_RIGHTS in str(e):
             return False
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)     
+        if attempt != 1:
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)     
         return False
     finally:
         await del_media_group(file_path)
