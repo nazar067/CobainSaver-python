@@ -28,29 +28,28 @@ async def fetch_twitter_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     
     media_urls = data["media_urls"]
     
-    count_media = 0
-    for media_url in media_urls:
-        type = data["types"][count_media]
-
-        if type == "video":
-            ext = "mp4"
-        elif type == "image":
-            ext = "jpg"
-            
-        random_name = f"twitter {uniq_id}" + get_random_file_name(ext)
-        save_path = f"{directory}/{random_name}"
-        await download_file(media_url, save_path)
-        count_media += 1
-        
-    matching_files = [
-        os.path.join(directory, file) for file in os.listdir(directory) if f"twitter {uniq_id}" in file
-    ]
     caption = await get_clear_name(data["caption"], 800)
     result = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, media_urls, caption, msg_id, pool=pool, attempt=1)
     
     if result is False:
+        count_media = 0
+        for media_url in media_urls:
+            type = data["types"][count_media]
+
+            if type == "video":
+                ext = "mp4"
+            elif type == "image":
+                ext = "jpg"
+                
+            random_name = f"twitter {uniq_id}" + get_random_file_name(ext)
+            save_path = f"{directory}/{random_name}"
+            await download_file(media_url, save_path)
+            count_media += 1
+        
+        matching_files = [
+            os.path.join(directory, file) for file in os.listdir(directory) if f"twitter {uniq_id}" in file
+        ]
+        
         result = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, caption, msg_id, pool=pool)
-    else:
-        await del_media_group(matching_files)
         
     return result
