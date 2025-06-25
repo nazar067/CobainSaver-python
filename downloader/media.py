@@ -11,7 +11,7 @@ from utils.get_name import get_clear_name
 from utils.media_source import get_media_source
 from utils.service_identifier import identify_service
 
-async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None) -> None:
+async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None, parse_mode = None) -> None:
     """
     Отправляет скачанное видео в чат (по ссылке или из файла).
     """
@@ -20,7 +20,8 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         video = get_media_source(file_path_or_url)
         thumbnail = get_media_source(thumbnail_path_or_url)
         title = await get_clear_name(title, 800)
-        parse_mode = "HTML" if len(title) > 174 else None
+        if parse_mode == None:
+            parse_mode = "HTML" if len(title) > 174 else None
         await bot.send_video(
             business_connection_id=business_connection_id,
             chat_id=chat_id,

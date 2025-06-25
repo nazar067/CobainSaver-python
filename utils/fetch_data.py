@@ -7,11 +7,15 @@ import yt_dlp
 from logs.write_server_errors import log_error
 from utils.get_file_size import get_music_size
 from utils.get_name import get_random_file_name, sanitize_filename
+from utils.get_url import split_time_code_and_video
 from utils.service_identifier import identify_service
+from utils.text_format import remove_special_chars
+from utils.time_format import format_seconds
+from localisation.translations.downloader import translations
 
 DEFAULT_THUMBNAIL_URL = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
 
-async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
+async def fetch_youtube_data(url: str, user_folder: str, quality: str, chat_language) -> dict:
     """
     Асинхронно извлекает данные видео, скачивает видео и превью.
     """
@@ -28,18 +32,28 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str) -> dict:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36',
         },
     }
+    correct_url = url
+    seconds = 0
+    if "&t=" in url:
+        parsed_url = await split_time_code_and_video(url)
+        correct_url = parsed_url["url"]
+        seconds = int(parsed_url["time_code"])
 
     def download_video():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            return ydl.extract_info(url, download=True)
+            return ydl.extract_info(correct_url, download=True)
 
     try:
         info_dict = await asyncio.to_thread(download_video)
-
+        
         file_path = info_dict["requested_downloads"][0]["filepath"]
-        video_title = info_dict.get("title", "Видео без названия")
+        video_title = info_dict.get("title", "")
         video_id = info_dict.get("id", None)
         duration = info_dict.get("duration", 0)
+
+        video_title = await remove_special_chars(video_title)
+        if seconds > 0:
+            video_title += f"\n\n<i>{translations["time_code"][chat_language]}</i> {await format_seconds(seconds)}"
 
         thumbnail_path = None
         if video_id:

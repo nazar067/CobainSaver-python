@@ -4,7 +4,7 @@ from downloader.media import del_media_content
 from utils.fetch_data import download_file, fetch_youtube_data
 
 
-async def select_optimal_quality(url: str, user_folder: str, initial_quality: str) -> dict:
+async def select_optimal_quality(url: str, user_folder: str, initial_quality: str, chat_language) -> dict:
     """
     Универсальная функция выбора оптимального качества для скачивания.
     Поддерживает любую платформу, где есть градация качества.
@@ -20,7 +20,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
     quality_downgrades = ["240", "144"]
     current_quality = initial_quality
 
-    data = await fetch_youtube_data(url, user_folder, current_quality)
+    data = await fetch_youtube_data(url, user_folder, current_quality, chat_language)
 
     if "error" in data:
         return {"error": data["error"]}
@@ -53,7 +53,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
         await del_media_content(thumbnail_path)
         current_quality = next_quality
 
-        data = await fetch_youtube_data(url, user_folder, current_quality)
+        data = await fetch_youtube_data(url, user_folder, current_quality, chat_language)
         if "error" in data:
             return {"error": data["error"]}
 
@@ -80,7 +80,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
         await del_media_content(thumbnail_path)
         current_quality = next_quality
 
-        data = await fetch_youtube_data(url, user_folder, current_quality)
+        data = await fetch_youtube_data(url, user_folder, current_quality, chat_language)
         if "error" in data:
             return {"error": data["error"]}
 

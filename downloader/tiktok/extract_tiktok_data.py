@@ -56,7 +56,7 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
     if media_title:
         media_title = await get_clear_name(media_title, 760)
         if len(media_title) > 174:
-            media_title = format_as_expandable_quote(media_title)
+            media_title = await format_as_expandable_quote(media_title)
 
     # 📸 Фото
     if "images" in data["data"]:
