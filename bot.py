@@ -1,4 +1,5 @@
 from downloader.tiktok.extract_tiktok_data import tiktok_request_worker
+from logs.send_server_errors import send_log_from_users
 from logs.write_server_errors import setup_logging
 from polls.send_review_poll import daily_feedback_task
 from polls.write_review_result import handle_poll_answer
@@ -65,6 +66,10 @@ async def change_audio(callback: CallbackQuery):
 @dp.callback_query(lambda c: c.data.startswith(("toggle_hd_size")))
 async def change_tt_size(callback: CallbackQuery):
     await toggle_hd_size_callback(callback, dp)
+    
+@dp.callback_query(lambda c: c.data.startswith(("error_file")))
+async def change_tt_size(callback: CallbackQuery):
+    await send_log_from_users(bot, callback)
 
 @dp.callback_query(lambda c: c.data.startswith(("pay:")))
 async def pay_stars_handler(callback: CallbackQuery):
