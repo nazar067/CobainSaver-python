@@ -68,8 +68,8 @@ async def change_tt_size(callback: CallbackQuery):
     await toggle_hd_size_callback(callback, dp)
     
 @dp.callback_query(lambda c: c.data.startswith(("error_file")))
-async def change_tt_size(callback: CallbackQuery):
-    await send_log_from_users(bot, callback)
+async def send_logs(callback: CallbackQuery):
+    await send_log_from_users(bot, callback, dp)
 
 @dp.callback_query(lambda c: c.data.startswith(("pay:")))
 async def pay_stars_handler(callback: CallbackQuery):

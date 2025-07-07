@@ -5,6 +5,7 @@ from aiogram import Bot, Dispatcher
 
 from constants.errors.telegram_errors import NOT_RIGHTS
 from downloader.send_album import send_social_media_album
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
@@ -47,10 +48,10 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
         if matching_files:
             return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, caption, msg_id, pool=pool)
         else:
-            await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id)
+            await bot.send_message(chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], "Not found insta files", chat_language, chat_id, url))
     except Exception as e:
         log_error(url, e, chat_id, await identify_service(url))
         if NOT_RIGHTS in str(e):
             return False
-        await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id)
+        await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], str(e), chat_language, chat_id, url))
         return False

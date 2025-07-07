@@ -8,6 +8,7 @@ from utils.get_name import get_clear_name, get_name_for_button_data, get_random_
 from utils.get_settings import get_settings
 from localisation.translations.downloader import translations as downloader_translations
 from localisation.translations.general import translations as general_translations
+from localisation.translations.errors import translations as erorr_translations
 
 async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, total_pages, content_type, dp, chat_id):
     """
@@ -85,7 +86,7 @@ def language_keyboard(message: Message) -> InlineKeyboardMarkup:
     builder.adjust(1)
     return builder.as_markup()
 
-async def send_log_keyboard(bot_message, message_error, chat_language, chat_id) -> InlineKeyboardMarkup:
+async def send_log_keyboard(bot_message, message_error, chat_language, chat_id, url) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     file_name = get_random_file_name("txt")
     user_path = await get_user_path(chat_id)
@@ -93,14 +94,14 @@ async def send_log_keyboard(bot_message, message_error, chat_language, chat_id) 
     log_path = os.path.join(user_path, file_name)
     if not os.path.exists(log_path):
         with open(log_path, 'w', encoding='utf-8') as f:
-            f.write(bot_message + "\n" + message_error + "\n" + chat_language)
+            f.write(bot_message + "\n" + message_error + "\n" + url)
     else:
         with open(log_path, 'r', encoding='utf-8') as f:
             old_data = f.read()
 
         with open(log_path, 'w', encoding='utf-8') as f:
-            f.write(bot_message + "\n" + message_error + "\n" + chat_language + "\n" + old_data)
+            f.write(bot_message + "\n" + message_error + "\n" + url + "\n" + old_data)
             
-    builder.button(text="Отправить📨", callback_data=f"error_file {log_path}")
+    builder.button(text=erorr_translations["send_log_button"][chat_language], callback_data=f"error_file {log_path}")
     builder.adjust(1)
     return builder.as_markup()

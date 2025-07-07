@@ -7,7 +7,7 @@ import math
 from aiogram import Bot, Dispatcher
 from aiogram.types import FSInputFile
 from downloader.media import del_media_content
-from keyboard import generate_playlist_keyboard
+from keyboard import generate_playlist_keyboard, send_log_keyboard
 from typing import Optional
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
@@ -35,7 +35,7 @@ async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_i
         source = "Y"
 
     if "error" in playlist_info:
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], playlist_info, chat_language, chat_id, url))
 
     title = playlist_info.get("title", "")
     owner = playlist_info.get("owner", "")
