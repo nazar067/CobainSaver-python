@@ -1,11 +1,14 @@
+import os
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
 from localisation.get_language import get_language
-from utils.get_name import get_clear_name, get_name_for_button_data
+from user.get_user_path import get_user_path
+from utils.get_name import get_clear_name, get_name_for_button_data, get_random_file_name
 from utils.get_settings import get_settings
 from localisation.translations.downloader import translations as downloader_translations
 from localisation.translations.general import translations as general_translations
+from localisation.translations.errors import translations as erorr_translations
 
 async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, total_pages, content_type, dp, chat_id):
     """
@@ -80,5 +83,25 @@ def language_keyboard(message: Message) -> InlineKeyboardMarkup:
     builder.button(text="English", callback_data=f"set_language:en {str(msg_id)}")
     builder.button(text="Русский", callback_data=f"set_language:ru {str(msg_id)}")
     builder.button(text="Українська", callback_data=f"set_language:uk {str(msg_id)}")
+    builder.adjust(1)
+    return builder.as_markup()
+
+async def send_log_keyboard(bot_message, message_error, chat_language, chat_id, url) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    file_name = get_random_file_name("txt")
+    user_path = await get_user_path(chat_id)
+    os.makedirs(os.path.dirname(user_path), exist_ok=True)
+    log_path = os.path.join(user_path, file_name)
+    if not os.path.exists(log_path):
+        with open(log_path, 'w', encoding='utf-8') as f:
+            f.write(bot_message + "\n" + message_error + "\n" + url)
+    else:
+        with open(log_path, 'r', encoding='utf-8') as f:
+            old_data = f.read()
+
+        with open(log_path, 'w', encoding='utf-8') as f:
+            f.write(bot_message + "\n" + message_error + "\n" + url + "\n" + old_data)
+            
+    builder.button(text=erorr_translations["send_log_button"][chat_language], callback_data=f"error_file {log_path}")
     builder.adjust(1)
     return builder.as_markup()

@@ -7,6 +7,7 @@ from aiogram import Bot, Dispatcher
 
 from downloader.media import del_media_content, send_audio
 from downloader.playlist import process_music_playlist
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from localisation.translations.downloader import translations
@@ -33,7 +34,7 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         error_text = short_track_name + " - " + translations["unavaliable_content"][chat_language]
 
     if "error" in data:
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=error_text, reply_to_message_id=msg_id)
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=error_text, reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
         return
     elif "large" in data:
         await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data['audio_title'] + " - " + translations["large_content"][chat_language], reply_to_message_id=msg_id)

@@ -8,6 +8,7 @@ from aiogram import Bot, Dispatcher
 
 from downloader.media import send_video
 from downloader.send_album import send_social_media_album
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
@@ -52,7 +53,7 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     if image_urls:
         return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, image_urls, "", msg_id)
 
-    await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id)
+    await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], "No photos from content", chat_language, chat_id, url))
 
 
 async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) -> dict:

@@ -1,6 +1,7 @@
 from aiogram import Bot, Dispatcher
 
 from downloader.media import send_video
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from localisation.translations.downloader import translations
@@ -40,7 +41,8 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
             chat_id=chat_id,
             business_connection_id=business_connection_id,
             text=translations["unavaliable_content"][chat_language],
-            reply_to_message_id=msg_id
+            reply_to_message_id=msg_id,
+            reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], quality_result, chat_language, chat_id, url)
         )
 
     file_path = quality_result["file_path"]
