@@ -3,6 +3,7 @@ import os
 import instaloader
 from aiogram import Bot, Dispatcher
 
+from config import INSTAGRAM_LOGIN, INSTAGRAM_PASSWORD
 from constants.errors.telegram_errors import NOT_RIGHTS
 from downloader.send_album import send_social_media_album
 from keyboard import send_log_keyboard
@@ -31,7 +32,7 @@ async def fetch_instagram_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
         )
 
         shortcode = url.split('/')[-2]
-
+        loader.login(INSTAGRAM_LOGIN, INSTAGRAM_PASSWORD)
         post = instaloader.Post.from_shortcode(loader.context, shortcode)
         loader.download_post(post, target=shortcode)
         
