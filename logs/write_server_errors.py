@@ -2,7 +2,7 @@ import os
 import logging
 import traceback
 
-from constants.errors.telegram_errors import CANNOT_BE_FORWARDED, NOT_RIGHTS
+from constants.errors.telegram_errors import CANNOT_BE_FORWARDED, PROTECTED_MESSAGE, NOT_RIGHTS
 from constants.errors.tiktok_api_errors import API_LIMIT
 
 def setup_logging():
@@ -50,7 +50,7 @@ def log_error(url: str, error: Exception = None, chat_id: int = None, service: s
     else:
         correct_error = f"❗️Ошибка: {string_error}"
 
-    if NOT_RIGHTS not in str(correct_error) and CANNOT_BE_FORWARDED not in str(correct_error) and API_LIMIT not in str(correct_error):
+    if NOT_RIGHTS not in str(correct_error) and PROTECTED_MESSAGE not in str(correct_error) and API_LIMIT not in str(correct_error) and CANNOT_BE_FORWARDED not in str(correct_error):
         log_message = (
             f"🧩 Ошибка в сервисе: {service or 'Неизвестно'}\n"
             f"💬 Chat ID: {chat_id or 'Неизвестно'}\n"
