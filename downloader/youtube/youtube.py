@@ -42,7 +42,7 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
             business_connection_id=business_connection_id,
             text=translations["unavaliable_content"][chat_language],
             reply_to_message_id=msg_id,
-            reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], quality_result, chat_language, chat_id, url)
+            reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], quality_result["error"], chat_language, chat_id, url)
         )
 
     file_path = quality_result["file_path"]
