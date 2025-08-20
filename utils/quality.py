@@ -23,6 +23,7 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
     data = await fetch_youtube_data(url, user_folder, current_quality, chat_language)
 
     if "error" in data:
+        print(data)
         return {"error": data["error"]}
 
     file_path = data["file_path"]
