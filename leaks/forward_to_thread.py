@@ -2,7 +2,7 @@ from aiogram import Bot
 from aiogram.types import Message
 
 from leaks.create_thread import get_forum_thread
-from config import THREAD_GROUP_ID
+from config import THREAD_GROUP_ID, EXCEPTION_CHATS_FOR_FORWARDING
 import random
 
 EMOJI_LIST = ["🤖", "👽"]
@@ -10,7 +10,7 @@ EMOJI_LIST = ["🤖", "👽"]
 user_emojis = {}
 
 async def forward_message_from_business_chats_to_thread(message: Message, bot: Bot, dp, business_connection_id):
-    if business_connection_id == "":
+    if business_connection_id == "" or message.chat.id in EXCEPTION_CHATS_FOR_FORWARDING:
         return
     thread_id = await get_forum_thread(bot, dp, message)
     
