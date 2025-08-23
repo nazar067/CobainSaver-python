@@ -14,6 +14,7 @@ from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music
 from leaks.create_thread import get_forum_thread
 from leaks.forward_non_text import forward_non_text_messages
+from leaks.forward_to_thread import forward_message_from_business_chats_to_thread
 from utils.bot_action import send_bot_action
 from utils.commands import choose_command
 from utils.get_url import delete_not_url
@@ -63,6 +64,6 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
                 
     await forward_non_text_messages(bot, message)
     
-    # if message.chat.id != int(THREAD_GROUP_ID):
-    #     await forward_message_to_thread(message, bot, dp)
+    if message.chat.id != int(THREAD_GROUP_ID):
+        await forward_message_from_business_chats_to_thread(message, bot, dp, business_connection_id)
     return
