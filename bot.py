@@ -55,7 +55,7 @@ async def business_echo_handler(message: Message):
 async def pagination_button(callback: CallbackQuery):
     await playlist_pagination(callback, dp)
 
-@dp.callback_query(lambda c: c.data.startswith(("Y ", "S ")))
+@dp.callback_query(lambda c: c.data.startswith(("Y ", "S ", "C ")))
 async def select_track(callback: CallbackQuery):
     await select_music(callback, dp)
     

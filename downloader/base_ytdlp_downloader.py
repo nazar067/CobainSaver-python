@@ -5,6 +5,7 @@ import yt_dlp
 import subprocess
 
 from downloader.media import del_media_content, send_video, send_audio
+from downloader.playlist import process_music_playlist
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
@@ -41,6 +42,11 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         file_ext = video_info.get("ext", "").lower()
         is_audio = file_ext in audio_extensions
         is_video = file_ext in video_extensions
+        type = video_info.get("_type", "")
+
+        if type == "playlist":
+            await process_music_playlist(bot, dp, business_connection_id, chat_id, url, user_msg_id=msg_id)
+            return
 
         file_url = video_info.get("url", "")
         title = video_info.get("title", "")

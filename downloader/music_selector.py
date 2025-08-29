@@ -1,8 +1,10 @@
 import asyncio
 from aiogram import Dispatcher
 from aiogram.types import CallbackQuery
+from downloader.base_ytdlp_downloader import fetch_base_media
 from downloader.spotify import process_spotify_track
 from downloader.youtube.youtube_music import process_youtube_music
+from utils.soundcloud_helper import get_soundcloud_url
 
 
 async def select_music(callback: CallbackQuery, dp: Dispatcher):
@@ -21,5 +23,9 @@ async def select_music(callback: CallbackQuery, dp: Dispatcher):
     elif source == "S":
         url = "https://open.spotify.com/track/" + track_id
         asyncio.create_task(process_spotify_track(callback.bot, url, chat_id, dp, business_connection_id, msg_id))
+
+    elif source == "C":
+        url = await get_soundcloud_url(track_id)
+        asyncio.create_task(fetch_base_media(callback.bot, url, chat_id, dp, business_connection_id, msg_id))
 
     await callback.answer()

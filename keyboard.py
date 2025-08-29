@@ -94,7 +94,7 @@ async def send_log_keyboard(bot_message, message_error, chat_language, chat_id, 
     log_path = os.path.join(user_path, file_name)
     if not os.path.exists(log_path):
         with open(log_path, 'w', encoding='utf-8') as f:
-            f.write(bot_message + "\n" + message_error + "\n" + url)
+            f.write(str(bot_message) + "\n" + str(message_error) + "\n" + url)
     else:
         with open(log_path, 'r', encoding='utf-8') as f:
             old_data = f.read()
