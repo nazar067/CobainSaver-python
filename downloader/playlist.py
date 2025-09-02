@@ -32,7 +32,7 @@ async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_i
     if "spotify" in url:
         playlist_info = await fetch_spotify_data(url, user_folder)
         source = "S"
-    if "soundcloud" in url:
+    elif "soundcloud" in url:
         playlist_info = await fetch_soundcloud_playlist(url, user_folder)
         source = "C"
     else:
