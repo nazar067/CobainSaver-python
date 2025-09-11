@@ -17,10 +17,11 @@ async def save_thread(pool: asyncpg.Pool, adder_user_id: int, second_user_id: in
             adder_user_id, second_user_id, business_connection_id, topic_id
         )
         
-async def is_thread_exists(pool: asyncpg.Pool, business_connection_id: str) -> Optional[int]:
+async def is_thread_exists(pool: asyncpg.Pool, business_connection_id: str, adder_user_id: int, second_user_id: int) -> Optional[int]:
     async with pool.acquire() as conn:
         topic_id = await conn.fetchval(
-            "SELECT topic_id FROM threads WHERE business_connection_id = $1", business_connection_id
+            "SELECT topic_id FROM threads WHERE business_connection_id = $1 AND ( (adder_user_id = $2 AND second_user_id = $3) OR (adder_user_id = $3 AND second_user_id = $2) ) LIMIT 1", 
+            business_connection_id, adder_user_id, second_user_id
         )
     return topic_id
 
@@ -52,7 +53,7 @@ async def get_forum_thread(bot: Bot, dp, message: Message):
         if chat_id == thread_group_id:
             return
 
-        topic_id = await is_thread_exists(pool, business_connection_id)
+        topic_id = await is_thread_exists(pool, business_connection_id, adder_user_id, chat_id)
 
         if topic_id:
             return topic_id
