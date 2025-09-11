@@ -1,7 +1,7 @@
 from aiogram import Bot
 from aiogram.types import Message
 
-from leaks.create_thread import get_forum_thread
+from leaks.create_thread import get_adder_user_id, get_chat_id, get_forum_thread
 from config import THREAD_GROUP_ID, EXCEPTION_CHATS_FOR_FORWARDING
 import random
 
@@ -12,18 +12,28 @@ user_emojis = {}
 async def forward_message_from_business_chats_to_thread(message: Message, bot: Bot, dp, business_connection_id):
     if business_connection_id == "" or message.chat.id in EXCEPTION_CHATS_FOR_FORWARDING:
         return
+    pool = dp["db_pool"]
     thread_id = await get_forum_thread(bot, dp, message)
+    adder_user_id = await get_adder_user_id(pool, message.business_connection_id)
+    chat_id = await get_chat_id(pool, message.business_connection_id)
     
     user_id = message.from_user.id
+    
+    user_emoji = ""
 
-    if user_id not in user_emojis:
-        available_emojis = list(set(EMOJI_LIST) - set(user_emojis.values()))
-        if available_emojis:
-            user_emojis[user_id] = random.choice(available_emojis)
-        else:
-            user_emojis[user_id] = random.choice(EMOJI_LIST)
+    # if user_id not in user_emojis:
+    #     available_emojis = list(set(EMOJI_LIST) - set(user_emojis.values()))
+    #     if available_emojis:
+    #         user_emojis[user_id] = random.choice(available_emojis)
+    #     else:
+    #         user_emojis[user_id] = random.choice(EMOJI_LIST)
 
-    user_emoji = user_emojis[user_id]
+    # user_emoji = user_emojis[user_id]
+    
+    if user_id == adder_user_id:
+        user_emoji = "👽"
+    elif user_id == chat_id:
+        user_emoji = "🤖"
 
     user_info = (
         f"{user_emoji} <b><a href='https://t.me/{message.from_user.username if message.from_user.username else ''}'>"
