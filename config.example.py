@@ -15,3 +15,4 @@ LOGS_ID = "Group id where you want to send logs"
 INSTAGRAM_LOGIN = "your instagram login"
 INSTAGRAM_PASSWORD = "your instagram password"
 EXCEPTION_CHATS_FOR_FORWARDING = [] #chat_ids
+LOCAL_API_SERVER = "http://your local api server:your port"

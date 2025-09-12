@@ -1,8 +1,8 @@
 translations = {
     "large_content": {
-        "en": "⚠️This content is over 50MB",
-        "ru": "⚠️Данный контент больше 50МБ",
-        "uk": "⚠️Цей контент більше 50МБ",
+        "en": "⚠️This content is over 2000MB",
+        "ru": "⚠️Данный контент больше 2000МБ",
+        "uk": "⚠️Цей контент більше 2000МБ",
     },
     "unavaliable_content": {
         "en": "❌This content is unavaliable or hidden",

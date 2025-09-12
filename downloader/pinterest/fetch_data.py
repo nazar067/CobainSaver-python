@@ -18,7 +18,7 @@ from localisation.translations.downloader import translations
 from utils.service_identifier import identify_service
 
 
-MAX_VIDEO_SIZE_MB = 50
+MAX_VIDEO_SIZE_MB = 1999
 
 
 async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):

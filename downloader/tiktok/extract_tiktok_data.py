@@ -80,9 +80,9 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
 
     hd_settings = await get_settings(pool, chat_id)
     
-    if hd_size_mb >= 0 and hd_size_mb < 49 and hd_settings["hd_size"] == True:
+    if hd_size_mb >= 0 and hd_size_mb < 1999 and hd_settings["hd_size"] == True:
         video_url = data["data"]["hdplay"]
-    elif play_size_mb >= 0 and play_size_mb < 49:
+    elif play_size_mb >= 0 and play_size_mb < 1999:
         video_url = data["data"]["play"]
     else:
         return "large"

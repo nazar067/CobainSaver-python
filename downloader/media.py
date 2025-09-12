@@ -31,7 +31,7 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             thumbnail=thumbnail,
             duration=duration,
             reply_to_message_id=msg_id,
-            parse_mode=parse_mode
+            parse_mode=parse_mode,
         )
         return True
     except Exception as e:

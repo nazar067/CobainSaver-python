@@ -21,7 +21,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str, chat_lang
     """
     ydl_opts = {
         "cookies_from_browser": ("firefox"),
-        'format': f"bestvideo[height<={quality}]+bestaudio/best",
+        'format': f"bestvideo[height={quality}]+bestaudio/best[ext=m4a]/best",
         'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
         'noplaylist': True,
@@ -166,3 +166,23 @@ async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> N
         except Exception as e:
             log_error(url, e, 1111, await identify_service(url))
     
+async def get_video_duration(url: str):
+    ydl_opts = {
+        "cookies_from_browser": ("firefox"),
+        'noplaylist': True,
+        'quiet': True,
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.115 Safari/537.36',
+        },
+    }
+    def download_video():
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            return ydl.extract_info(url, download=False)
+        
+    try:
+        info_dict = await asyncio.to_thread(download_video)
+        duration = info_dict.get("duration", 0)
+        return duration
+    except Exception as e:
+        log_error(url, e, 1111, await identify_service(url))
+        return 0

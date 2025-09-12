@@ -8,9 +8,11 @@ setup_logging()
 
 import asyncio
 from aiogram import Bot, Dispatcher
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.client.telegram import TelegramAPIServer
 from aiogram.types import Message, CallbackQuery, PreCheckoutQuery, PollAnswer
 from aiogram.filters import CommandStart
-from config import API_TOKEN, DATABASE_URL
+from config import API_TOKEN, DATABASE_URL, LOCAL_API_SERVER
 from db.db import get_db_pool, init_db
 from bot_settings.commands import set_bot_commands
 from bot_settings.description import set_bot_description
@@ -26,7 +28,11 @@ from utils.select_service import choose_service
 
 TOKEN = API_TOKEN
 
-bot = Bot(token=TOKEN)
+api = TelegramAPIServer.from_base(LOCAL_API_SERVER, is_local=True)
+session = AiohttpSession(api=api)
+
+bot = Bot(token=TOKEN, session=session)
+
 dp = Dispatcher()
 
 @dp.message(CommandStart())
@@ -104,6 +110,7 @@ async def on_poll_answer(poll_answer: PollAnswer):
 
 async def main():
     print("Bot started")
+    print("API base:", bot.session.api.base, "is_local:", bot.session.api.is_local)
     pool = await get_db_pool(DATABASE_URL)
     dp["db_pool"] = pool
     await init_db(pool)

@@ -53,7 +53,7 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         duration = video_info.get("duration", 0)
         thumbnail = video_info.get("thumbnail", None)
 
-        if duration > 1101:
+        if duration > 5400:
             return await bot.send_message(
                 chat_id=chat_id,
                 business_connection_id=business_connection_id,
@@ -76,7 +76,7 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
             audio_info = await asyncio.to_thread(extract_music_info)
 
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
-        if file_size_mb >= 50:
+        if file_size_mb >= 1999:
             await del_media_content(file_path)
             return await bot.send_message(
                 chat_id=chat_id,

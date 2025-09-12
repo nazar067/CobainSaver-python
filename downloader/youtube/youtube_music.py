@@ -13,7 +13,7 @@ from user.get_user_path import get_user_path
 from localisation.translations.downloader import translations
 from utils.fetch_data import fetch_youtube_music_data
 
-MAX_SIZE_MB = 50 
+MAX_SIZE_MB = 1999 
 
 async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: Optional[str] = None, msg_id = None, short_track_name = None) -> str:
     """
