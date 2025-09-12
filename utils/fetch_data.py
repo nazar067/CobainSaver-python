@@ -5,7 +5,7 @@ import aiohttp
 import requests
 import yt_dlp
 from logs.write_server_errors import log_error
-from utils.get_file_size import get_music_size
+from utils.get_file_info import get_music_size
 from utils.get_name import get_random_file_name, sanitize_filename
 from utils.get_url import split_time_code_and_video
 from utils.service_identifier import identify_service

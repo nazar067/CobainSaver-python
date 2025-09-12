@@ -27,7 +27,6 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         )
 
     video_duration = await get_video_duration(url)
-    print(video_duration)
     if video_duration > 5400:
         return await bot.send_message(
             chat_id=chat_id,

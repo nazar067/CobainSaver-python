@@ -1,8 +1,8 @@
 translations = {
     "cobain_news": {
-        "en": '<b><a href="https://t.me/cobainSaver">SoundCloud playlists are available on CobainSaver</a></b>',
-        "ru": '<b><a href="https://t.me/cobainSaver">Плейлисты SoundCloud доступны в CobainSaver</a></b>',
-        "uk": '<b><a href="https://t.me/cobainSaver">Плейлисти SoundCloud доступні в CobainSaver</a></b>',
+        "en": '<b><a href="https://t.me/cobainSaver">Video size increased from 50MB to 2GB</a></b>',
+        "ru": '<b><a href="https://t.me/cobainSaver">Размер видео увеличен с 50МБ до 2ГБ</a></b>',
+        "uk": '<b><a href="https://t.me/cobainSaver">Розмір відео збільшено з 50МБ до 2ГБ</a></b>',
     },
     "dice": {
         "en": '<b><a href="https://t.me/gambleHouse_bot">Play dice with your friends🎲</a></b>',

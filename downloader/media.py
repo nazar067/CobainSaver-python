@@ -8,6 +8,7 @@ from keyboard import send_log_keyboard
 from localisation.translations.errors import translations
 from logs.write_server_errors import log_error
 from utils.bot_action import send_bot_action
+from utils.get_file_info import get_video_size
 from utils.get_name import get_clear_name
 from utils.media_source import get_media_source
 from utils.service_identifier import identify_service
@@ -20,6 +21,7 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         await send_bot_action(bot, chat_id, business_connection_id, "video")
         video = get_media_source(file_path_or_url)
         thumbnail = get_media_source(thumbnail_path_or_url)
+        video_size = await get_video_size(video)
         title = await get_clear_name(title, 800)
         if parse_mode == None:
             parse_mode = "HTML" if len(title) > 174 else None
@@ -32,6 +34,8 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             duration=duration,
             reply_to_message_id=msg_id,
             parse_mode=parse_mode,
+            width=video_size[0] if video_size else None,
+            height=video_size[1] if video_size else None,
         )
         return True
     except Exception as e:
