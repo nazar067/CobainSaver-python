@@ -53,7 +53,7 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         duration = video_info.get("duration", 0)
         thumbnail = video_info.get("thumbnail", None)
 
-        if duration > 5400:
+        if duration > 20000:
             return await bot.send_message(
                 chat_id=chat_id,
                 business_connection_id=business_connection_id,

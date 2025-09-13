@@ -27,7 +27,7 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         )
 
     video_duration = await get_video_duration(url)
-    if video_duration > 5400:
+    if video_duration > 36000:
         return await bot.send_message(
             chat_id=chat_id,
             business_connection_id=business_connection_id,
@@ -35,6 +35,14 @@ async def process_youtube_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher
             reply_to_message_id=msg_id
         )
     
+    if video_duration > 18000:
+        await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["warning_long_video"][chat_language],
+            reply_to_message_id=msg_id
+        )
+
     user_folder = await get_user_path(chat_id)
 
     quality_result = await select_optimal_quality(url, user_folder, initial_quality="360", chat_language=chat_language)

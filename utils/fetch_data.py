@@ -98,7 +98,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         original_title = info_for_size.get("title", "audio")
         
         size = await get_music_size(192, info_for_size.get("duration", 0))
-        if size > 49:
+        if size > 1999:
             return {
                 "large": True,
                 "audio_title": original_title

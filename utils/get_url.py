@@ -29,6 +29,8 @@ async def split_time_code_and_video(url: str):
     time_code = "0"
     if "t" in query_params:
         time_value = query_params["t"][0]
+        if time_value.endswith("s"):
+            time_value = time_value[:-1]
         time_code = time_value
 
     query_params.pop("t", None)
