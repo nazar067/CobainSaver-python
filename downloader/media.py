@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Optional
 from aiogram import Bot
-from aiogram.types import FSInputFile, InputMediaPhoto
+from aiogram.types import FSInputFile
 from constants.errors.telegram_errors import NOT_RIGHTS
 from keyboard import send_log_keyboard
 from localisation.translations.errors import translations
@@ -11,7 +11,6 @@ from utils.bot_action import send_bot_action
 from utils.get_file_info import get_video_width_height
 from utils.get_name import get_clear_name
 from utils.media_source import get_media_source
-from utils.service_identifier import identify_service
 
 async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None, parse_mode = None) -> None:
     """
@@ -20,23 +19,24 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "video")
         video = get_media_source(file_path_or_url)
-        thumbnail = get_media_source(thumbnail_path_or_url)
         video_size = await get_video_width_height(video)
+        thumbnail = get_media_source(thumbnail_path_or_url, video_size)
         title = await get_clear_name(title, 800)
         if parse_mode == None:
             parse_mode = "HTML" if len(title) > 174 else None
         await bot.send_video(
             business_connection_id=business_connection_id,
-            chat_id=chat_id,
+            chat_id=chat_id,    
             video=video,
             caption=title,
             thumbnail=thumbnail,
             duration=duration,
             reply_to_message_id=msg_id,
             parse_mode=parse_mode,
-            width=video_size[0] if video_size else None,
-            height=video_size[1] if video_size else None,
-            request_timeout=1800
+            width=video_size[0],
+            height=video_size[1],
+            request_timeout=1800,
+            supports_streaming=True
         )
         return True
     except Exception as e:

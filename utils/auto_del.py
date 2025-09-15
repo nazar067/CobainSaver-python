@@ -7,11 +7,11 @@ from datetime import datetime, timedelta
 from logs.write_server_errors import log_error
 
 DOWNLOADS_FOLDER = "downloads"
-CHECK_INTERVAL = 600
+CHECK_INTERVAL = 3600
 
 async def delete_old_files():
     """
-    Функция, которая каждые 10 минут проверяет папки в 'downloads/' и удаляет файлы старше 10 минут.
+    Функция, которая каждые 1 час проверяет папки в 'downloads/' и удаляет файлы старше 1 часа.
     """
     while True:
         now = datetime.now()
@@ -30,7 +30,7 @@ async def delete_old_files():
 
                 file_creation_time = datetime.fromtimestamp(os.path.getctime(file_path))
 
-                if now - file_creation_time > timedelta(minutes=10):
+                if now - file_creation_time > timedelta(hours=1):
                     try:
                         os.remove(file_path)
                     except Exception as e:
