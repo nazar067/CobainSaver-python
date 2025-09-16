@@ -2,10 +2,13 @@ import os
 import asyncio
 import re
 import time
+from aiogram import Dispatcher
 import instaloader
 from typing import Dict, Any, Optional
 from pathlib import Path
 
+class InstagramRateLimited(Exception):
+    pass
 
 _SHORTCODE_RE = re.compile(
     r"(?:https?://)?(?:www\.)?instagram\.com/(?:(?:p|reel|tv)/([A-Za-z0-9_-]+))",
@@ -22,6 +25,28 @@ def _extract_shortcode(url: str) -> str:
         return parts[-2]
     raise ValueError(f"Cannot extract shortcode from URL: {url}")
 
+_IG_MIN_INTERVAL_SEC_DEFAULT = 8.0 
+_IG_SEMAPHORE_DEFAULT = asyncio.Semaphore(1)
+
+def _get_dp_sem_and_throttle(dp: Dispatcher):
+    sem = dp.get("ig_semaphore") or _IG_SEMAPHORE_DEFAULT
+    dp["ig_semaphore"] = sem
+    min_interval = dp.get("ig_min_interval") or _IG_MIN_INTERVAL_SEC_DEFAULT
+    dp["ig_min_interval"] = min_interval
+    return sem, float(min_interval)
+
+def _enforce_min_interval(dp: Dispatcher):
+    now = time.time()
+    last = dp.get("ig_last_call_ts")
+    min_interval = float(dp.get("ig_min_interval") or _IG_MIN_INTERVAL_SEC_DEFAULT)
+    if last is not None:
+        delta = now - float(last)
+        wait = min_interval - delta
+        if wait > 0:
+            time.sleep(wait)
+    dp["ig_last_call_ts"] = time.time()
+
+# -------- sync worker --------
 def _download_inst_post_sync(
     url: str,
     base_dir: str,
@@ -30,8 +55,17 @@ def _download_inst_post_sync(
     password: Optional[str] = None,
     sessionfile: Optional[str] = None,
     max_retries: int = 3,
-    retry_delay: float = 1.5,
+    retry_delay: float = 2.0,
 ) -> Dict[str, Any]:
+    from instaloader.exceptions import (
+        LoginRequiredException,
+        BadCredentialsException,
+        TwoFactorAuthRequiredException,
+        ConnectionException,
+        QueryReturnedNotFoundException,
+        InvalidArgumentException,
+    )
+
     os.makedirs(base_dir, exist_ok=True)
 
     loader = instaloader.Instaloader(
@@ -42,37 +76,81 @@ def _download_inst_post_sync(
         download_pictures=True,
         download_video_thumbnails=False,
         save_metadata=False,
+        max_connection_attempts=1,  # меньше агрессии к IG (NEW)
+        request_timeout=30.0,       # (NEW)
+        compress_json=False,        # (NEW) иногда снижает «подозрительность»
     )
 
-    if sessionfile and os.path.exists(sessionfile):
-        try:
-            loader.load_session_from_file(login, sessionfile)
-        except Exception:
-            if login and password:
-                loader.login(login, password)
-                try:
+    def _load_session_or_login():
+        """Сначала пробуем сессию; если нет — один логин. При 401 НЕ логинимся заново."""
+        if sessionfile and os.path.exists(sessionfile):
+            try:
+                loader.load_session_from_file(login, sessionfile)
+                return
+            except Exception:
+                pass
+        if login and password:
+            loader.login(login, password)
+            try:
+                if sessionfile:
                     loader.save_session_to_file(sessionfile)
-                except Exception:
-                    pass
-    elif login and password:
-        loader.login(login, password)
-        try:
-            if sessionfile:
-                loader.save_session_to_file(sessionfile)
-        except Exception:
-            pass
+            except Exception:
+                pass
+
+    _load_session_or_login()
 
     shortcode = _extract_shortcode(url)
 
-    last_err = None
+    # Экспоненциальный backoff
+    attempt = 0
+    delay = retry_delay
     post = None
-    for _ in range(max_retries):
+    last_err = None
+
+    while attempt < max_retries:
+        attempt += 1
         try:
             post = instaloader.Post.from_shortcode(loader.context, shortcode)
             break
+        except LoginRequiredException as e:
+            # Это может быть «сессия протухла», но частый релогин = быстрое 401.
+            # Дадим одну попытку принудительного логина только ЕСЛИ ещё не логинились в этом ранe.
+            last_err = e
+            if login and password and not (sessionfile and os.path.exists(sessionfile)):
+                # первый запуск без сессии -> пробовали логин; сюда попадём редко
+                try:
+                    loader.login(login, password)
+                    if sessionfile:
+                        try:
+                            loader.save_session_to_file(sessionfile)
+                        except Exception:
+                            pass
+                    continue
+                except Exception as le:
+                    last_err = le
+            # иначе просто backoff
+            time.sleep(delay)
+            delay *= 2
+        except ConnectionException as e:
+            last_err = e
+            msg = str(e).lower()
+            if "please wait a few minutes" in msg or "429" in msg or "401" in msg:
+                # Явная блокировка rate limit -> бросаем спец-исключение
+                raise InstagramRateLimited(str(e))
+            time.sleep(delay)
+            delay *= 2
+        except QueryReturnedNotFoundException as e:
+            last_err = e
+            # Иногда IG маскирует throttling как 404 -> backoff
+            time.sleep(delay)
+            delay *= 2
+        except (InvalidArgumentException, BadCredentialsException, TwoFactorAuthRequiredException) as e:
+            raise e
         except Exception as e:
             last_err = e
-            time.sleep(retry_delay)
+            time.sleep(delay)
+            delay *= 2
+
     if post is None:
         raise last_err or RuntimeError("Failed to fetch post metadata")
 

@@ -46,8 +46,8 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
                 is_success = await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Twitter/X":
                 is_success = await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id, msg_id)
-            # elif service == "Instagram":
-            #     is_success = await fetch_instagram_content(bot, url, chat_id, dp, business_connection_id, msg_id)
+            elif service == "Instagram":
+                is_success = await fetch_instagram_content(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Pinterest":
                 is_success = await fetch_pinterest_content(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "PornHub":
