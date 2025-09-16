@@ -11,8 +11,8 @@ async def download_and_send_tiktok_video(bot: Bot, chat_id: int, chat_language, 
     """
     Скачивает TikTok-видео и отправляет его в чат.
     """
-    video_path = os.path.join(save_folder, get_random_file_name("mp4"))
-    video_thumbnail_path = os.path.join(save_folder, get_random_file_name("jpg"))
+    video_path = os.path.join(save_folder, await get_random_file_name("mp4"))
+    video_thumbnail_path = os.path.join(save_folder, await get_random_file_name("jpg"))
 
     await download_file(data["video_url"], video_path)
 

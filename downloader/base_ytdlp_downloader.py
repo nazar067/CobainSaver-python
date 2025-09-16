@@ -18,7 +18,7 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
-    random_name = get_random_file_name("")
+    random_name = await get_random_file_name("")
 
     video_extensions = ["mp4", "mov", "avi", "webm", "mkv", "flv"]
     audio_extensions = ["mp3", "wav", "m4a", "aac", "ogg", "flac", "opus"]

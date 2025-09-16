@@ -27,3 +27,5 @@ venv/
 .ytdl/
 
 cookies.txt
+
+ig.session

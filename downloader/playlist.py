@@ -182,7 +182,7 @@ async def fetch_soundcloud_playlist(url: str, user_folder: str) -> dict:
     """
     Универсальная функция для получения информации о плейлисте YouTube Music.
     """
-    random_name = get_random_file_name("")
+    random_name = await get_random_file_name("")
     ydl_opts = {
         'quiet': True,
         'http_headers': {'User-Agent': 'Mozilla/5.0'},

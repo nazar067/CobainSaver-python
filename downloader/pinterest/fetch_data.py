@@ -28,7 +28,7 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
-    random_name = get_random_file_name("mp4")
+    random_name = await get_random_file_name("mp4")
 
     video_info = await fetch_pinterest_video(url, save_folder, random_name)
 
@@ -81,7 +81,7 @@ async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) ->
 
         thumbnail_path = None
         if thumbnail_url:
-            thumbnail_path = os.path.join(save_folder, get_random_file_name("jpg"))
+            thumbnail_path = os.path.join(save_folder, await get_random_file_name("jpg"))
             await download_file(thumbnail_url, thumbnail_path)
 
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)

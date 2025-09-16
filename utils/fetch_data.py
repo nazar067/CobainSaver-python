@@ -22,7 +22,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str, chat_lang
     ydl_opts = {
         "cookies_from_browser": ("firefox"),
         'format': f"bestvideo[height={quality}]+bestaudio/best[ext=m4a]/best",
-        'outtmpl': os.path.join(user_folder, get_random_file_name("%(ext)s")),
+        'outtmpl': os.path.join(user_folder, await get_random_file_name("%(ext)s")),
         'merge_output_format': 'mp4',
         'noplaylist': True,
         'quiet': True,
@@ -58,7 +58,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str, chat_lang
         thumbnail_path = None
         if video_id:
             thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
-            thumbnail_path = os.path.join(user_folder, get_random_file_name("jpg"))
+            thumbnail_path = os.path.join(user_folder, await get_random_file_name("jpg"))
             await download_file(thumbnail_url, thumbnail_path)
 
         return {
@@ -104,7 +104,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
                 "audio_title": original_title
             }
 
-        sanitized_title = sanitize_filename(original_title) or get_random_file_name("")
+        sanitized_title = await sanitize_filename(original_title) or await get_random_file_name("")
 
         ydl_opts = base_ydl_opts.copy()
         ydl_opts['outtmpl'] = os.path.join(user_folder, f"{sanitized_title}.%(ext)s")
@@ -126,7 +126,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         thumbnail_path = None
         if audio_id:
             thumbnail_url = f"https://img.youtube.com/vi/{audio_id}/maxresdefault.jpg"
-            thumbnail_path = os.path.join(user_folder, get_random_file_name("jpg"))
+            thumbnail_path = os.path.join(user_folder, await get_random_file_name("jpg"))
             await download_file(thumbnail_url, thumbnail_path)
 
         return {

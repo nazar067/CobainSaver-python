@@ -18,9 +18,9 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
     """
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "video")
-        video = get_media_source(file_path_or_url)
+        video = await get_media_source(file_path_or_url)
         video_size = await get_video_width_height(video)
-        thumbnail = get_media_source(thumbnail_path_or_url, video_size)
+        thumbnail = await get_media_source(thumbnail_path_or_url, video_size)
         title = await get_clear_name(title, 800)
         if parse_mode == None:
             parse_mode = "HTML" if len(title) > 174 else None
@@ -95,7 +95,7 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
 async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path, attempt = None):
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "photo")
-        media = get_media_source(media_album)
+        media = await get_media_source(media_album)
         await bot.send_media_group(
             chat_id=chat_id, 
             business_connection_id=business_connection_id, 

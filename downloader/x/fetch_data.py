@@ -19,7 +19,7 @@ async def fetch_twitter_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     directory = await get_user_path(chat_id)
-    uniq_id = get_random_file_name("")
+    uniq_id = await get_random_file_name("")
     
     ext = ""
 
@@ -43,7 +43,7 @@ async def fetch_twitter_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher
             elif type == "image":
                 ext = "jpg"
                 
-            random_name = f"twitter {uniq_id}" + get_random_file_name(ext)
+            random_name = f"twitter {uniq_id}" + await get_random_file_name(ext)
             save_path = f"{directory}/{random_name}"
             await download_file(media_url, save_path)
             count_media += 1

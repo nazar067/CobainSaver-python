@@ -6,7 +6,7 @@ import os
 from logs.write_server_errors import log_error
 
 
-def get_media_source(media_input: Optional[Union[str, List[str], List[Union[InputMediaPhoto, InputMediaVideo]]]], video_size = [0, 1]) -> Optional[Union[str, FSInputFile, List[Union[InputMediaPhoto, InputMediaVideo]]]]:
+async def get_media_source(media_input: Optional[Union[str, List[str], List[Union[InputMediaPhoto, InputMediaVideo]]]], video_size = [0, 1]) -> Optional[Union[str, FSInputFile, List[Union[InputMediaPhoto, InputMediaVideo]]]]:
     """
     Обрабатывает медиа: строку (ссылка/путь) или список.
     - Если строка: возвращает URL или FSInputFile.
@@ -26,7 +26,7 @@ def get_media_source(media_input: Optional[Union[str, List[str], List[Union[Inpu
             return media_input
         if os.path.exists(media_input):
             if media_input.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
-                resize_thumbnail(media_input, video_size[0], video_size[1])
+                await resize_thumbnail(media_input, video_size[0], video_size[1])
             return FSInputFile(media_input)
         return None
 
@@ -42,7 +42,7 @@ def get_media_source(media_input: Optional[Union[str, List[str], List[Union[Inpu
                         media_album.append(InputMediaVideo(media=media_path))
                 elif os.path.exists(media_path):
                     if media_path.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
-                        resize_thumbnail(media_path, video_size[0], video_size[1])
+                        await resize_thumbnail(media_path, video_size[0], video_size[1])
                         media_album.append(InputMediaPhoto(media=FSInputFile(media_path)))
                     elif media_path.lower().endswith((".mp4", ".mov", ".mkv")):
                         media_album.append(InputMediaVideo(media=FSInputFile(media_path)))
@@ -52,7 +52,7 @@ def get_media_source(media_input: Optional[Union[str, List[str], List[Union[Inpu
     return None
 
 
-def resize_thumbnail(path: str, width, height):
+async def resize_thumbnail(path: str, width, height):
     try:
         with Image.open(path) as img:
             img = img.convert("RGB")

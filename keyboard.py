@@ -88,7 +88,7 @@ def language_keyboard(message: Message) -> InlineKeyboardMarkup:
 
 async def send_log_keyboard(bot_message, message_error, chat_language, chat_id, url) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    file_name = get_random_file_name("txt")
+    file_name = await get_random_file_name("txt")
     user_path = await get_user_path(chat_id)
     os.makedirs(os.path.dirname(user_path), exist_ok=True)
     log_path = os.path.join(user_path, file_name)
