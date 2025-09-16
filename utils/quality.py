@@ -67,4 +67,6 @@ async def select_optimal_quality(url: str, user_folder: str, initial_quality: st
         await del_media_content(last_file_path)
     if last_thumb_path:
         await del_media_content(last_thumb_path)
-    return "large"
+    return {
+        "error": "Cant download video, no formats available."
+    }
