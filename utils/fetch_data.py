@@ -34,7 +34,7 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str, chat_lang
     }
     correct_url = url
     seconds = 0
-    if "&t=" in url:
+    if "&t=" in url or "?t=" in url:
         parsed_url = await split_time_code_and_video(url)
         correct_url = parsed_url["url"]
         seconds = int(parsed_url["time_code"])
