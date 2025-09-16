@@ -32,10 +32,10 @@ async def get_adder_user_id(pool: asyncpg.Pool, business_connection_id: str) -> 
         )
     return adder_user_id
 
-async def get_chat_id(pool: asyncpg.Pool, business_connection_id: str) -> Optional[int]:
+async def get_second_user_id(pool: asyncpg.Pool, business_connection_id: str, second_user_id) -> Optional[int]:
     async with pool.acquire() as conn:
         second_user_id = await conn.fetchval(
-            "SELECT second_user_id FROM threads WHERE business_connection_id = $1", business_connection_id
+            "SELECT second_user_id FROM threads WHERE business_connection_id = $1 AND second_user_id = $2", business_connection_id, second_user_id
         )
     return second_user_id
 
