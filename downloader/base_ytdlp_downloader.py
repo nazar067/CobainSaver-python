@@ -6,6 +6,7 @@ import subprocess
 
 from downloader.media import del_media_content, send_video, send_audio
 from downloader.playlist import process_music_playlist
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
@@ -73,9 +74,11 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
 
         file_path = os.path.join(save_folder, f"{random_name}{file_ext}")
         if is_video:
-            # file_url = video_info["formats"][0]["url"]
-            # await download_file(file_url, file_path)
-            await asyncio.to_thread(download_video)
+            if "tiktok.com" in url:
+                await asyncio.to_thread(download_video)
+            else:
+                file_url = video_info["formats"][0]["url"]
+                await download_file(file_url, file_path)
         else:
             audio_info = await asyncio.to_thread(extract_music_info)
 
@@ -133,4 +136,6 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         )
 
     except Exception as e:
+        if "tiktok.com" in url:
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], e, chat_language, chat_id, url))
         log_error(url, e, chat_id, await identify_service(url))
