@@ -43,7 +43,8 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
             elif service == "Spotify":
                 is_success = await process_spotify_track(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "TikTok":
-                is_success = await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+                #is_success = await fetch_tiktok_video(bot, url, chat_id, dp, business_connection_id, msg_id)
+                is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Twitter/X":
                 is_success = await fetch_twitter_content(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Instagram":

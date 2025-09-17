@@ -35,6 +35,9 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
     def extract_video_info():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=False)
+    def download_video():
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            return ydl.extract_info(url, download=True)
 
     try:
         video_info = await asyncio.to_thread(extract_video_info)
@@ -70,8 +73,9 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
 
         file_path = os.path.join(save_folder, f"{random_name}{file_ext}")
         if is_video:
-            file_url = video_info["formats"][0]["url"]
-            await download_file(file_url, file_path)
+            # file_url = video_info["formats"][0]["url"]
+            # await download_file(file_url, file_path)
+            await asyncio.to_thread(download_video)
         else:
             audio_info = await asyncio.to_thread(extract_music_info)
 
