@@ -9,6 +9,7 @@ from localisation.get_language import get_language
 from localisation.translations.downloader import translations
 from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
+from utils.get_file_info import extract_index
 from utils.get_name import get_clear_name, get_random_file_name
 
 
@@ -43,7 +44,7 @@ async def fetch_twitter_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher
             elif type == "image":
                 ext = "jpg"
                 
-            random_name = f"twitter {uniq_id}" + await get_random_file_name(ext)
+            random_name = f"{count_media} twitter {uniq_id}" + await get_random_file_name(ext)
             save_path = f"{directory}/{random_name}"
             await download_file(media_url, save_path)
             count_media += 1
@@ -51,7 +52,7 @@ async def fetch_twitter_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         matching_files = [
             os.path.join(directory, file) for file in os.listdir(directory) if f"twitter {uniq_id}" in file
         ]
-        
+        matching_files.sort(key=extract_index)
         result = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, caption, msg_id, pool=pool)
         
     return result

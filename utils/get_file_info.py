@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 from typing import Optional, Tuple, Union, List
 from aiogram.types import InputMediaPhoto, InputMediaVideo, FSInputFile
@@ -64,3 +65,7 @@ async def get_video_width_height(
     except Exception:
         return None
     
+def extract_index(path):
+    name = os.path.basename(path)
+    m = re.match(r"(\d+)", name)
+    return int(m.group(1)) if m else 0 
