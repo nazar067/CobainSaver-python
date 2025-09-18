@@ -41,6 +41,10 @@ async def send_social_media_album(bot, chat_id, chat_language, business_connecti
     is_success = False
     for i in range(0, len(media_album), batch_size):
         batch = media_album[i:i + batch_size]
-        is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list, attempt=attempt)
-    
+        is_last = i + batch_size >= len(media_album)
+        if is_last:
+            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list, attempt=attempt)
+        else:
+            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, "", attempt=attempt)
+
     return is_success

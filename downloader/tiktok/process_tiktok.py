@@ -1,3 +1,4 @@
+import os
 from aiogram import Bot, Dispatcher
 
 from downloader.send_album import send_social_media_album
@@ -8,6 +9,8 @@ from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from localisation.translations.downloader import translations
+from utils.fetch_data import download_file
+from utils.get_name import get_random_file_name
 from utils.get_settings import get_settings
 
 async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id) -> None:
@@ -18,6 +21,7 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
     settings = await get_settings(pool, chat_id)
+    uniq_id = await get_random_file_name("")
     is_audio = settings["send_tiktok_music"]
     is_media_success = False
     is_audio_success = False
@@ -30,7 +34,14 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         return False #await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
     
     if data["type"] == "photo":
-        is_media_success = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, data["images"], data["title"], msg_id, False, pool=pool)
+        for image in data["images"]:
+            random_name = f"tiktok {uniq_id}" + await get_random_file_name("jpeg")
+            save_path = f"{save_folder}/{random_name}"
+            await download_file(image, save_path)
+        matching_files = [
+            os.path.join(save_folder, file) for file in os.listdir(save_folder) if f"tiktok {uniq_id}" in file
+        ]
+        is_media_success = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, data["title"], msg_id, False, pool=pool)
     else:
         is_media_success = await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, False)
 
