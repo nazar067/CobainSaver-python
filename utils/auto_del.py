@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from logs.write_server_errors import log_error
 
 DOWNLOADS_FOLDER = "downloads"
-CHECK_INTERVAL = 3600
+CHECK_INTERVAL = 1800
 
 async def delete_old_files():
     """
@@ -30,7 +30,7 @@ async def delete_old_files():
 
                 file_creation_time = datetime.fromtimestamp(os.path.getctime(file_path))
 
-                if now - file_creation_time > timedelta(hours=1):
+                if now - file_creation_time > timedelta(minutes=30):
                     try:
                         os.remove(file_path)
                     except Exception as e:
