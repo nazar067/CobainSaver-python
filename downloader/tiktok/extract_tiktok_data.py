@@ -64,7 +64,7 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
             "type": "photo",
             "images": data["data"]["images"],
             "title": media_title,
-            "audio_url": data["data"]["music_info"].get("play", None),
+            "audio_url": data["data"].get("play", None),
             "audio_title": data["data"]["music_info"].get("title", "TikTok_Audio"),
             "audio_thumbnail_url": data["data"]["music_info"].get("cover", None),
             "audio_duration": data["data"]["music_info"].get("duration", 0),
