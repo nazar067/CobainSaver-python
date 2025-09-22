@@ -1,10 +1,14 @@
 import os
 from aiogram import Bot, Dispatcher
 
+from api.tiktok_api import is_server_alive
+from config import TIKTOK_API
 from downloader.send_album import send_social_media_album
 from downloader.tiktok.download_audio import download_and_send_tiktok_audio
 from downloader.tiktok.extract_tiktok_data import extract_tiktok_data
 from downloader.tiktok.internet_video import send_tiktok_video
+from downloader.tiktok.ytdlp.download_audio import download_audio_ytlp
+from downloader.tiktok.ytdlp.download_video import download_video_ytdlp
 from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
@@ -27,34 +31,46 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     is_media_success = False
     is_audio_success = False
 
-    data = await extract_tiktok_data(url, pool, chat_id)
-    if data == "large":
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language], reply_to_message_id=msg_id)
-        return "large"
-    elif "error" in data:
-        return False #await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
-    
-    if data["type"] == "photo":
-        count_images = 0
-        for image in data["images"]:
-            random_name = f"{count_images} tiktok {uniq_id}" + await get_random_file_name("jpeg")
-            save_path = f"{save_folder}/{random_name}"
-            await download_file(image, save_path)
-            count_images += 1
-        matching_files = [
-            os.path.join(save_folder, file) for file in os.listdir(save_folder) if f"tiktok {uniq_id}" in file
-        ]
-        matching_files.sort(key=extract_index)
-        is_media_success = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, data["title"], msg_id, False, pool=pool)
-    else:
-        is_media_success = await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, False)
+    is_tikwm_alive = await is_server_alive(TIKTOK_API, 1)
+    if is_tikwm_alive:
+        data = await extract_tiktok_data(url, pool, chat_id)
+        if data == "large":
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language], reply_to_message_id=msg_id)
+            return "large"
+        elif "error" in data:
+            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
+        
+        if data["type"] == "photo":
+            count_images = 0
+            for image in data["images"]:
+                random_name = f"{count_images} tiktok {uniq_id}" + await get_random_file_name("jpeg")
+                save_path = f"{save_folder}/{random_name}"
+                await download_file(image, save_path)
+                count_images += 1
+            matching_files = [
+                os.path.join(save_folder, file) for file in os.listdir(save_folder) if f"tiktok {uniq_id}" in file
+            ]
+            matching_files.sort(key=extract_index)
+            is_media_success = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, data["title"], msg_id, False, pool=pool)
+        else:
+            is_media_success = await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, False)
 
-    if is_audio:
-        is_audio_success = await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool)
+        if is_audio:
+            is_audio_success = await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool)
+            if is_audio_success == "No audio":
+                is_audio_success = await download_audio_ytlp(bot, url, chat_id, dp, business_connection_id, msg_id)
+        else:
+            is_audio_success = True
+        
+        if is_media_success == True and is_audio_success == True:
+            return True
     else:
-        is_audio_success = True
-    
-    if is_media_success == True and is_audio_success == True:
-        return True
-    elif is_media_success == True and is_audio_success == False:
-        return "None audio"
+        is_media_success = await download_video_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
+        if is_audio:
+            is_audio_success = await download_audio_ytlp(bot, url, chat_id, dp, business_connection_id, msg_id)
+        else:
+            is_audio_success = True
+
+        if is_media_success == True and is_audio_success == True:
+            return True
+        
