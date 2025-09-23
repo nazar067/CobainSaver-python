@@ -4,6 +4,7 @@ import os
 import aiohttp
 import requests
 import yt_dlp
+from constants.errors.aiohttp_errors import RESPONSE_IS_NOT_COMPLETED
 from logs.write_server_errors import log_error
 from utils.get_file_info import get_music_size
 from utils.get_name import get_random_file_name, sanitize_filename
@@ -142,7 +143,7 @@ async def fetch_youtube_music_data(url: str, user_folder: str) -> dict:
         log_error(url, e, 1111, await identify_service(url))
         return {"error": f"{str(e)}"}
 
-async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> None:
+async def download_file(url: str, save_path: str, isThumbnail: bool = True, attempt = 0) -> None:
     """
     Скачивает превью по URL. В случае ошибки загружает резервное изображение.
     """
@@ -154,6 +155,9 @@ async def download_file(url: str, save_path: str, isThumbnail: bool = True) -> N
                         f.write(await resp.read())
             return
     except Exception as e:
+        if RESPONSE_IS_NOT_COMPLETED in str(e) and attempt < 3:
+            await asyncio.sleep(0.5)
+            return await download_file(url, save_path, isThumbnail, attempt + 1)
         log_error(url, e, 1111, await identify_service(url))
         
     if isThumbnail:
