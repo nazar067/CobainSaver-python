@@ -29,3 +29,5 @@ venv/
 cookies.txt
 
 ig.session
+
+.DS_Store
