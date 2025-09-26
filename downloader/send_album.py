@@ -3,16 +3,15 @@ import re
 from aiogram.types import InputMediaPhoto, InputMediaVideo, FSInputFile
 from downloader.media import send_media_group
 from utils.detect_type import detect_file_type
+from utils.get_name import get_clear_name
 
-async def send_social_media_album(bot, chat_id, chat_language, business_connection_id, media_list: list, caption: str, msg_id, isAds = True, pool = None):
+async def send_social_media_album(bot, chat_id, chat_language, business_connection_id, media_list: list, caption: str, msg_id, isAds = True, pool = None, attempt = None):
     """
     📩 Отправляет альбом из фото и видео (по 10 файлов за раз).
     Поддерживает TikTok и Twitter.
     """
-    if caption: 
-        caption = re.sub(r"#\S+", "", caption).strip()
-        caption = caption[:800] + "..." if len(caption) > 800 else caption 
-
+    if caption:
+        caption = await get_clear_name(caption, 800) 
     media_album = []
     count = 0
 
@@ -42,6 +41,10 @@ async def send_social_media_album(bot, chat_id, chat_language, business_connecti
     is_success = False
     for i in range(0, len(media_album), batch_size):
         batch = media_album[i:i + batch_size]
-        is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list)
-    
+        is_last = i + batch_size >= len(media_album)
+        if is_last:
+            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list, attempt=attempt)
+        else:
+            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, "", attempt=attempt)
+
     return is_success

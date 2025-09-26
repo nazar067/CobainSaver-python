@@ -52,6 +52,11 @@ translations = {
         "ru": "✅ Язык успешно изменён",
         "uk": "✅ Мова успішно змінена",
     },
+    "success_send": {
+        "en": "✅ Successfully sent",
+        "ru": "✅ Успешно отправлено",
+        "uk": "✅ Успішно відправлено",
+    },
     "turn_on_ads_btn": {
         "en": "✅ Enable advertising",
         "ru": "✅ Включить рекламу",

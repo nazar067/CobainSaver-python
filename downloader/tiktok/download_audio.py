@@ -11,17 +11,17 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
     Скачивает TikTok-аудио и отправляет его в чат.
     """
     if not data["audio_url"]:
-        return
+        return "No audio"
 
     # Оригинальное название
     original_title = data["audio_title"]
-    sanitized_title = sanitize_filename(original_title)
+    sanitized_title = await sanitize_filename(original_title)
 
     if not sanitized_title:
-        sanitized_title = get_random_file_name("")
+        sanitized_title = await get_random_file_name("")
 
     audio_path = os.path.join(save_folder, f"{sanitized_title}.mp3")
-    audio_thumbnail_path = os.path.join(save_folder, get_random_file_name("jpg"))
+    audio_thumbnail_path = os.path.join(save_folder, await get_random_file_name("jpg"))
 
     await download_file(data["audio_url"], audio_path)
 

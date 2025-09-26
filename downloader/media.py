@@ -2,37 +2,55 @@ import logging
 import os
 from typing import Optional
 from aiogram import Bot
-from aiogram.types import FSInputFile, InputMediaPhoto
-from localisation.translations.erros import translations
+from aiogram.types import FSInputFile
+from constants.errors.telegram_errors import NOT_RIGHTS, MSG_TO_REPLY_NOT_FOUND
+from keyboard import send_log_keyboard
+from localisation.translations.errors import translations
+from logs.write_server_errors import log_error
 from utils.bot_action import send_bot_action
+from utils.get_file_info import get_video_width_height
 from utils.get_name import get_clear_name
 from utils.media_source import get_media_source
 
-async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None) -> None:
+async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None, parse_mode = None) -> None:
     """
     Отправляет скачанное видео в чат (по ссылке или из файла).
     """
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "video")
-        video = get_media_source(file_path_or_url)
-        thumbnail = get_media_source(thumbnail_path_or_url)
-        title = await get_clear_name(title)
+        video = await get_media_source(file_path_or_url)
+        video_size = await get_video_width_height(video)
+        thumbnail = await get_media_source(thumbnail_path_or_url, video_size)
+        title = await get_clear_name(title, 800)
+        if parse_mode == None:
+            parse_mode = "HTML" if len(title) > 174 else None
         await bot.send_video(
             business_connection_id=business_connection_id,
-            chat_id=chat_id,
+            chat_id=chat_id,    
             video=video,
             caption=title,
             thumbnail=thumbnail,
             duration=duration,
-            reply_to_message_id=msg_id
+            reply_to_message_id=msg_id,
+            parse_mode=parse_mode,
+            width=video_size[0],
+            height=video_size[1],
+            request_timeout=1800,
+            supports_streaming=True
         )
         return True
     except Exception as e:
         if attempt:
             return False
         else:
-            logging.error(f"Ошибка при отправке видео: {str(e)}")
-            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)
+            log_error("url", e, chat_id, "send video")
+            if NOT_RIGHTS in str(e):
+                return False
+            if MSG_TO_REPLY_NOT_FOUND in str(e):
+                await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["msg_to_reply_not_found"][chat_language])
+                return False
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["send_content_error"][chat_language], str(e), chat_language, chat_id, file_path_or_url))
+            return False
     finally:
         if file_path_or_url != "premium_guide.mp4":
             if not file_path_or_url.startswith("http"):
@@ -47,8 +65,9 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
     """
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "audio")
-        audio = FSInputFile(file_path)
-        thumbnail = FSInputFile(thumbnail_path) if thumbnail_path else None
+
+        audio = FSInputFile(file_path, filename=os.path.basename(file_path))
+        thumbnail = FSInputFile(thumbnail_path) if thumbnail_path and os.path.exists(thumbnail_path) else None
 
         await bot.send_audio(
             business_connection_id=business_connection_id,
@@ -60,31 +79,47 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             performer=author,
             reply_to_message_id=msg_id,
             caption='<a href="https://t.me/cobainSaver_bot"><i>by CobainSaver</i></a>',
-            parse_mode="HTML"
-            )
+            parse_mode="HTML",
+            request_timeout=1800
+        )
         return True
+
     except Exception as e:
-        logging.error(e)
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)     
+        log_error("url", e, chat_id, "send audio")
+        if NOT_RIGHTS in str(e):
+            return False   
+        if MSG_TO_REPLY_NOT_FOUND in str(e):
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["msg_to_reply_not_found"][chat_language])
+            return False
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["send_content_error"][chat_language], str(e), chat_language, chat_id, file_path)) 
+        return False
     finally:
         await del_media_content(file_path)
         if thumbnail_path:
-            await del_media_content(thumbnail_path)  
+            await del_media_content(thumbnail_path)
             
-async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path):
+async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path, attempt = None):
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "photo")
-        media = get_media_source(media_album)
+        media = await get_media_source(media_album)
         await bot.send_media_group(
             chat_id=chat_id, 
             business_connection_id=business_connection_id, 
             media=media,
-            reply_to_message_id=msg_id
+            reply_to_message_id=msg_id,
+            request_timeout=1800
             )
         return True
     except Exception as e:
-        logging.error(e)
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id)     
+        log_error("url", e, chat_id, "send media group")
+        if NOT_RIGHTS in str(e):
+            return False
+        if MSG_TO_REPLY_NOT_FOUND in str(e):
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["msg_to_reply_not_found"][chat_language])
+            return False
+        if attempt != 1:
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["send_content_error"][chat_language], str(e), chat_language, chat_id, "no url"))     
+        return False
     finally:
         await del_media_group(file_path)
         
@@ -98,4 +133,4 @@ async def del_media_group(media):
             if os.path.exists(file):
                 os.remove(file)
     except Exception as e:
-        logging.error(e)
+        log_error("url", e, 1111, "del media group")

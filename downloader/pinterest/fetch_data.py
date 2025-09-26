@@ -8,15 +8,17 @@ from aiogram import Bot, Dispatcher
 
 from downloader.media import send_video
 from downloader.send_album import send_social_media_album
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
+from utils.service_identifier import identify_service
 
 
-MAX_VIDEO_SIZE_MB = 50
+MAX_VIDEO_SIZE_MB = 1999
 
 
 async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
@@ -26,7 +28,7 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
-    random_name = get_random_file_name("mp4")
+    random_name = await get_random_file_name("mp4")
 
     video_info = await fetch_pinterest_video(url, save_folder, random_name)
 
@@ -51,7 +53,7 @@ async def fetch_pinterest_content(bot: Bot, url: str, chat_id: int, dp: Dispatch
     if image_urls:
         return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, image_urls, "", msg_id)
 
-    await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id)
+    await bot.send_message(chat_id=chat_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, business_connection_id=business_connection_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], "No photos from content", chat_language, chat_id, url))
 
 
 async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) -> dict:
@@ -79,7 +81,7 @@ async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) ->
 
         thumbnail_path = None
         if thumbnail_url:
-            thumbnail_path = os.path.join(save_folder, get_random_file_name("jpg"))
+            thumbnail_path = os.path.join(save_folder, await get_random_file_name("jpg"))
             await download_file(thumbnail_url, thumbnail_path)
 
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
@@ -91,7 +93,7 @@ async def fetch_pinterest_video(url: str, save_folder: str, random_name: str) ->
         }
 
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e, 1111, await identify_service(url))
         return None
 
 
@@ -114,6 +116,6 @@ async def fetch_pinterest_images(url: str) -> list:
         return image_urls if image_urls else None
 
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e, 1111, await identify_service(url))
         return None
 

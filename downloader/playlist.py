@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 import yt_dlp
 import os
 import requests
@@ -7,12 +8,13 @@ import math
 from aiogram import Bot, Dispatcher
 from aiogram.types import FSInputFile
 from downloader.media import del_media_content
-from keyboard import generate_playlist_keyboard
+from keyboard import generate_playlist_keyboard, send_log_keyboard
 from typing import Optional
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
+from utils.get_name import get_random_file_name
 from utils.spotify_helper import extract_spotify_id, get_spotify_client
 from localisation.translations.downloader import translations
 
@@ -30,12 +32,15 @@ async def process_music_playlist(bot: Bot, dp: Dispatcher, business_connection_i
     if "spotify" in url:
         playlist_info = await fetch_spotify_data(url, user_folder)
         source = "S"
+    elif "soundcloud" in url:
+        playlist_info = await fetch_soundcloud_playlist(url, user_folder)
+        source = "C"
     else:
         playlist_info = await fetch_youtube_music_playlist(url, user_folder)
         source = "Y"
 
     if "error" in playlist_info:
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], playlist_info, chat_language, chat_id, url))
 
     title = playlist_info.get("title", "")
     owner = playlist_info.get("owner", "")
@@ -117,7 +122,7 @@ async def fetch_youtube_music_playlist(url: str, user_folder: str) -> dict:
             return {"error": "Ошибка: Не удалось получить информацию о плейлисте."}
 
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e, 1111, "fetch yt playlist")
         return {"error": f"Ошибка при извлечении плейлиста: {str(e)}"}
     
 
@@ -170,5 +175,53 @@ async def fetch_spotify_data(url: str, user_folder: str) -> dict:
         }
     
     except Exception as e:
-        log_error(url, str(e))
+        log_error(url, e, 1111, "fetch spotify data")
         return {"error": f"Ошибка при обработке Spotify: {str(e)}"}
+
+async def fetch_soundcloud_playlist(url: str, user_folder: str) -> dict:
+    """
+    Универсальная функция для получения информации о плейлисте YouTube Music.
+    """
+    random_name = await get_random_file_name("")
+    ydl_opts = {
+        'quiet': True,
+        'http_headers': {'User-Agent': 'Mozilla/5.0'},
+        'outtmpl': os.path.join(user_folder, random_name + "%(ext)s"),
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+
+        if "_type" in info and info["_type"] == "playlist":
+            title = info.get("title", "")
+            owner = info.get("uploader", "")
+            playlist_id = info.get("id", None)
+
+            # 📌 Формируем список треков
+            tracks = [
+                {"title": entry["title"], "id": entry["id"]}
+                for entry in info.get("entries", []) if entry.get("id")
+            ]
+
+            # 📌 Обложка плейлиста (по первому видео)
+            cover_url = "https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"
+            cover_path = os.path.join(user_folder, f"{playlist_id}_thumbnail.jpg")
+
+            if cover_url:
+                await download_file(cover_url, cover_path)
+
+            return {
+                "title": title,
+                "owner": owner,
+                "tracks": tracks,
+                "cover_path": cover_path,
+                "content_type": "плейлист",
+                "playlist_id": playlist_id
+            }
+        else:
+            return {"error": "Ошибка: Не удалось получить информацию о плейлисте."}
+
+    except Exception as e:
+        log_error(url, e, 1111, "fetch yt playlist")
+        return {"error": f"Ошибка при извлечении плейлиста: {str(e)}"}

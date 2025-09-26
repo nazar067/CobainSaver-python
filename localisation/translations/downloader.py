@@ -1,8 +1,8 @@
 translations = {
     "large_content": {
-        "en": "⚠️This content is over 50MB",
-        "ru": "⚠️Данный контент больше 50МБ",
-        "uk": "⚠️Цей контент більше 50МБ",
+        "en": "⚠️This content is over 2000MB",
+        "ru": "⚠️Данный контент больше 2000МБ",
+        "uk": "⚠️Цей контент більше 2000МБ",
     },
     "unavaliable_content": {
         "en": "❌This content is unavaliable or hidden",
@@ -34,4 +34,19 @@ translations = {
         "ru": "◀️ Назад",
         "uk": "◀️ Назад",
     },
+    "unsupport_format": {
+        "en": "⚠️ Unsupported file format.",
+        "ru": "⚠️ Неподдерживаемый формат файла.",
+        "uk": "⚠️ Непідтримуваний формат файлу.",
+    },
+    "time_code":{
+        "en": "Start with",
+        "ru": "Начало с",
+        "uk": "Початок з",
+    },
+    "warning_long_video":{
+        "en": "⚠️This video is very long, processing may take up to 30 minutes.",
+        "ru": "⚠️Это видео очень длинное, обработка может длится до 30 минут.",
+        "uk": "⚠️Це відео дуже довге, обробка може зайняти до 30 хвилин.",
+    }
 }

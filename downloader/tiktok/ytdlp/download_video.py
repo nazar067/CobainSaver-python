@@ -4,8 +4,11 @@ from aiogram import Bot, Dispatcher
 import yt_dlp
 import subprocess
 
+from constants.errors.tiktok_api_errors import UNSUPPORTED_URL
 from downloader.media import del_media_content, send_video, send_audio
 from downloader.playlist import process_music_playlist
+from downloader.tiktok.gallerydl.download_photo import download_photo_gallerydl
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
@@ -14,14 +17,11 @@ from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
 from utils.service_identifier import identify_service
 
-async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
+async def download_video_ytdlp(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
     random_name = await get_random_file_name("")
-
-    video_extensions = ["mp4", "mov", "avi", "webm", "mkv", "flv"]
-    audio_extensions = ["mp3", "wav", "m4a", "aac", "ogg", "flac", "opus"]
 
     ydl_opts = {
         'quiet': True,
@@ -29,22 +29,14 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         'outtmpl': os.path.join(save_folder, random_name + "%(ext)s"),
     }
 
-    def extract_music_info():
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            return ydl.extract_info(url, download=True)
-    def extract_info():
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            return ydl.extract_info(url, download=False)
     def download_video():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=True)
 
     try:
-        video_info = await asyncio.to_thread(extract_info)
+        video_info = await asyncio.to_thread(download_video)
 
         file_ext = video_info.get("ext", "").lower()
-        is_audio = file_ext in audio_extensions
-        is_video = file_ext in video_extensions
         type = video_info.get("_type", "")
 
         if type == "playlist":
@@ -63,19 +55,8 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
                 text=translations["large_content"][chat_language],
                 reply_to_message_id=msg_id
             )
-        if is_video:
-            await bot.send_message(
-                chat_id=chat_id,
-                business_connection_id=business_connection_id,
-                text=translations["downloading"][chat_language],
-                reply_to_message_id=msg_id
-            )
 
         file_path = os.path.join(save_folder, f"{random_name}{file_ext}")
-        if is_video:
-            await asyncio.to_thread(download_video)
-        else:
-            audio_info = await asyncio.to_thread(extract_music_info)
 
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         if file_size_mb >= 1999:
@@ -93,42 +74,16 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
         else:
             thumbnail_path = None
 
-        if is_audio and file_ext == "opus":
-            mp3_path = os.path.join(save_folder, f"{random_name}.mp3")
-            ffmpeg_command = [
-                "ffmpeg", "-y", "-i", file_path,
-                "-vn", "-ab", "192k", "-ar", "44100", "-f", "mp3", mp3_path
-            ]
-            subprocess.run(ffmpeg_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-            await del_media_content(file_path)
-
-            file_path = mp3_path
-        
-        if is_audio:
-            return await send_audio(
-                bot, chat_id, msg_id, chat_language,
-                business_connection_id, file_path, title,
-                thumbnail_path, int(duration), author=audio_info.get("uploader", "CobainSaver")
-            )
-
-        if is_video:
-            return await send_video(
-                bot, chat_id, msg_id, chat_language,
-                business_connection_id, file_path, title,
-                thumbnail_path, int(duration)
-            )
-
-        # fallback
-        await del_media_content(file_path)
-        if thumbnail_path:
-            await del_media_content(thumbnail_path)
-        return await bot.send_message(
-            chat_id=chat_id,
-            business_connection_id=business_connection_id,
-            text=translations["unsupport_format"][chat_language],
-            reply_to_message_id=msg_id
+        return await send_video(
+            bot, chat_id, msg_id, chat_language,
+            business_connection_id, file_path, title,
+            thumbnail_path, int(duration)
         )
 
     except Exception as e:
+        if UNSUPPORTED_URL in str(e) and "/photo/" in str(e):
+            return await download_photo_gallerydl(bot, url, chat_id, dp, business_connection_id, msg_id)
+
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], e, chat_language, chat_id, url))
         log_error(url, e, chat_id, await identify_service(url))
+        return False

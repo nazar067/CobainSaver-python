@@ -42,8 +42,18 @@ async def init_db(pool):
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS threads (
                 id SERIAL PRIMARY KEY,
-                chat_id BIGINT NOT NULL,
+                adder_user_id BIGINT NOT NULL,
+                second_user_id BIGINT NOT NULL,
+                business_connection_id TEXT NOT NULL,
                 topic_id BIGINT NOT NULL,
+                timestamp TIMESTAMP DEFAULT NOW()
+            )
+        """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_marks (
+                id SERIAL PRIMARY KEY,
+                chat_id BIGINT NOT NULL,
+                mark INT NOT NULL,
                 timestamp TIMESTAMP DEFAULT NOW()
             )
         """)

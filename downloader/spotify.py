@@ -4,7 +4,9 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from downloader.youtube.youtube_music import process_youtube_music
 from downloader.playlist import process_music_playlist
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
+from logs.write_server_errors import log_error
 from utils.spotify_helper import extract_track_id, get_spotify_client
 from localisation.translations.downloader import translations
 
@@ -28,7 +30,7 @@ async def find_song_on_ytmusic(query: str) -> str:
             return f"https://music.youtube.com/watch?v={video_id}"
         return None
     except Exception as e:
-        logging.error(f"❌ Ошибка при поиске YouTube Music: {str(e)}")
+        log_error("url", e, 1111, "find song on ytmusic")
         return None
 
 async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: str = None, msg_id = None):
@@ -52,5 +54,5 @@ async def process_spotify_track(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         print(f"✅ Найдено: {youtube_music_url}")
         return await process_youtube_music(bot, youtube_music_url, chat_id, dp, business_connection_id, msg_id)
     else:
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], "Not found in YouTube", chat_language, chat_id, url))
     

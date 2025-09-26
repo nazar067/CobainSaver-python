@@ -1,8 +1,8 @@
 translations = {
     "cobain_news": {
-        "en": '<b><a href="https://t.me/cobainSaver">Bot news and updates</a></b>',
-        "ru": '<b><a href="https://t.me/cobainSaver">Hовости и обновления бота</a></b>',
-        "uk": '<b><a href="https://t.me/cobainSaver">Новини та оновлення бота</a></b>',
+        "en": '<b><a href="https://t.me/cobainSaver">Video size increased from 50MB to 2GB</a></b>',
+        "ru": '<b><a href="https://t.me/cobainSaver">Размер видео увеличен с 50МБ до 2ГБ</a></b>',
+        "uk": '<b><a href="https://t.me/cobainSaver">Розмір відео збільшено з 50МБ до 2ГБ</a></b>',
     },
     "dice": {
         "en": '<b><a href="https://t.me/gambleHouse_bot">Play dice with your friends🎲</a></b>',

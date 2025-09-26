@@ -1,5 +1,6 @@
 from aiogram.types import CallbackQuery
 from downloader.playlist import process_music_playlist
+from utils.soundcloud_helper import get_soundcloud_playlist_url
 
 
 async def playlist_pagination(callback: CallbackQuery, dp):
@@ -9,6 +10,9 @@ async def playlist_pagination(callback: CallbackQuery, dp):
     business_connection_id = callback.message.business_connection_id
     if source == "Y":
         await process_music_playlist(callback.bot, dp, business_connection_id, int(chat_id), f"https://music.youtube.com/playlist?list={playlist_id}", int(new_page), int(msg_id))
+    elif source == "C":
+        playlist_url = await get_soundcloud_playlist_url(playlist_id)
+        await process_music_playlist(callback.bot, dp, business_connection_id, int(chat_id), playlist_url, int(new_page), int(msg_id))
     elif source == "S":
         if content_type == "a":
             await process_music_playlist(callback.bot, dp, business_connection_id, int(chat_id), f"https://open.spotify.com/album/{playlist_id}", int(new_page), int(msg_id))

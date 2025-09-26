@@ -16,8 +16,10 @@ async def extract_twitter_data(url: str) -> dict:
 
     if "mediaURLs" not in data:
         return {"error": "Медиафайлы не найдены"}
-
+    
+    media_types = [item.get("type", "unknown") for item in data.get("media_extended", [])]
     return {
         "media_urls": data.get("mediaURLs", []),
         "caption": data.get("text", "Twitter Post"),
+        "types": media_types,
     }

@@ -5,6 +5,8 @@ from downloader.tiktok.download_video import download_and_send_tiktok_video
 
 
 async def send_tiktok_video(bot: Bot, chat_id: int, chat_language, business_connection_id: str, data: dict, save_folder, msg_id, pool, is_Ads=False):
+    if data["video_url"] == "":
+        return False
     attempt = await send_video(
         bot,
         chat_id,

@@ -7,14 +7,15 @@ from aiogram import Bot, Dispatcher
 
 from downloader.media import del_media_content, send_audio
 from downloader.playlist import process_music_playlist
+from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from user.get_user_path import get_user_path
 from localisation.translations.downloader import translations
 from utils.fetch_data import fetch_youtube_music_data
 
-MAX_SIZE_MB = 50 
+MAX_SIZE_MB = 1999 
 
-async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: Optional[str] = None, msg_id = None) -> str:
+async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id: Optional[str] = None, msg_id = None, short_track_name = None) -> str:
     """
     Обрабатывает скачивание аудио с YouTube Music и отправляет его пользователю.
     """
@@ -28,14 +29,23 @@ async def process_youtube_music(bot: Bot, url: str, chat_id: int, dp: Dispatcher
     
     chat_language = await get_language(pool, chat_id)
 
+    error_text = translations["unavaliable_content"][chat_language]
+    if short_track_name != None:
+        error_text = short_track_name + " - " + translations["unavaliable_content"][chat_language]
+
     if "error" in data:
-        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id)
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=error_text, reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
+        return
+    elif "large" in data:
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=data['audio_title'] + " - " + translations["large_content"][chat_language], reply_to_message_id=msg_id)
+        return
 
     file_path = data["file_path"]
     audio_title = data["audio_title"]
     duration = data["duration"]
     thumbnail_path = data["thumbnail_path"]
     author = data["author"]
+
     if os.path.exists(file_path):
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
         if file_size_mb <= MAX_SIZE_MB:

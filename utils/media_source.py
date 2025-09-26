@@ -1,14 +1,18 @@
 from aiogram.types import InputMediaPhoto, InputMediaVideo
 from aiogram.types.input_file import FSInputFile
 from typing import Optional, Union, List
+from PIL import Image
 import os
+from logs.write_server_errors import log_error
 
-def get_media_source(media_input: Optional[Union[str, List[str], List[Union[InputMediaPhoto, InputMediaVideo]]]]) -> Optional[Union[str, FSInputFile, List[Union[InputMediaPhoto, InputMediaVideo]]]]:
+
+async def get_media_source(media_input: Optional[Union[str, List[str], List[Union[InputMediaPhoto, InputMediaVideo]]]], video_size = [0, 1]) -> Optional[Union[str, FSInputFile, List[Union[InputMediaPhoto, InputMediaVideo]]]]:
     """
-    Определяет тип переданных данных: одиночный файл/ссылку или список файлов/ссылок.
-    - Если передана строка, возвращает либо URL, либо FSInputFile.
-    - Если передан список `InputMediaPhoto` или `InputMediaVideo`, возвращает его без изменений.
-    - Если передан список путей или ссылок, возвращает список объектов `InputMediaPhoto` или `InputMediaVideo`.
+    Обрабатывает медиа: строку (ссылка/путь) или список.
+    - Если строка: возвращает URL или FSInputFile.
+    - Если список объектов InputMediaPhoto/InputMediaVideo — возвращает как есть.
+    - Если список строк (путь/ссылка) — собирает InputMediaPhoto/InputMediaVideo.
+      При обработке локальных изображений ресайзит до 320x320.
     """
 
     if not media_input:
@@ -20,7 +24,11 @@ def get_media_source(media_input: Optional[Union[str, List[str], List[Union[Inpu
     if isinstance(media_input, str):
         if media_input.startswith("http"):
             return media_input
-        return FSInputFile(media_input) if os.path.exists(media_input) else None
+        if os.path.exists(media_input):
+            if media_input.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+                await resize_thumbnail(media_input, video_size[0], video_size[1])
+            return FSInputFile(media_input)
+        return None
 
     elif isinstance(media_input, list):
         media_album = []
@@ -28,14 +36,30 @@ def get_media_source(media_input: Optional[Union[str, List[str], List[Union[Inpu
         for media_path in media_input:
             if isinstance(media_path, str):
                 if media_path.startswith("http"):
-                    if any(media_path.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
+                    if media_path.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
                         media_album.append(InputMediaPhoto(media=media_path))
-                    elif any(media_path.lower().endswith(ext) for ext in [".mp4", ".mov", ".mkv"]):
+                    elif media_path.lower().endswith((".mp4", ".mov", ".mkv")):
                         media_album.append(InputMediaVideo(media=media_path))
                 elif os.path.exists(media_path):
-                    if any(media_path.lower().endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp"]):
+                    if media_path.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+                        await resize_thumbnail(media_path, video_size[0], video_size[1])
                         media_album.append(InputMediaPhoto(media=FSInputFile(media_path)))
-                    elif any(media_path.lower().endswith(ext) for ext in [".mp4", ".mov", ".mkv"]):
+                    elif media_path.lower().endswith((".mp4", ".mov", ".mkv")):
                         media_album.append(InputMediaVideo(media=FSInputFile(media_path)))
 
         return media_album if media_album else None
+
+    return None
+
+
+async def resize_thumbnail(path: str, width, height):
+    try:
+        with Image.open(path) as img:
+            img = img.convert("RGB")
+            if(height > width):
+                img = img.resize((180, 320))
+            elif(width > height):
+                img = img.resize((320, 180))
+            img.save(path, "JPEG", quality=80)
+    except Exception as e:
+        log_error("url", e, 1111, "resize thumbnail")

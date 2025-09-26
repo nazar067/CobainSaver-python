@@ -1,8 +1,11 @@
 import asyncio
 import logging
 from aiogram import Bot
+from aiogram.types import FSInputFile
+from downloader.media import send_video
 from localisation.get_language import get_language
 from localisation.translations.general import translations
+from logs.write_server_errors import log_error
 
 async def send_message_to_chats(bot: Bot, dp):
     pool = dp["db_pool"]
@@ -16,4 +19,4 @@ async def send_message_to_chats(bot: Bot, dp):
             await bot.send_message(chat_id=chat_id, text=translations["update"][chat_language], parse_mode="HTML", disable_web_page_preview=True)
             await asyncio.sleep(0.5)
         except Exception as e:
-            logging.error(f"Failed to send message to chat {chat_id}: {e}")
+            log_error("url", e, chat_id, "send message to users")
