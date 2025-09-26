@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 from typing import Optional
 from aiogram import Bot
 from aiogram.types import FSInputFile
@@ -123,6 +124,44 @@ async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, busine
     finally:
         await del_media_group(file_path)
         
+async def send_gif(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, parse_mode = None) -> None:
+    """
+    Отправляет скачанное видео в чат (по ссылке или из файла).
+    """
+    try:
+        await send_bot_action(bot, chat_id, business_connection_id, "video")
+        p = Path(file_path)
+        animation = FSInputFile(p, filename=p.name)
+        title = await get_clear_name(title, 800)
+        if parse_mode == None:
+            parse_mode = "HTML" if len(title) > 174 else None
+        await bot.send_animation(
+            business_connection_id=business_connection_id,
+            chat_id=chat_id,    
+            animation=animation,
+            caption=title,
+            reply_to_message_id=msg_id,
+            parse_mode=parse_mode,
+            request_timeout=1800,
+        )
+        return True
+    except Exception as e:
+        log_error("url", e, chat_id, "send animation")
+        if NOT_RIGHTS in str(e):
+            return False
+        if MSG_TO_REPLY_NOT_FOUND in str(e):
+            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["msg_to_reply_not_found"][chat_language])
+            return False
+        await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["send_content_error"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["send_content_error"][chat_language], str(e), chat_language, chat_id, file_path))
+        return False
+    finally:
+        if file_path != "premium_guide.mp4":
+            if not file_path.startswith("http"):
+                await del_media_content(file_path)
+
+        if thumbnail_path_or_url and not thumbnail_path_or_url.startswith("http"):
+            await del_media_content(thumbnail_path_or_url) 
+
 async def del_media_content(file_path):
     if os.path.exists(file_path):
         os.remove(file_path)
