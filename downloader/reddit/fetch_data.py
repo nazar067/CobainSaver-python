@@ -18,6 +18,7 @@ from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
+from utils.get_url import resolve_reddit_url
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) "
       "Gecko/20100101 Firefox/124.0")
@@ -148,24 +149,33 @@ async def download_reddit_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher
         chat_language = await get_language(pool, chat_id)
         dest_dir = await get_user_path(chat_id)
         _ensure_dir(dest_dir)
-        p = urlparse(url)
 
-        # 1) Прямые ссылки на i.redd.it (картинка) — просто качаем
+        # --- Новая часть: нормализуем ссылку ---
+        canonical, json_url = await resolve_reddit_url(url)
+        p = urlparse(canonical)
+
+        # 1) Прямые ссылки на i.redd.it (картинка)
         if p.netloc in {"i.redd.it", "preview.redd.it"}:
             name = await get_random_file_name("")
             if not os.path.splitext(name)[1]:
                 name += ".jpg"
             out = os.path.join(dest_dir, name)
-            await download_file(url, out)
+            await download_file(canonical, out)
             return [out]
 
-        # 2) Прямые ссылки на v.redd.it (видео) — предполагаем fallback и пробуем аудио
+        # 2) Прямые ссылки на v.redd.it (видео)
         if p.netloc == "v.redd.it":
-            return await download_video_content(bot, url, chat_id, dp, business_connection_id, msg_id)
+            return await download_video_content(bot, canonical, chat_id, dp, business_connection_id, msg_id)
 
-        # 3) Ссылка на пост reddit.com/... — парсим JSON
-        if "reddit.com" in p.netloc:
-            post = await _get_json_for_post(url)
+        # 3) Ссылка на пост reddit.com/... — берём JSON
+        if json_url:
+            resp = SESSION.get(json_url, timeout=20)
+            ctype = resp.headers.get("Content-Type", "")
+            if "application/json" not in ctype:
+                raise ValueError(f"Not a JSON response (Content-Type={ctype})")
+
+            data = resp.json()
+            post = data[0]["data"]["children"][0]["data"]
             if not post:
                 raise ValueError("Не удалось получить JSON поста")
 
@@ -182,21 +192,36 @@ async def download_reddit_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher
                 out_path = os.path.join(dest_dir, f"{random_name}{ext}")
                 await download_file(media_url, out_path)
                 if ext.lower() in {".gif", ".gifv"}:
-                    return await send_gif(bot, chat_id, msg_id, chat_language, business_connection_id, out_path, post.get("title", ""), None, "HTML")
+                    return await send_gif(bot, chat_id, msg_id, chat_language, business_connection_id,
+                                          out_path, post.get("title", ""), None, "HTML")
                 else:
-                    await send_social_media_album(bot, chat_id, chat_language, business_connection_id, out_path, post.get("title", ""), msg_id, False, pool=pool)
+                    await send_social_media_album(bot, chat_id, chat_language, business_connection_id,
+                                                  out_path, post.get("title", ""), msg_id, False, pool=pool)
 
             # GIF через reddit_video_preview (будет mp4)
             if post.get("preview", {}).get("reddit_video_preview"):
-                return await _download_reddit_video(bot, chat_id, msg_id, chat_language, business_connection_id, post, dest_dir, random_name)
+                return await _download_reddit_video(bot, chat_id, msg_id, chat_language,
+                                                    business_connection_id, post, dest_dir, random_name)
 
             # Видео reddit
             if (post.get("secure_media") or post.get("media")) and (
                 (post.get("secure_media") or {}).get("reddit_video") or
                 (post.get("media") or {}).get("reddit_video")
             ):
-                return await download_video_content(bot, url, chat_id, dp, business_connection_id, msg_id)
+                return await download_video_content(bot, canonical, chat_id, dp, business_connection_id, msg_id)
 
     except Exception as e:
         log_error(url, e, chat_id, "Reddit")
-        return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], str(e), chat_language, chat_id, url))
+        return await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["unavaliable_content"][chat_language],
+            reply_to_message_id=msg_id,
+            reply_markup=await send_log_keyboard(
+                translations["unavaliable_content"][chat_language],
+                str(e),
+                chat_language,
+                chat_id,
+                url
+            )
+        )
