@@ -64,7 +64,8 @@ async def analyze_services(links_data):
     services = {
         "YouTube": [0, 0], "YouTubeMusic": [0, 0], "Spotify": [0, 0],
         "TikTok": [0, 0], "Twitter/X": [0, 0], "Instagram": [0, 0],
-        "Pinterest": [0, 0], "PornHub": [0, 0], "Twitch": [0, 0], "SoundCloud": [0, 0], "Another": [0, 0]
+        "Pinterest": [0, 0], "PornHub": [0, 0], "Twitch": [0, 0], "SoundCloud": [0, 0], 
+        "Reddit": [0, 0], "Another": [0, 0]
     }
 
     for row in links_data:
