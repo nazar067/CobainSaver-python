@@ -7,7 +7,7 @@ from db.links import insert_link_into_db, update_link_status
 from downloader.base_ytdlp_downloader import fetch_base_media
 from downloader.instagram.fetch_data import fetch_instagram_content
 from downloader.pinterest.fetch_data import fetch_pinterest_content
-from downloader.reddit import fetch_reddit_post
+from downloader.reddit.photo_download import download_photo_content
 from downloader.spotify import process_spotify_track
 from downloader.tiktok.gallerydl.download_photo import download_photo_gallerydl
 from downloader.tiktok.process_tiktok import fetch_tiktok_video
@@ -62,6 +62,8 @@ async def choose_service(bot: Bot, message: Message, business_connection_id, dp:
                 is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
             elif service == "Another":
                 is_success = await fetch_base_media(bot, url, chat_id, dp, business_connection_id, msg_id)
+            elif service == "Reddit":
+                is_success = await download_photo_content(bot, url, chat_id, dp, business_connection_id, msg_id)
             if is_success == True:
                 await update_link_status(dp, chat_id, msg_id, True)
                 await send_ad(dp, chat_id, bot, business_connection_id)
