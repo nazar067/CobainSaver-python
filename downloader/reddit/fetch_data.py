@@ -195,8 +195,9 @@ async def download_reddit_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher
                     return await send_gif(bot, chat_id, msg_id, chat_language, business_connection_id,
                                           out_path, post.get("title", ""), None, "HTML")
                 else:
+                    list = [out_path]
                     await send_social_media_album(bot, chat_id, chat_language, business_connection_id,
-                                                  out_path, post.get("title", ""), msg_id, False, pool=pool)
+                                                  list, post.get("title", ""), msg_id, False, pool=pool)
 
             # GIF через reddit_video_preview (будет mp4)
             if post.get("preview", {}).get("reddit_video_preview"):
