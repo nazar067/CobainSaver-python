@@ -18,9 +18,9 @@ async def generate_playlist_keyboard(tracks, source, playlist_id, current_page, 
     pool = dp["db_pool"]
     builder = InlineKeyboardBuilder()
     chat_language = await get_language(pool, chat_id)
-    # Добавляем кнопки треков
+    #Добавляем кнопки треков
     for track in tracks:
-        clear_tittle = await get_name_for_button_data(track["title"], 7)
+        clear_tittle = await get_name_for_button_data(track["title"], 4)
         builder.button(
             text=track["title"],
             callback_data=f"{source} {track['id']} {playlist_id} {clear_tittle}"
