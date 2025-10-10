@@ -4,6 +4,7 @@ from logs.write_server_errors import setup_logging
 from polls.send_review_poll import daily_feedback_task
 from polls.write_review_result import handle_poll_answer
 from utils.auto_del import delete_old_files
+from utils.task_queue import start_task_queue
 setup_logging()
 
 import asyncio
@@ -118,6 +119,8 @@ async def main():
     await set_bot_description(bot)
     await set_bot_commands(bot)
     await set_bot_short_description(bot)
+
+    await start_task_queue(max_concurrency=5) 
     
     asyncio.create_task(check_and_update_ads(pool))
     asyncio.create_task(delete_old_files())
