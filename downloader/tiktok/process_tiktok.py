@@ -3,6 +3,7 @@ from aiogram import Bot, Dispatcher
 
 from api.tiktok_api import is_server_alive
 from config import TIKTOK_API
+from constants.errors.tiktok_api_errors import URL_PARSING_FAILED
 from downloader.send_album import send_social_media_album
 from downloader.tiktok.download_audio import download_and_send_tiktok_audio
 from downloader.tiktok.extract_tiktok_data import extract_tiktok_data
@@ -38,6 +39,8 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
             await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language], reply_to_message_id=msg_id)
             return "large"
         elif "error" in data:
+            if URL_PARSING_FAILED in data["error"]:
+                return await transfer_to_yt_dlp(is_audio, bot, url, chat_id, dp, business_connection_id, msg_id)
             return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
         
         if data["type"] == "photo":
@@ -65,12 +68,15 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         if is_media_success == True and is_audio_success == True:
             return True
     else:
-        is_media_success = await download_video_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
-        if is_audio:
-            is_audio_success = await download_audio_ytlp(bot, url, chat_id, dp, business_connection_id, msg_id)
-        else:
-            is_audio_success = True
+        return await transfer_to_yt_dlp(is_audio, bot, url, chat_id, dp, business_connection_id, msg_id)
+        
+async def transfer_to_yt_dlp(is_audio: bool, bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
+    is_media_success = await download_video_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
+    if is_audio:
+        is_audio_success = await download_audio_ytlp(bot, url, chat_id, dp, business_connection_id, msg_id)
+    else:
+        is_audio_success = True
 
-        if is_media_success == True and is_audio_success == True:
-            return True
+    if is_media_success == True and is_audio_success == True:
+        return True
         

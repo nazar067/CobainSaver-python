@@ -50,7 +50,7 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
 
     if "data" not in data:
         log_error(url, chat_id=chat_id, service=await identify_service(url), string_error=data)
-        return {"error": "Контент не найден"}
+        return {"error": f"Контент не найден, {data}"}
     
     media_title = data["data"].get("title", "TikTok_Content")
     if media_title:
