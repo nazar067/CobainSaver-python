@@ -82,7 +82,9 @@ async def download_video_ytdlp(bot: Bot, url: str, chat_id: int, dp: Dispatcher,
 
     except Exception as e:
         if UNSUPPORTED_URL in str(e) and "/photo/" in str(e):
-            return await download_photo_gallerydl(bot, url, chat_id, dp, business_connection_id, msg_id)
+            photo_send = await download_photo_gallerydl(bot, url, chat_id, dp, business_connection_id, msg_id)
+            return {"is_success": photo_send,
+                    "type": "Photo"}
 
         await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], e, chat_language, chat_id, url))
         log_error(url, e, chat_id, await identify_service(url))

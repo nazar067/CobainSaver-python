@@ -7,6 +7,7 @@ from constants.errors.tiktok_api_errors import URL_PARSING_FAILED
 from downloader.send_album import send_social_media_album
 from downloader.tiktok.download_audio import download_and_send_tiktok_audio
 from downloader.tiktok.extract_tiktok_data import extract_tiktok_data
+from downloader.tiktok.gallerydl.download_auido import download_audio_gallerydl
 from downloader.tiktok.internet_video import send_tiktok_video
 from downloader.tiktok.ytdlp.download_audio import download_audio_ytlp
 from downloader.tiktok.ytdlp.download_video import download_video_ytdlp
@@ -72,7 +73,11 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         
 async def transfer_to_yt_dlp(is_audio: bool, bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     is_media_success = await download_video_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
-    if is_audio:
+    if is_audio and is_media_success["type"] == "Photo":
+        is_audio_success = await download_audio_gallerydl(bot, url, chat_id, dp, business_connection_id, msg_id)
+        if is_media_success["is_success"] == True:
+            is_media_success = True
+    elif is_audio:
         is_audio_success = await download_audio_ytlp(bot, url, chat_id, dp, business_connection_id, msg_id)
     else:
         is_audio_success = True

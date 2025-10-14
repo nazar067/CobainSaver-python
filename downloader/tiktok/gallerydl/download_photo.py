@@ -9,6 +9,7 @@ from keyboard import send_log_keyboard
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
+from utils.get_file_info import extract_index
 from utils.get_name import get_random_file_name
 from utils.service_identifier import identify_service
 from localisation.translations.downloader import translations
@@ -60,10 +61,11 @@ async def download_photo_gallerydl(bot: Bot, url: str, chat_id: int, dp: Dispatc
         new_paths = [os.path.join(save_dir, name) for name in new_names]
         new_paths = [p for p in new_paths if p.lower().endswith(IMAGE_EXTS)]
 
-        new_paths.sort()
-        new_paths.sort(key=lambda p: os.path.getmtime(p))
+        #new_paths.sort()
+        #new_paths.sort(key=lambda p: os.path.getmtime(p))
+        new_paths.sort(key=extract_index)
 
-        return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, new_paths, "test", msg_id, False, pool=pool)
+        return await send_social_media_album(bot, chat_id, chat_language, business_connection_id, new_paths, "", msg_id, False, pool=pool)
     except Exception as e:
         await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], e, chat_language, chat_id, url))
         log_error(url, e, chat_id, await identify_service(url))
