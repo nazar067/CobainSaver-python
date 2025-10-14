@@ -1,9 +1,6 @@
-import json
 import os
 import asyncio
 
-from typing import Optional, Dict, Any, List
-from gallery_dl import job
 from aiogram import Bot, Dispatcher
 from downloader.media import send_audio
 from localisation.get_language import get_language
@@ -11,7 +8,6 @@ from keyboard import send_log_keyboard
 from localisation.translations.downloader import translations
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
-from utils.get_file_info import extract_index
 from utils.get_name import get_random_file_name
 from utils.service_identifier import identify_service
 
