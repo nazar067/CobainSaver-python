@@ -1,5 +1,6 @@
 from datetime import datetime
 from aiogram.types import Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from admin.check_is_admin import is_user_admin
 from admin.send_to_users import send_message_to_chats
@@ -47,3 +48,15 @@ async def choose_command(bot, message: Message, dp, business_connection_id):
         else:
             date = datetime.now().date()
         await send_user_reviews(bot, pool, date)
+    if message.text.startswith("/topup"):
+        if not is_user_admin(user_id):
+            return
+        
+        amount = int(message.text.split(" ")[1])
+        builder = InlineKeyboardBuilder()
+        builder.button(
+                text="topup stars",
+                callback_data=f"pay:{amount}"
+        )
+
+        await bot.send_message(chat_id=chat_id, text="topup stars", reply_markup=builder.as_markup())
