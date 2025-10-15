@@ -2,6 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot
 from aiogram.types import FSInputFile
+from config import ADMIN_ID
 from downloader.media import send_video
 from localisation.get_language import get_language
 from localisation.translations.general import translations
@@ -20,3 +21,8 @@ async def send_message_to_chats(bot: Bot, dp):
             await asyncio.sleep(0.5)
         except Exception as e:
             log_error("url", e, chat_id, "send message to users")
+
+async def send_test_message_to_admin(bot: Bot, dp):
+    pool = dp["db_pool"]
+    chat_language = await get_language(pool, int(ADMIN_ID))
+    await bot.send_message(ADMIN_ID, translations["add_bot_to_private_chats"][chat_language], parse_mode="HTML")

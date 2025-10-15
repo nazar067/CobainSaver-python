@@ -3,7 +3,8 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from admin.check_is_admin import is_user_admin
-from admin.send_to_users import send_message_to_chats
+from admin.send_gifts import send_premium
+from admin.send_to_users import send_message_to_chats, send_test_message_to_admin
 from admin.statistics import send_statistics, send_user_reviews
 from keyboard import language_keyboard
 from localisation.get_language import get_language
@@ -60,3 +61,18 @@ async def choose_command(bot, message: Message, dp, business_connection_id):
         )
 
         await bot.send_message(chat_id=chat_id, text="topup stars", reply_markup=builder.as_markup())
+    if message.text.startswith("/test_premium"):
+        if not is_user_admin(user_id):
+            return
+        await send_test_message_to_admin(bot, dp)
+    if message.text.startswith("/send_premium"):
+        if not is_user_admin(user_id):
+            return
+        parts = message.text.split(" ")
+        # user_id = int(parts[1])
+        # months = int(parts[2])
+        # star = int(parts[3])
+        winner_id = 2017336354
+        months = 12
+        star = 2500
+        await send_premium(bot, dp, winner_id, months, star)
