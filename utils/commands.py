@@ -69,10 +69,7 @@ async def choose_command(bot, message: Message, dp, business_connection_id):
         if not is_user_admin(user_id):
             return
         parts = message.text.split(" ")
-        # user_id = int(parts[1])
-        # months = int(parts[2])
-        # star = int(parts[3])
-        winner_id = 2017336354
-        months = 12
-        star = 2500
+        winner_id = int(parts[1])
+        months = int(parts[2])
+        star = int(parts[3])
         await send_premium(bot, dp, winner_id, months, star)

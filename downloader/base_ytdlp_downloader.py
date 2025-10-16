@@ -26,11 +26,16 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
 
         video_extensions = ["mp4", "mov", "avi", "webm", "mkv", "flv"]
         audio_extensions = ["mp3", "wav", "m4a", "aac", "ogg", "flac", "opus"]
+        format_selector = (
+            "bv*[height<=720][ext=mp4]+ba/b[height<=720][ext=mp4]/b"
+        )
 
         ydl_opts = {
             'quiet': True,
             'http_headers': {'User-Agent': 'Mozilla/5.0'},
             'outtmpl': os.path.join(save_folder, random_name + "%(ext)s"),
+            "format": format_selector,
+            "merge_output_format": "mp4",
         }
 
         def extract_music_info():
