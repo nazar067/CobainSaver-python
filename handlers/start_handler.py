@@ -24,7 +24,7 @@ async def start_handler(bot: Bot, message: Message, dp: Dispatcher, business_con
         if not language_code:
             language_code = "en"
         await set_language(pool, chat_id, language_code)
-        chat_language = language_code
+        chat_language = await get_language(pool, chat_id)
     else:
         chat_language = await get_language(pool, chat_id)
     if message.from_user.is_premium and message.chat.type == "private":    
