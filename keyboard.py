@@ -105,3 +105,15 @@ async def send_log_keyboard(bot_message, message_error, chat_language, chat_id, 
     builder.button(text=erorr_translations["send_log_button"][chat_language], callback_data=f"error_file {log_path}")
     builder.adjust(1)
     return builder.as_markup()
+
+async def full_hd_quality_keyboard(chat_id: int, dp) -> InlineKeyboardMarkup:
+    pool = dp["db_pool"]
+    chat_language = await get_language(pool, chat_id)
+    builder = InlineKeyboardBuilder()
+    ads_text = "donwload in 1080p"
+    builder.button(
+        text=ads_text,
+        callback_data=f"pay:{1}"
+    )
+    builder.adjust(1)
+    return builder.as_markup()

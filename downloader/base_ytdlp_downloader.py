@@ -6,7 +6,7 @@ import subprocess
 
 from downloader.media import del_media_content, send_video, send_audio
 from downloader.playlist import process_music_playlist
-from keyboard import send_log_keyboard
+from keyboard import full_hd_quality_keyboard, send_log_keyboard
 from localisation.get_language import get_language
 from logs.write_server_errors import log_error
 from user.get_user_path import get_user_path
@@ -17,7 +17,6 @@ from utils.service_identifier import identify_service
 from utils.task_queue import enqueue
 
 async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
-    # НИЖЕ — просто перенесём ТВОЮ текущую логику в отдельную корутину и выполним её через очередь
     async def _process():
         pool = dp["db_pool"]
         chat_language = await get_language(pool, chat_id)
@@ -108,7 +107,6 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
                     "ffmpeg", "-y", "-i", file_path,
                     "-vn", "-ab", "192k", "-ar", "44100", "-f", "mp3", mp3_path
                 ]
-                # оставим как у тебя (блокирующий run), логика не меняется
                 subprocess.run(ffmpeg_command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
                 await del_media_content(file_path)
@@ -122,13 +120,22 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
                 )
 
             if is_video:
+                service = await identify_service(url)
+                if service == "PornHub":
+                    result = await send_video(
+                        bot, chat_id, msg_id, chat_language,
+                        business_connection_id, file_path, title,
+                        thumbnail_path, int(duration)
+                    )
+                    await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text="download in 1080", reply_to_message_id=msg_id, reply_markup=await full_hd_quality_keyboard(chat_id, dp))
+                    return result
+
                 return await send_video(
                     bot, chat_id, msg_id, chat_language,
                     business_connection_id, file_path, title,
                     thumbnail_path, int(duration)
                 )
 
-            # fallback
             await del_media_content(file_path)
             if thumbnail_path:
                 await del_media_content(thumbnail_path)
@@ -145,5 +152,4 @@ async def fetch_base_media(bot: Bot, url: str, chat_id: int, dp: Dispatcher, bus
                 await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], e, chat_language, chat_id, url))
             log_error(url, e, chat_id, await identify_service(url))
 
-    # 👇 ВАЖНО: теперь вся тяжёлая работа идёт ЧЕРЕЗ ОЧЕРЕДЬ
     return await enqueue(_process)
