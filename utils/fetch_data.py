@@ -51,6 +51,11 @@ async def fetch_youtube_data(url: str, user_folder: str, quality: str, chat_lang
         video_title = info_dict.get("title", "")
         video_id = info_dict.get("id", None)
         duration = info_dict.get("duration", 0)
+        if not isinstance(duration, int):
+            try:
+                duration = int(float(duration))
+            except (ValueError, TypeError):
+                duration = 0
 
         video_title = await remove_special_chars(video_title)
         if seconds > 0:
