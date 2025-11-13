@@ -11,7 +11,7 @@ from downloader.reddit.fetch_data import download_reddit_media
 from downloader.spotify import process_spotify_track
 from downloader.tiktok.gallerydl.download_photo import download_photo_gallerydl
 from downloader.tiktok.process_tiktok import fetch_tiktok_video
-from downloader.tiktok.ytdlp.download_audio import download_audio_ytlp
+from downloader.tiktok.ytdlp.download_audio import download_audio_ytdlp
 from downloader.x.fetch_data import fetch_twitter_content
 from downloader.youtube.youtube import process_youtube_video
 from downloader.youtube.youtube_music import process_youtube_music

@@ -15,7 +15,7 @@ from utils.get_name import get_random_file_name
 from localisation.translations.downloader import translations
 from utils.service_identifier import identify_service
 
-async def download_audio_ytlp(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
+async def download_audio_ytdlp(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)

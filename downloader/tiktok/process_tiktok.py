@@ -9,7 +9,7 @@ from downloader.tiktok.download_audio import download_and_send_tiktok_audio
 from downloader.tiktok.extract_tiktok_data import extract_tiktok_data
 from downloader.tiktok.gallerydl.download_auido import download_audio_gallerydl
 from downloader.tiktok.internet_video import send_tiktok_video
-from downloader.tiktok.ytdlp.download_audio import download_audio_ytlp
+from downloader.tiktok.ytdlp.download_audio import download_audio_ytdlp
 from downloader.tiktok.ytdlp.download_video import download_video_ytdlp
 from keyboard import send_log_keyboard
 from localisation.get_language import get_language
@@ -62,7 +62,7 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         if is_audio:
             is_audio_success = await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool)
             if is_audio_success == "No audio":
-                is_audio_success = await download_audio_ytlp(bot, url, chat_id, dp, business_connection_id, msg_id)
+                is_audio_success = await download_audio_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
         else:
             is_audio_success = True
         
@@ -71,17 +71,32 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     else:
         return await transfer_to_yt_dlp(is_audio, bot, url, chat_id, dp, business_connection_id, msg_id)
         
-async def transfer_to_yt_dlp(is_audio: bool, bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id):
-    is_media_success = await download_video_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
-    if is_audio and is_media_success["type"] == "Photo":
-        is_audio_success = await download_audio_gallerydl(bot, url, chat_id, dp, business_connection_id, msg_id)
-        if is_media_success["is_success"] == True:
-            is_media_success = True
-    elif is_audio:
-        is_audio_success = await download_audio_ytlp(bot, url, chat_id, dp, business_connection_id, msg_id)
-    else:
-        is_audio_success = True
+async def transfer_to_yt_dlp(
+    is_audio: bool,
+    bot: Bot,
+    url: str,
+    chat_id: int,
+    dp: Dispatcher,
+    business_connection_id,
+    msg_id
+):
+    raw_res = await download_video_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
 
-    if is_media_success == True and is_audio_success == True:
-        return True
+    if isinstance(raw_res, dict):
+        media_ok = bool(raw_res.get("is_success") or raw_res.get("success") or raw_res.get("ok"))
+        media_type = raw_res.get("type")
+    else:
+        media_ok = bool(raw_res)
+        media_type = None
+
+    audio_ok = True 
+
+    if is_audio:
+        if media_type == "Photo":
+            audio_ok = bool(await download_audio_gallerydl(bot, url, chat_id, dp, business_connection_id, msg_id))
+        else:
+            audio_ok = bool(await download_audio_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id))
+
+    return media_ok and audio_ok
+
         
