@@ -33,7 +33,7 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
     is_media_success = False
     is_audio_success = False
 
-    is_tikwm_alive = False #await is_server_alive(TIKTOK_API, 1)
+    is_tikwm_alive = await is_server_alive(TIKTOK_API, 1)
     if is_tikwm_alive:
         data = await extract_tiktok_data(url, pool, chat_id)
         if data == "large":
