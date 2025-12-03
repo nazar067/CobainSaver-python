@@ -77,7 +77,7 @@ async def download_video_ytdlp(bot: Bot, url: str, chat_id: int, dp: Dispatcher,
         return await send_video(
             bot, chat_id, msg_id, chat_language,
             business_connection_id, file_path, title,
-            thumbnail_path, int(duration)
+            thumbnail_path, int(duration), disableNotification=True
         )
 
     except Exception as e:

@@ -87,7 +87,7 @@ async def download_audio_ytdlp(bot: Bot, url: str, chat_id: int, dp: Dispatcher,
         return await send_audio(
             bot, chat_id, msg_id, chat_language,
             business_connection_id, file_path, title,
-            thumbnail_path, int(duration), author=audio_info.get("uploader", "CobainSaver")
+            thumbnail_path, int(duration), author=audio_info.get("uploader", "CobainSaver"), disableNotification=True
         )
 
     except Exception as e:

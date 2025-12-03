@@ -38,4 +38,5 @@ async def download_and_send_tiktok_audio(bot: Bot, chat_id: int, chat_language, 
         audio_thumbnail_path,
         data["audio_duration"],
         data["audio_author"],
+        disableNotification=True
     )

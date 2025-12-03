@@ -5,7 +5,7 @@ from downloader.media import send_media_group
 from utils.detect_type import detect_file_type
 from utils.get_name import get_clear_name
 
-async def send_social_media_album(bot, chat_id, chat_language, business_connection_id, media_list: list, caption: str, msg_id, isAds = True, pool = None, attempt = None):
+async def send_social_media_album(bot, chat_id, chat_language, business_connection_id, media_list: list, caption: str, msg_id, isAds = True, pool = None, attempt = None, disableNotification = False):
     """
     📩 Отправляет альбом из фото и видео (по 10 файлов за раз).
     Поддерживает TikTok и Twitter.
@@ -43,8 +43,8 @@ async def send_social_media_album(bot, chat_id, chat_language, business_connecti
         batch = media_album[i:i + batch_size]
         is_last = i + batch_size >= len(media_album)
         if is_last:
-            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list, attempt=attempt)
+            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, media_list, attempt=attempt, disableNotification=disableNotification)
         else:
-            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, "", attempt=attempt)
+            is_success = await send_media_group(bot, chat_id, msg_id, chat_language, business_connection_id, batch, "", attempt=attempt, disableNotification=disableNotification)
 
     return is_success

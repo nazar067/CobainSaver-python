@@ -13,7 +13,7 @@ from utils.get_file_info import get_video_width_height
 from utils.get_name import get_clear_name
 from utils.media_source import get_media_source
 
-async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None, parse_mode = None) -> None:
+async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id, file_path_or_url: str, title: str = None, thumbnail_path_or_url: Optional[str] = None, duration: int = None, attempt = None, parse_mode = None, disableNotification = False) -> None:
     """
     Отправляет скачанное видео в чат (по ссылке или из файла).
     """
@@ -37,7 +37,8 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             width=video_size[0],
             height=video_size[1],
             request_timeout=1800,
-            supports_streaming=True
+            supports_streaming=True,
+            disable_notification=disableNotification
         )
         return True
     except Exception as e:
@@ -60,7 +61,7 @@ async def send_video(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         if thumbnail_path_or_url and not thumbnail_path_or_url.startswith("http"):
             await del_media_content(thumbnail_path_or_url) 
         
-async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author) -> str:
+async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], file_path: str, title: str, thumbnail_path: Optional[str], duration: int, author, disableNotification = False) -> str:
     """
     Отправляет аудио в чат.
     """
@@ -81,7 +82,8 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
             reply_to_message_id=msg_id,
             caption='<a href="https://t.me/cobainSaver_bot"><i>by CobainSaver</i></a>',
             parse_mode="HTML",
-            request_timeout=1800
+            request_timeout=1800,
+            disable_notification=disableNotification
         )
         return True
 
@@ -99,7 +101,7 @@ async def send_audio(bot: Bot, chat_id: int, msg_id, chat_language, business_con
         if thumbnail_path:
             await del_media_content(thumbnail_path)
             
-async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path, attempt = None):
+async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, business_connection_id: Optional[str], media_album: str, file_path, attempt = None, disableNotification = False):
     try:
         await send_bot_action(bot, chat_id, business_connection_id, "photo")
         media = await get_media_source(media_album)
@@ -108,7 +110,8 @@ async def send_media_group(bot: Bot, chat_id: int, msg_id, chat_language, busine
             business_connection_id=business_connection_id, 
             media=media,
             reply_to_message_id=msg_id,
-            request_timeout=1800
+            request_timeout=1800, 
+            disable_notification=disableNotification
             )
         return True
     except Exception as e:

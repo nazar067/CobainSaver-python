@@ -80,7 +80,7 @@ async def download_audio_gallerydl(
         return await send_audio(
             bot, chat_id, msg_id, chat_language,
             business_connection_id, audio_path, "tiktok music",
-            None, 0, author="CobainSaver"
+            None, 0, author="CobainSaver", disableNotification=True
         )
 
     except Exception as e:
