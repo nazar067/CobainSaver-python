@@ -3,7 +3,7 @@ from aiogram import Bot, Dispatcher
 
 from api.tiktok_api import is_server_alive
 from config import TIKTOK_API
-from constants.errors.tiktok_api_errors import URL_PARSING_FAILED
+from constants.errors.tiktok_api_errors import API_ERROR, URL_PARSING_FAILED
 from downloader.send_album import send_social_media_album
 from downloader.tiktok.download_audio import download_and_send_tiktok_audio
 from downloader.tiktok.extract_tiktok_data import extract_tiktok_data
@@ -40,7 +40,7 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
             await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language], reply_to_message_id=msg_id)
             return "large"
         elif "error" in data:
-            if URL_PARSING_FAILED in data["error"]:
+            if URL_PARSING_FAILED in data["error"] or API_ERROR in data["error"]:
                 return await transfer_to_yt_dlp(is_audio, bot, url, chat_id, dp, business_connection_id, msg_id)
             return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
         
