@@ -46,10 +46,12 @@ async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, b
         
         if data["type"] == "photo":
             count_images = 0
-            for image in data["images"]:
-                random_name = f"{count_images} tiktok {uniq_id}" + await get_random_file_name("jpeg")
+            for media in data["images"]:
+                is_live = media["type"] == "live"
+                ext = "mp4" if is_live else "jpeg"
+                random_name = f"{count_images} tiktok {uniq_id}.{ext}"
                 save_path = f"{save_folder}/{random_name}"
-                await download_file(image, save_path)
+                await download_file(media["url"], save_path)
                 count_images += 1
             matching_files = [
                 os.path.join(save_folder, file) for file in os.listdir(save_folder) if f"tiktok {uniq_id}" in file

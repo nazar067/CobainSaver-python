@@ -51,18 +51,22 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
     if "data" not in data:
         log_error(url, chat_id=chat_id, service=await identify_service(url), string_error=data)
         return {"error": f"Контент не найден, {data}"}
-    
+
     media_title = data["data"].get("title", "TikTok_Content")
     if media_title:
         media_title = await get_clear_name(media_title, 760)
         if len(media_title) > 174:
             media_title = await format_as_expandable_quote(media_title)
 
+    images = data["data"].get("images", [])
+    live_images = data["data"].get("live_images", [])
+
+    merged_images = await merge_images_with_live(images, live_images)
     # 📸 Фото
     if "images" in data["data"]:
         return {
             "type": "photo",
-            "images": data["data"]["images"],
+            "images": merged_images,
             "title": media_title,
             "audio_url": data["data"].get("play", None),
             "audio_title": data["data"]["music_info"].get("title", "TikTok_Audio"),
@@ -99,3 +103,23 @@ async def extract_tiktok_data(url: str, pool, chat_id) -> dict:
         "audio_duration": data["data"]["music_info"].get("duration", 0),
         "audio_author": data["data"]["music_info"].get("author", "Unknown Artist"),
     }
+
+async def merge_images_with_live(images: list, live_images: list) -> list:
+    result = []
+
+    for i, img in enumerate(images):
+        live = live_images[i] if i < len(live_images) else None
+
+        if live:
+            result.append({
+                "type": "live",
+                "url": live
+            })
+        else:
+            result.append({
+                "type": "image",
+                "url": img
+            })
+
+    return result
+
