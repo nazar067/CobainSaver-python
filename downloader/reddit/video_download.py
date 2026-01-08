@@ -27,6 +27,7 @@ async def download_video_content(bot: Bot, url: str, chat_id: int, dp: Dispatche
         'quiet': True,
         'http_headers': {'User-Agent': 'Mozilla/5.0'},
         'outtmpl': os.path.join(save_folder, random_name + "%(ext)s"),
+        'cookiefile': 'reddit_cookies.txt',
     }
 
     def download_video():
