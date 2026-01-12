@@ -11,33 +11,24 @@ async def get_music_size(bit_rate_kbps: int, duration_seconds: int) -> float:
 async def get_video_width_height(
     media: Optional[Union[str, FSInputFile, List[Union[InputMediaPhoto, InputMediaVideo]]]]
 ) -> Optional[Tuple[int, int]]:
-    """
-    Определяет (width, height) видео.
-    Поддерживает:
-      - str: путь к видео
-      - FSInputFile: локальный файл
-      - список InputMediaVideo: берём первый элемент
-    Требует установленного ffprobe (часть ffmpeg).
-    """
     if media is None:
         return None
 
     path = None
 
-    # Список
+    # list
     if isinstance(media, list) and media:
         first = media[0]
         if isinstance(first, InputMediaVideo):
             if isinstance(first.media, str) and os.path.exists(first.media):
                 path = first.media
         elif isinstance(first, InputMediaPhoto):
-            return None  # это фото, не видео
+            return None
 
-    # Строка
+    # str
     if isinstance(media, str) and os.path.exists(media):
         path = media
 
-    # FSInputFile
     if isinstance(media, FSInputFile) and os.path.exists(media.path):
         path = media.path
 
@@ -45,7 +36,6 @@ async def get_video_width_height(
         return None
 
     try:
-        # вызываем ffprobe
         result = subprocess.run(
             [
                 "ffprobe",
@@ -60,10 +50,22 @@ async def get_video_width_height(
             text=True,
             check=True,
         )
-        w, h = result.stdout.strip().split("x")
-        return int(w), int(h)
-    except Exception:
-        return None
+
+        out = (result.stdout or "").strip()
+        if not out:
+            return None
+
+        first_line = out.splitlines()[0].strip()
+        m = re.search(r"(\d+)\s*x\s*(\d+)", first_line)
+        if not m:
+            return None
+
+        w, h = int(m.group(1)), int(m.group(2))
+        return w, h
+
+    except Exception as ex:
+        print(ex)
+        return 180, 320
     
 def extract_index(path):
     name = os.path.basename(path)
