@@ -47,22 +47,42 @@ async def split_time_code_and_video(url: str):
     parsed = urlparse(url)
     query_params = parse_qs(parsed.query)
 
+    def _parse_time_to_seconds(t: str) -> int:
+        if not t:
+            return 0
+        t = t.strip().lower()
+
+        if t.isdigit():
+            return int(t)
+
+        m = re.fullmatch(r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", t)
+        if m and any(g is not None for g in m.groups()):
+            h = int(m.group(1) or 0)
+            mn = int(m.group(2) or 0)
+            s = int(m.group(3) or 0)
+            return h * 3600 + mn * 60 + s
+
+        total = 0
+        for val, unit in re.findall(r"(\d+)\s*([hms])", t):
+            v = int(val)
+            if unit == "h":
+                total += v * 3600
+            elif unit == "m":
+                total += v * 60
+            else:
+                total += v
+        return total
+
     time_code = "0"
-    if "t" in query_params:
-        time_value = query_params["t"][0]
-        if time_value.endswith("s"):
-            time_value = time_value[:-1]
-        time_code = time_value
+    if "t" in query_params and query_params["t"]:
+        raw_t = query_params["t"][0]
+        time_code = str(_parse_time_to_seconds(raw_t))
 
     query_params.pop("t", None)
-
     new_query = urlencode(query_params, doseq=True)
     url_without_time_code = urlunparse(parsed._replace(query=new_query))
 
-    return {
-        "url": url_without_time_code,
-        "time_code": time_code
-    }
+    return {"url": url_without_time_code, "time_code": time_code}
 
 async def _extract_redirect_from_html(html_text: str, base_url: str) -> str | None:
     # 1) meta refresh
