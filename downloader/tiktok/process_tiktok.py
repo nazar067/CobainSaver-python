@@ -1,8 +1,7 @@
 import os
+
 from aiogram import Bot, Dispatcher
 
-from api.tiktok_api import is_server_alive
-from config import TIKTOK_API
 from constants.errors.tiktok_api_errors import API_ERROR, URL_PARSING_FAILED
 from downloader.send_album import send_social_media_album
 from downloader.tiktok.download_audio import download_and_send_tiktok_audio
@@ -13,66 +12,176 @@ from downloader.tiktok.ytdlp.download_audio import download_audio_ytdlp
 from downloader.tiktok.ytdlp.download_video import download_video_ytdlp
 from keyboard import send_log_keyboard
 from localisation.get_language import get_language
-from user.get_user_path import get_user_path
 from localisation.translations.downloader import translations
+from user.get_user_path import get_user_path
 from utils.fetch_data import download_file
 from utils.get_file_info import extract_index
 from utils.get_name import get_random_file_name
 from utils.get_settings import get_settings
 
-async def fetch_tiktok_video(bot: Bot, url: str, chat_id: int, dp: Dispatcher, business_connection_id, msg_id) -> None:
+
+async def fetch_tiktok_video(
+    bot: Bot,
+    url: str,
+    chat_id: int,
+    dp: Dispatcher,
+    business_connection_id,
+    msg_id
+) -> None:
     """
-    Главная функция: извлекает данные, скачивает и отправляет TikTok-контент (видео или фото).
+    Главная функция: извлекает данные, скачивает и отправляет
+    TikTok-контент (видео или фото).
+
+    Сначала пытаемся получить контент через TikWM.
+    Если TikWM недоступен или возвращает связанную с API ошибку,
+    используем yt-dlp.
     """
     pool = dp["db_pool"]
     chat_language = await get_language(pool, chat_id)
     save_folder = await get_user_path(chat_id)
     settings = await get_settings(pool, chat_id)
     uniq_id = await get_random_file_name("")
+
     is_audio = settings["send_tiktok_music"]
     is_media_success = False
     is_audio_success = False
 
-    is_tikwm_alive = await is_server_alive(TIKTOK_API, 1)
-    if is_tikwm_alive:
+    # Сразу пробуем TikWM, без предварительного health-check.
+    try:
         data = await extract_tiktok_data(url, pool, chat_id)
-        if data == "large":
-            await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["large_content"][chat_language], reply_to_message_id=msg_id)
-            return "large"
-        elif "error" in data:
-            if URL_PARSING_FAILED in data["error"] or API_ERROR in data["error"]:
-                return await transfer_to_yt_dlp(is_audio, bot, url, chat_id, dp, business_connection_id, msg_id)
-            return await bot.send_message(chat_id=chat_id, business_connection_id=business_connection_id, text=translations["unavaliable_content"][chat_language], reply_to_message_id=msg_id, reply_markup=await send_log_keyboard(translations["unavaliable_content"][chat_language], data["error"], chat_language, chat_id, url))
-        
-        if data["type"] == "photo":
-            count_images = 0
-            for media in data["images"]:
-                is_live = media["type"] == "live"
-                ext = "mp4" if is_live else "jpeg"
-                random_name = f"{count_images} tiktok {uniq_id}.{ext}"
-                save_path = f"{save_folder}/{random_name}"
-                await download_file(media["url"], save_path)
-                count_images += 1
-            matching_files = [
-                os.path.join(save_folder, file) for file in os.listdir(save_folder) if f"tiktok {uniq_id}" in file
-            ]
-            matching_files.sort(key=extract_index)
-            is_media_success = await send_social_media_album(bot, chat_id, chat_language, business_connection_id, matching_files, data["title"], msg_id, False, pool=pool)
-        else:
-            is_media_success = await send_tiktok_video(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool, False)
+    except Exception:
+        return await transfer_to_yt_dlp(
+            is_audio,
+            bot,
+            url,
+            chat_id,
+            dp,
+            business_connection_id,
+            msg_id,
+        )
 
-        if is_audio:
-            is_audio_success = await download_and_send_tiktok_audio(bot, chat_id, chat_language, business_connection_id, data, save_folder, msg_id, pool)
-            if is_audio_success == "No audio":
-                is_audio_success = await download_audio_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
-        else:
-            is_audio_success = True
-        
-        if is_media_success == True and is_audio_success == True:
-            return True
+    if data == "large":
+        await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["large_content"][chat_language],
+            reply_to_message_id=msg_id,
+        )
+        return "large"
+
+    # Некорректный ответ от TikWM — пробуем fallback.
+    if not isinstance(data, dict):
+        return await transfer_to_yt_dlp(
+            is_audio,
+            bot,
+            url,
+            chat_id,
+            dp,
+            business_connection_id,
+            msg_id,
+        )
+
+    if "error" in data:
+        error = data["error"]
+
+        if URL_PARSING_FAILED in error or API_ERROR in error:
+            return await transfer_to_yt_dlp(
+                is_audio,
+                bot,
+                url,
+                chat_id,
+                dp,
+                business_connection_id,
+                msg_id,
+            )
+
+        return await bot.send_message(
+            chat_id=chat_id,
+            business_connection_id=business_connection_id,
+            text=translations["unavaliable_content"][chat_language],
+            reply_to_message_id=msg_id,
+            reply_markup=await send_log_keyboard(
+                translations["unavaliable_content"][chat_language],
+                error,
+                chat_language,
+                chat_id,
+                url,
+            ),
+        )
+
+    if data["type"] == "photo":
+        count_images = 0
+
+        for media in data["images"]:
+            is_live = media["type"] == "live"
+            ext = "mp4" if is_live else "jpeg"
+
+            random_name = f"{count_images} tiktok {uniq_id}.{ext}"
+            save_path = f"{save_folder}/{random_name}"
+
+            await download_file(media["url"], save_path)
+            count_images += 1
+
+        matching_files = [
+            os.path.join(save_folder, file)
+            for file in os.listdir(save_folder)
+            if f"tiktok {uniq_id}" in file
+        ]
+
+        matching_files.sort(key=extract_index)
+
+        is_media_success = await send_social_media_album(
+            bot,
+            chat_id,
+            chat_language,
+            business_connection_id,
+            matching_files,
+            data["title"],
+            msg_id,
+            False,
+            pool=pool,
+        )
     else:
-        return await transfer_to_yt_dlp(is_audio, bot, url, chat_id, dp, business_connection_id, msg_id)
-        
+        is_media_success = await send_tiktok_video(
+            bot,
+            chat_id,
+            chat_language,
+            business_connection_id,
+            data,
+            save_folder,
+            msg_id,
+            pool,
+            False,
+        )
+
+    if is_audio:
+        is_audio_success = await download_and_send_tiktok_audio(
+            bot,
+            chat_id,
+            chat_language,
+            business_connection_id,
+            data,
+            save_folder,
+            msg_id,
+            pool,
+        )
+
+        if is_audio_success == "No audio":
+            is_audio_success = await download_audio_ytdlp(
+                bot,
+                url,
+                chat_id,
+                dp,
+                business_connection_id,
+                msg_id,
+            )
+    else:
+        is_audio_success = True
+
+    if is_media_success is True and is_audio_success is True:
+        return True
+
+
 async def transfer_to_yt_dlp(
     is_audio: bool,
     bot: Bot,
@@ -82,23 +191,50 @@ async def transfer_to_yt_dlp(
     business_connection_id,
     msg_id
 ):
-    raw_res = await download_video_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id)
+    raw_res = await download_video_ytdlp(
+        bot,
+        url,
+        chat_id,
+        dp,
+        business_connection_id,
+        msg_id,
+    )
 
     if isinstance(raw_res, dict):
-        media_ok = bool(raw_res.get("is_success") or raw_res.get("success") or raw_res.get("ok"))
+        media_ok = bool(
+            raw_res.get("is_success")
+            or raw_res.get("success")
+            or raw_res.get("ok")
+        )
         media_type = raw_res.get("type")
     else:
         media_ok = bool(raw_res)
         media_type = None
 
-    audio_ok = True 
+    audio_ok = True
 
     if is_audio:
         if media_type == "Photo":
-            audio_ok = bool(await download_audio_gallerydl(bot, url, chat_id, dp, business_connection_id, msg_id))
+            audio_ok = bool(
+                await download_audio_gallerydl(
+                    bot,
+                    url,
+                    chat_id,
+                    dp,
+                    business_connection_id,
+                    msg_id,
+                )
+            )
         else:
-            audio_ok = bool(await download_audio_ytdlp(bot, url, chat_id, dp, business_connection_id, msg_id))
+            audio_ok = bool(
+                await download_audio_ytdlp(
+                    bot,
+                    url,
+                    chat_id,
+                    dp,
+                    business_connection_id,
+                    msg_id,
+                )
+            )
 
     return media_ok and audio_ok
-
-        

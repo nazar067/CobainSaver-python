@@ -1,15 +1,17 @@
 import aiohttp
 
 
-async def is_server_alive(api_url: str, timeout: int = 3) -> bool:
+async def is_server_alive(api_url: str, timeout: int = 5) -> bool:
     """
-    Проверяет, отвечает ли сервер (жив ли).
-    Делает HEAD-запрос для минимальной нагрузки.
-    Возвращает True, если сервер ответил статусом < 500.
+    Проверяет, доступен ли API.
+    Считаем сервер живым, если он вернул любой HTTP-ответ < 500.
     """
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.head(api_url, timeout=timeout) as resp:
+        client_timeout = aiohttp.ClientTimeout(total=timeout)
+
+        async with aiohttp.ClientSession(timeout=client_timeout) as session:
+            async with session.get(api_url) as resp:
                 return resp.status < 500
-    except Exception:
+
+    except (aiohttp.ClientError, TimeoutError):
         return False
