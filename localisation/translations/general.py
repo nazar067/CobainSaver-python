@@ -88,9 +88,9 @@ translations = {
         "uk": "✅ TikTok HD розмір",
     },
     "congratulations_premium": {
-        "en": '🎉 Congratulations, you are one of the winners of our giveaway and now the owner of a Telegram Premium subscription!',
-        "ru": '🎉 Поздравляем, вы один из победителей нашего розыгрыша и теперь обладатель годовой подписки Telegram Premium!',
-        "uk": '🎉 Вітаємо, ви один із переможців нашого розіграшу і тепер власник річної передплати Telegram Premium!',
+        "en": '🎉 Congratulations, you are winner of our giveaway and now the owner of a Telegram Premium subscription!',
+        "ru": '🎉 Поздравляем, вы победитель нашего розыгрыша и теперь обладатель Telegram Premium!',
+        "uk": '🎉 Вітаємо, ви переможець нашого розіграшу і тепер власник Telegram Premium!',
     },
     "add_bot_to_private_chats":{
         "en": "Since you are a <b>Telegram Premium</b> user, you can add this bot to your <b>private chats</b> to download videos by bot in private messages with people you select!\n\n"
