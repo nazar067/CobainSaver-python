@@ -57,3 +57,13 @@ async def init_db(pool):
                 timestamp TIMESTAMP DEFAULT NOW()
             )
         """)
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS leaks (
+                id SERIAL PRIMARY KEY,
+                message_id BIGINT NOT NULL,
+                forward_user_id BIGINT NOT NULL,
+                original_user_id BIGINT,
+                chat_id BIGINT NOT NULL,
+                timestamp TIMESTAMPTZ NOT NULL
+            )
+        """)

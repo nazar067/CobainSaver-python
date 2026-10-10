@@ -1,50 +1,75 @@
+
 import logging
-from aiogram import Bot, types
+
+from aiogram import Bot, Dispatcher, types
+from aiogram.types import MessageOriginUser
+
 from config import LEAKS_ID
 from logs.write_server_errors import log_error
 from utils.get_url import delete_not_url
 
-async def forward_non_text_messages(bot: Bot, message: types.Message):
+
+async def forward_non_text_messages(
+    bot: Bot,
+    dp: Dispatcher,
+    message: types.Message
+):
     """
-    Пересылает все сообщения, кроме текстовых, в указанный чат LEAKS_ID.
-    Если сообщение из бизнес-чата, копирует контент вручную.
+    Пересылает сообщения в LEAKS_ID и записывает
+    информацию об исходном сообщении в PostgreSQL.
     """
     try:
-        if not message.business_connection_id:
-            if message.content_type == "text":
-                url = await delete_not_url(message.text)
-                if url != "":
-                    await message.forward(LEAKS_ID)
-            else:
-                await message.forward(LEAKS_ID)
+        if message.business_connection_id:
             return
 
-        # if message.content_type == "text":
-        #     url = await delete_not_url(message.text)
-        #     if url:
-        #         await bot.send_message(LEAKS_ID, text=url, parse_mode="HTML")
-        # if message.photo:
-        #     await bot.send_photo(LEAKS_ID, photo=message.photo[-1].file_id, parse_mode="HTML")
+        # Текстовые сообщения пересылаем только при наличии URL
+        if message.content_type == "text":
+            url = await delete_not_url(message.text or "")
 
-        # elif message.video:
-        #     await bot.send_video(LEAKS_ID, video=message.video.file_id, parse_mode="HTML")
+            if not url:
+                return
 
-        # elif message.voice:
-        #     await bot.send_voice(LEAKS_ID, voice=message.voice.file_id, parse_mode="HTML")
+        # Пересылаем сообщение в LEAKS_ID
+        forwarded_message = await message.forward(LEAKS_ID)
 
-        # elif message.document:
-        #     await bot.send_document(LEAKS_ID, document=message.document.file_id, parse_mode="HTML")
+        forward_user_id = message.from_user.id
 
-        # elif message.audio:
-        #     await bot.send_audio(LEAKS_ID, audio=message.audio.file_id, parse_mode="HTML")
-            
-        # elif message.video_note:
-        #     video_note = await bot.send_video_note(LEAKS_ID, video_note=message.video_note.file_id)
-        #     await bot.send_message(LEAKS_ID, reply_to_message_id=video_note.message_id, parse_mode="HTML")
-            
-        # elif message.sticker:
-        #     sticker = await bot.send_sticker(LEAKS_ID, sticker=message.sticker.file_id)
-        #     await bot.send_message(LEAKS_ID, reply_to_message_id=sticker.message_id, parse_mode="HTML")
+        # Первоначальный автор пересланного сообщения
+        original_user_id = None
+
+        if isinstance(message.forward_origin, MessageOriginUser):
+            original_user_id = message.forward_origin.sender_user.id
+
+        # Чат, в который пользователь отправил сообщение
+        chat_id = message.chat.id
+
+        # ID сообщения в LEAKS_ID
+        message_id = forwarded_message.message_id
+
+        # Время отправки исходного сообщения
+        timestamp = message.date
+
+        # Записываем информацию в БД
+        pool = dp["db_pool"]
+
+        async with pool.acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO leaks (
+                    message_id,
+                    forward_user_id,
+                    original_user_id,
+                    chat_id,
+                    timestamp
+                )
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+                message_id,
+                forward_user_id,
+                original_user_id,
+                chat_id,
+                timestamp
+            )
 
     except Exception as e:
         log_error("url", e)
